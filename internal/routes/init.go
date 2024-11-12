@@ -4,6 +4,7 @@ import (
 	"sync"
 
 	"github.com/gin-gonic/gin"
+	"github.com/zhongxic/sellbot/internal/controller/ping"
 )
 
 var (
@@ -20,5 +21,11 @@ func Init() *gin.Engine {
 
 func initRoutes() *gin.Engine {
 	r := gin.Default()
+	registerRoutes(r)
 	return r
+}
+
+func registerRoutes(r *gin.Engine) {
+	pingController := &ping.PingController{}
+	r.GET("/ping", pingController.Ping)
 }
