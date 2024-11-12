@@ -14,7 +14,12 @@ const (
 )
 
 type Config struct {
+	Server  Server  `yaml:"server"`
 	Logging Logging `yaml:"logging"`
+}
+
+type Server struct {
+	Port int `yaml:"port"`
 }
 
 type Logging struct {
@@ -39,6 +44,9 @@ func Parse(file string) (*Config, error) {
 }
 
 func applyDefault(config *Config) {
+	if config.Server.Port <= 0 {
+		config.Server.Port = 8080
+	}
 	if config.Logging.Level == "" {
 		config.Logging.Level = defaultLogLevel
 	}

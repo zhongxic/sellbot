@@ -5,6 +5,7 @@ import (
 )
 
 func TestParse(t *testing.T) {
+	expectedServerPort := 8080
 	expectedLogLevel := "debug"
 	expectedLogFile := "log.log"
 	expectedLogFileAge := 7
@@ -13,6 +14,9 @@ func TestParse(t *testing.T) {
 	config, err := Parse("config.yaml")
 	if err != nil {
 		t.Fatal(err)
+	}
+	if config.Server.Port != expectedServerPort {
+		t.Errorf("expected server port [%v] actual [%v]", expectedServerPort, config.Server.Port)
 	}
 	if config.Logging.Level != expectedLogLevel {
 		t.Errorf("expected log level [%v] actual [%v]", expectedLogLevel, config.Logging.Level)
