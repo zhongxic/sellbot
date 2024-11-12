@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/zhongxic/sellbot/internal/controller/ping"
+	"github.com/zhongxic/sellbot/pkg/middleware"
 )
 
 var (
@@ -20,9 +21,15 @@ func Init() *gin.Engine {
 }
 
 func initRoutes() *gin.Engine {
-	r := gin.Default()
+	r := gin.New()
+	registerMiddleware(r)
 	registerRoutes(r)
 	return r
+}
+
+func registerMiddleware(r *gin.Engine) {
+	r.Use(middleware.Logger())
+	// TODO require recover middleware
 }
 
 func registerRoutes(r *gin.Engine) {
