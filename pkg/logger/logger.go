@@ -30,13 +30,15 @@ func init() {
 	stdLogger = slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}))
 }
 
-func Init(logging config.Logging) {
+func Init(logging config.Logging) error {
+	var err error
 	initOnce.Do(func() {
-		initLogger(logging)
+		err = initLogger(logging)
 	})
+	return err
 }
 
-func initLogger(logging config.Logging) {
+func initLogger(logging config.Logging) error {
 	logWriter = &lumberjack.Logger{
 		Filename:  logging.File,
 		MaxAge:    logging.MaxAge,
@@ -45,8 +47,11 @@ func initLogger(logging config.Logging) {
 		LocalTime: true,
 	}
 	var logLevel slog.Level
-	logLevel.UnmarshalText([]byte(logging.Level))
+	if err := logLevel.UnmarshalText([]byte(logging.Level)); err != nil {
+		return err
+	}
 	logger = slog.New(slog.NewJSONHandler(io.MultiWriter(os.Stdout, logWriter), &slog.HandlerOptions{Level: logLevel}))
+	return nil
 }
 
 func Debug(msg string, args ...any) {
