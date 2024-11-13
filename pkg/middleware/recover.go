@@ -1,8 +1,23 @@
 package middleware
 
-import "github.com/gin-gonic/gin"
+import (
+	"log/slog"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+	"github.com/zhongxic/sellbot/pkg/logger"
+	"github.com/zhongxic/sellbot/pkg/model"
+)
 
 func Recover() gin.HandlerFunc {
-	// TODO impl-me
-	return nil
+	return func(c *gin.Context) {
+		defer func() {
+			if err := recover(); err != nil {
+				logger.Error("error recovered", slog.Any("error", err))
+				c.AbortWithStatusJSON(http.StatusInternalServerError,
+					model.FailedWithMessage(model.SYSTEM_ERROR, "internal server error"))
+			}
+		}()
+		c.Next()
+	}
 }
