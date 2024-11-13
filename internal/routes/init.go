@@ -29,7 +29,7 @@ func initRoutes() *gin.Engine {
 
 func registerMiddleware(r *gin.Engine) {
 	r.Use(middleware.Logger())
-	// TODO require recover middleware
+	r.Use(middleware.Recover())
 }
 
 func registerRoutes(r *gin.Engine) {
