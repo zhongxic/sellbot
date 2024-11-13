@@ -12,11 +12,6 @@ import (
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 
-const (
-	addition     = "addition"
-	loggerClosed = "the file logger has been closed"
-)
-
 var (
 	initOnce  sync.Once
 	closeOnce sync.Once
@@ -93,7 +88,7 @@ func isLoggerInvalid() bool {
 func logToStdOut(msg string, args ...any) {
 	record := slog.NewRecord(time.Now(), slog.LevelInfo, msg, 0)
 	record.Add(args...)
-	record.Add(slog.String(addition, loggerClosed))
+	record.Add(slog.String("addition", "the file logger has been closed"))
 	stdLogger.Handler().Handle(context.Background(), record)
 }
 
