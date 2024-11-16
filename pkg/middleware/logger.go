@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/zhongxic/sellbot/pkg/logger"
 	"github.com/zhongxic/sellbot/pkg/model"
 )
 
@@ -54,7 +53,7 @@ func Logger() gin.HandlerFunc {
 		elapsed := time.Since(start).Milliseconds()
 		response := dumpResponse(writer, c)
 
-		logger.Info("completed",
+		slog.Info("completed",
 			slog.Group("request",
 				slog.String("path", path),
 				slog.String("query", query),

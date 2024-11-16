@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"log/slog"
 	"testing"
 
 	"github.com/zhongxic/sellbot/config"
@@ -20,17 +21,11 @@ func TestLogging(t *testing.T) {
 	if logWriter == nil {
 		t.Fatal("the writer has not been initialized")
 	}
-	if logger == nil {
-		t.Fatal("the logger has not been initialized")
-	}
-	if stdLogger == nil {
-		t.Fatal("the stdout logger has not been initialized")
-	}
 
 	defer Close()
 
-	Debug("this is a debug message")
-	Info("this is an info message")
-	Warn("this is a warn message")
-	Error("this is an error message")
+	slog.Debug("this is a debug message")
+	slog.Info("this is an info message")
+	slog.Warn("this is a warn message")
+	slog.Error("this is an error message")
 }

@@ -1,12 +1,10 @@
 package logger
 
 import (
-	"context"
 	"io"
 	"log/slog"
 	"os"
 	"sync"
-	"time"
 
 	"github.com/zhongxic/sellbot/config"
 	"gopkg.in/natefinch/lumberjack.v2"
@@ -16,14 +14,7 @@ var (
 	initOnce  sync.Once
 	closeOnce sync.Once
 	logWriter io.WriteCloser
-	logger    *slog.Logger
-	stdLogger *slog.Logger
-	closed    bool
 )
-
-func init() {
-	stdLogger = slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}))
-}
 
 func Init(logging config.Logging) error {
 	var err error
@@ -45,57 +36,15 @@ func initLogger(logging config.Logging) error {
 	if err := logLevel.UnmarshalText([]byte(logging.Level)); err != nil {
 		return err
 	}
-	logger = slog.New(slog.NewJSONHandler(io.MultiWriter(os.Stdout, logWriter), &slog.HandlerOptions{Level: logLevel}))
+	logger := slog.New(slog.NewJSONHandler(io.MultiWriter(os.Stdout, logWriter), &slog.HandlerOptions{Level: logLevel}))
+	slog.SetDefault(logger)
+	slog.SetLogLoggerLevel(logLevel)
 	return nil
-}
-
-func Debug(msg string, args ...any) {
-	if isLoggerInvalid() {
-		logToStdOut(msg, args...)
-		return
-	}
-	logger.Debug(msg, args...)
-}
-
-func Info(msg string, args ...any) {
-	if isLoggerInvalid() {
-		logToStdOut(msg, args...)
-		return
-	}
-	logger.Info(msg, args...)
-}
-
-func Warn(msg string, args ...any) {
-	if isLoggerInvalid() {
-		logToStdOut(msg, args...)
-		return
-	}
-	logger.Warn(msg, args...)
-}
-
-func Error(msg string, args ...any) {
-	if isLoggerInvalid() {
-		logToStdOut(msg, args...)
-		return
-	}
-	logger.Error(msg, args...)
-}
-
-func isLoggerInvalid() bool {
-	return logger == nil || closed
-}
-
-func logToStdOut(msg string, args ...any) {
-	record := slog.NewRecord(time.Now(), slog.LevelInfo, msg, 0)
-	record.Add(args...)
-	record.Add(slog.String("addition", "the file logger has been closed"))
-	stdLogger.Handler().Handle(context.Background(), record)
 }
 
 func Close() error {
 	var err error
 	closeOnce.Do(func() {
-		closed = true
 		if logWriter != nil {
 			err = logWriter.Close()
 		}

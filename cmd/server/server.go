@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
@@ -43,14 +44,14 @@ func main() {
 		signal.Notify(sigint, os.Interrupt)
 		<-sigint
 
-		logger.Info("server is shutting down")
+		slog.Info("server is shutting down")
 		if err := srv.Shutdown(context.Background()); err != nil {
-			logger.Info("server shutdown", "error", err)
+			slog.Info("server shutdown", slog.Any("error", err))
 		}
 		close(idleConnsClosed)
 	}()
 
-	logger.Info("server started", "config", cfg)
+	slog.Info("server started", slog.Any("config", cfg))
 
 	if err := srv.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
 		log.Fatalf("server listen and serve: %v", err)
