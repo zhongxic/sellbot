@@ -1,5 +1,7 @@
 package model
 
+import "github.com/zhongxic/sellbot/pkg/errorcode"
+
 type Result[T any] struct {
 	Success      bool   `json:"success"`
 	ErrorCode    string `json:"errorCode"`
@@ -43,11 +45,11 @@ func FailedWithMessage(code, message string) *Result[any] {
 	}
 }
 
-func FailedWithData[T any](code, message string, data T) *Result[T] {
-	return &Result[T]{
+func FailedWithErrorCode(code *errorcode.ErrorCode, args ...any) *Result[any] {
+	return &Result[any]{
 		Success:      false,
-		ErrorCode:    code,
-		ErrorMessage: message,
-		Data:         data,
+		ErrorCode:    code.Code(),
+		ErrorMessage: code.Message(args...),
+		Data:         nil,
 	}
 }

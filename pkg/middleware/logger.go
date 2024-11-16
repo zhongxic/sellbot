@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/zhongxic/sellbot/pkg/errorcode"
 	"github.com/zhongxic/sellbot/pkg/model"
 )
 
@@ -73,7 +74,7 @@ func dumpRequest(c *gin.Context) any {
 	if c.Request.Header.Get(contentType) == applicationJson {
 		if data, err := io.ReadAll(c.Request.Body); err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError,
-				model.FailedWithMessage(model.SYSTEM_ERROR, msgErrDumpRequest))
+				model.FailedWithErrorCode(errorcode.SystemError, msgErrDumpRequest))
 			return msgErrDumpRequest
 		} else {
 			body := map[string]any{}

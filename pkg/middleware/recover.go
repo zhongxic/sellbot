@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/zhongxic/sellbot/pkg/errorcode"
 	"github.com/zhongxic/sellbot/pkg/model"
 )
 
@@ -14,7 +15,7 @@ func Recover() gin.HandlerFunc {
 			if err := recover(); err != nil {
 				slog.Error("error recovered", slog.Any("error", err))
 				c.AbortWithStatusJSON(http.StatusInternalServerError,
-					model.FailedWithMessage(model.SYSTEM_ERROR, "internal server error"))
+					model.FailedWithErrorCode(errorcode.SystemError, "internal server error"))
 			}
 		}()
 		c.Next()
