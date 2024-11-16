@@ -1,7 +1,6 @@
 package config
 
 import (
-	"encoding/json"
 	"os"
 
 	"gopkg.in/yaml.v3"
@@ -15,27 +14,19 @@ const (
 )
 
 type Config struct {
-	Server  Server  `yaml:"server" json:"server"`
-	Logging Logging `yaml:"logging" json:"logging"`
+	Server  Server  `yaml:"server"`
+	Logging Logging `yaml:"logging"`
 }
 
 type Server struct {
-	Port int `yaml:"port" json:"port"`
+	Port int `yaml:"port"`
 }
 
 type Logging struct {
-	Level   string `yaml:"level" json:"level"`
-	File    string `yaml:"file" json:"file"`
-	MaxAge  int    `yaml:"max-age" json:"maxAge"`
-	MaxSize int    `yaml:"max-size" json:"maxSize"`
-}
-
-func (c *Config) String() string {
-	bytes, err := json.Marshal(c)
-	if err != nil {
-		return ""
-	}
-	return string(bytes)
+	Level   string `yaml:"level"`
+	File    string `yaml:"file"`
+	MaxAge  int    `yaml:"max-age"`
+	MaxSize int    `yaml:"max-size"`
 }
 
 func Parse(file string) (*Config, error) {
