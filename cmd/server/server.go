@@ -31,6 +31,7 @@ func main() {
 	if err := logger.Init(cfg.Logging); err != nil {
 		log.Fatal(err)
 	}
+	defer logger.Close()
 	r := routes.Init()
 
 	srv := &http.Server{
