@@ -14,8 +14,12 @@ import (
 )
 
 const (
-	content_type     = "Content-Type"
-	application_json = "application/json"
+	contentType     = "Content-Type"
+	applicationJson = "application/json"
+
+	msgErrDumpRequest  = "dump request failed"
+	msgErrDumpResponse = "dump response failed"
+	msgNotInJsonFormat = "not in json format"
 )
 
 type ResponseWriterWrapper struct {
@@ -66,33 +70,34 @@ func Logger() gin.HandlerFunc {
 }
 
 func dumpRequest(c *gin.Context) any {
-	if c.Request.Header.Get(content_type) == application_json {
+	if c.Request.Header.Get(contentType) == applicationJson {
 		if data, err := io.ReadAll(c.Request.Body); err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError,
-				model.FailedWithMessage(model.SYSTEM_ERROR, "dump request failed"))
+				model.FailedWithMessage(model.SYSTEM_ERROR, msgErrDumpRequest))
+			return msgErrDumpRequest
 		} else {
 			body := map[string]any{}
 			if err = json.Unmarshal(data, &body); err != nil {
-				return "dump request failed"
+				return msgErrDumpRequest
 			}
 			c.Request.Body = io.NopCloser(bytes.NewBuffer(data))
 			return body
 		}
 	}
-	return "not in json format"
+	return msgNotInJsonFormat
 }
 
 func dumpResponse(writer *ResponseWriterWrapper, c *gin.Context) any {
-	if strings.Contains(c.Writer.Header().Get(content_type), application_json) {
+	if strings.Contains(c.Writer.Header().Get(contentType), applicationJson) {
 		if data, err := io.ReadAll(writer.Body); err != nil {
-			return "dump response failed"
+			return msgErrDumpResponse
 		} else {
 			response := map[string]any{}
 			if err := json.Unmarshal(data, &response); err != nil {
-				return "dump response failed"
+				return msgErrDumpResponse
 			}
 			return response
 		}
 	}
-	return "not in json format"
+	return msgNotInJsonFormat
 }
