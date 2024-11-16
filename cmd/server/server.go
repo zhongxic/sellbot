@@ -19,7 +19,7 @@ import (
 var configFile string
 
 func init() {
-	flag.StringVar(&configFile, "config", "config/config.yaml", "the config file in yaml format")
+	flag.StringVar(&configFile, "config", "config.yaml", "the config file in yaml format")
 	flag.Parse()
 }
 
