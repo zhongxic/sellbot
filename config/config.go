@@ -44,7 +44,7 @@ func Parse(file string) (*Config, error) {
 }
 
 func applyDefault(config *Config) {
-	if config.Server.Port <= 0 {
+	if config.Server.Port == 0 {
 		config.Server.Port = 8080
 	}
 	if config.Logging.Level == "" {

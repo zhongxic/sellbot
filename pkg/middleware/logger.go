@@ -17,10 +17,6 @@ import (
 const (
 	contentType     = "Content-Type"
 	applicationJson = "application/json"
-
-	msgErrDumpRequest  = "dump request failed"
-	msgErrDumpResponse = "dump response failed"
-	msgNotInJsonFormat = "not in json format"
 )
 
 type ResponseWriterWrapper struct {
@@ -47,7 +43,11 @@ func Logger() gin.HandlerFunc {
 		start := time.Now()
 		path := c.Request.URL.Path
 		query := c.Request.URL.RawQuery
-		body := dumpRequest(c)
+		body, err := dumpRequest(c)
+		if err != nil {
+			result := model.FailedWithErrorCode(errorcode.SystemError, "dump request failed")
+			c.AbortWithStatusJSON(http.StatusInternalServerError, result)
+		}
 
 		writer := &ResponseWriterWrapper{c.Writer, &bytes.Buffer{}}
 		c.Writer = writer
@@ -70,35 +70,34 @@ func Logger() gin.HandlerFunc {
 	}
 }
 
-func dumpRequest(c *gin.Context) any {
+func dumpRequest(c *gin.Context) (body *map[string]any, err error) {
 	if c.Request.Header.Get(contentType) == applicationJson {
 		if data, err := io.ReadAll(c.Request.Body); err != nil {
-			c.AbortWithStatusJSON(http.StatusInternalServerError,
-				model.FailedWithErrorCode(errorcode.SystemError, msgErrDumpRequest))
-			return msgErrDumpRequest
+			return nil, err
 		} else {
-			body := map[string]any{}
-			if err = json.Unmarshal(data, &body); err != nil {
-				return msgErrDumpRequest
+			m := &map[string]any{}
+			if err := json.Unmarshal(data, m); err != nil {
+				return nil, err
 			}
 			c.Request.Body = io.NopCloser(bytes.NewBuffer(data))
-			return body
+			return m, nil
 		}
 	}
-	return msgNotInJsonFormat
+	return &map[string]any{}, nil
 }
 
-func dumpResponse(writer *ResponseWriterWrapper, c *gin.Context) any {
+func dumpResponse(writer *ResponseWriterWrapper, c *gin.Context) (body *map[string]any) {
+	m := &map[string]any{"addition": "not in json format or dump failed"}
 	if strings.Contains(c.Writer.Header().Get(contentType), applicationJson) {
 		if data, err := io.ReadAll(writer.Body); err != nil {
-			return msgErrDumpResponse
+			return m
 		} else {
-			response := map[string]any{}
-			if err := json.Unmarshal(data, &response); err != nil {
-				return msgErrDumpResponse
+			res := &map[string]any{}
+			if err := json.Unmarshal(data, res); err != nil {
+				return m
 			}
-			return response
+			return res
 		}
 	}
-	return msgNotInJsonFormat
+	return m
 }

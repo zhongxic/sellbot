@@ -29,8 +29,9 @@ func (c ErrorCode) Code() string {
 func (c ErrorCode) Message(args ...any) string {
 	formatted := c.message
 	for i := range args {
-		replaced := fmt.Sprintf("{%d}", i)
-		formatted = strings.ReplaceAll(formatted, replaced, fmt.Sprintf("%v", args[i]))
+		placeholder := fmt.Sprintf("{%d}", i)
+		replaced := fmt.Sprintf("%v", args[i])
+		formatted = strings.ReplaceAll(formatted, placeholder, replaced)
 	}
 	return formatted
 }
