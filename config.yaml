@@ -1,7 +1,0 @@
-server:
-  port: 8080
-logging:
-  level: debug
-  file: log.log
-  max-age: 7
-  max-size: 1024
