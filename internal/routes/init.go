@@ -33,6 +33,6 @@ func registerMiddleware(r *gin.Engine) {
 }
 
 func registerRoutes(r *gin.Engine) {
-	pingController := &ping.PingController{}
+	pingController := &ping.Controller{}
 	r.GET("/ping", pingController.Ping)
 }

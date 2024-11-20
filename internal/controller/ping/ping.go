@@ -7,9 +7,9 @@ import (
 	"github.com/zhongxic/sellbot/pkg/model"
 )
 
-type PingController struct {
+type Controller struct {
 }
 
-func (p *PingController) Ping(c *gin.Context) {
+func (p *Controller) Ping(c *gin.Context) {
 	c.JSON(http.StatusOK, model.SuccessWithData("pong"))
 }
