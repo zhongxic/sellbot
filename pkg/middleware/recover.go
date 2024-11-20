@@ -15,7 +15,7 @@ func Recover() gin.HandlerFunc {
 			if err := recover(); err != nil {
 				slog.Error("error recovered", slog.Any("error", err))
 				c.AbortWithStatusJSON(http.StatusInternalServerError,
-					model.FailedWithErrorCode(errorcode.SystemError, "internal server error"))
+					model.FailedWithCode(errorcode.SystemError, "internal server error"))
 			}
 		}()
 		c.Next()

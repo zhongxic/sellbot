@@ -45,7 +45,7 @@ func Logger() gin.HandlerFunc {
 		query := c.Request.URL.RawQuery
 		body, err := dumpRequest(c)
 		if err != nil {
-			result := model.FailedWithErrorCode(errorcode.SystemError, "dump request failed")
+			result := model.FailedWithCode(errorcode.SystemError, "dump request failed")
 			c.AbortWithStatusJSON(http.StatusInternalServerError, result)
 		}
 
