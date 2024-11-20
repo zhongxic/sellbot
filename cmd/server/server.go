@@ -31,7 +31,6 @@ func main() {
 	if err := logger.Init(cfg.Logging); err != nil {
 		log.Fatal(err)
 	}
-	//goland:noinspection GoUnhandledErrorResult
 	defer logger.Close()
 	r := routes.Init()
 
