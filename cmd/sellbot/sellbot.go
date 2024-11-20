@@ -16,14 +16,25 @@ import (
 	"github.com/zhongxic/sellbot/pkg/logger"
 )
 
-var configFile string
+const version = "1.0-SNAPSHOT"
+
+var (
+	showVersion bool
+	configFile  string
+)
 
 func init() {
-	flag.StringVar(&configFile, "config", "config/config.yaml", "the config file in yaml format")
+	flag.BoolVar(&showVersion, "version", false, "show version")
+	flag.StringVar(&configFile, "config", "config/config.yaml", "config file in yaml format")
 	flag.Parse()
 }
 
 func main() {
+	if showVersion {
+		fmt.Println(version)
+		os.Exit(0)
+	}
+
 	cfg, err := config.Parse(configFile)
 	if err != nil {
 		log.Fatal(err)
