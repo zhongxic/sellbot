@@ -39,7 +39,7 @@ func Logger() gin.HandlerFunc {
 		body, err := c.GetRawData()
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError,
-				result.FailedWithCode(errorcode.SystemError, "dump request failed"))
+				result.FailedWithErrorCode(errorcode.SystemError, "dump request failed"))
 		}
 		c.Request.Body = io.NopCloser(bytes.NewBuffer(body))
 

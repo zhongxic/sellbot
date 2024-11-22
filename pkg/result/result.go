@@ -45,7 +45,7 @@ func FailedWithMessage(code, message string) *Result[any] {
 	}
 }
 
-func FailedWithCode(code *errorcode.ErrorCode, args ...any) *Result[any] {
+func FailedWithErrorCode(code *errorcode.ErrorCode, args ...any) *Result[any] {
 	return &Result[any]{
 		Success:      false,
 		ErrorCode:    code.Code(),
