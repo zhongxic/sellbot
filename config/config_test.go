@@ -1,33 +1,52 @@
 package config
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
+
+	"gopkg.in/yaml.v3"
 )
 
 func TestParse(t *testing.T) {
-	expectedServerPort := 8080
-	expectedLogLevel := "debug"
-	expectedLogFile := "log.log"
-	expectedLogFileAge := 7
-	expectedLogFileSize := 1024
-
-	config, err := Parse("config.yaml")
+	expected := &Config{
+		Server: Server{
+			Port: 8080,
+		},
+		Logging: Logging{
+			Level:   "debug",
+			File:    "log.log",
+			MaxAge:  7,
+			MaxSize: 1024,
+		},
+	}
+	filename := filepath.Join("testdata", "config.yaml")
+	data, err := yaml.Marshal(expected)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if config.Server.Port != expectedServerPort {
-		t.Errorf("expected server port [%v] actual [%v]", expectedServerPort, config.Server.Port)
+	err = os.WriteFile(filename, data, 0644)
+	if err != nil {
+		t.Fatal(err)
 	}
-	if config.Logging.Level != expectedLogLevel {
-		t.Errorf("expected log level [%v] actual [%v]", expectedLogLevel, config.Logging.Level)
+
+	config, err := Parse(filename)
+	if err != nil {
+		t.Fatal(err)
 	}
-	if config.Logging.File != expectedLogFile {
-		t.Errorf("expected log file [%v] actual [%v]", expectedLogFile, config.Logging.File)
+	if config.Server.Port != expected.Server.Port {
+		t.Errorf("expected server port [%v] actual [%v]", expected.Server.Port, config.Server.Port)
 	}
-	if config.Logging.MaxAge != expectedLogFileAge {
-		t.Errorf("expected log file age [%v] actual [%v]", expectedLogFile, config.Logging.MaxAge)
+	if config.Logging.Level != expected.Logging.Level {
+		t.Errorf("expected log level [%v] actual [%v]", expected.Logging.Level, config.Logging.Level)
 	}
-	if config.Logging.MaxSize != expectedLogFileSize {
-		t.Errorf("expected log file size [%v] actual [%v]", expectedLogFile, config.Logging.MaxSize)
+	if config.Logging.File != expected.Logging.File {
+		t.Errorf("expected log file [%v] actual [%v]", expected.Logging.File, config.Logging.File)
+	}
+	if config.Logging.MaxAge != expected.Logging.MaxAge {
+		t.Errorf("expected log file age [%v] actual [%v]", expected.Logging.MaxAge, config.Logging.MaxAge)
+	}
+	if config.Logging.MaxSize != expected.Logging.MaxSize {
+		t.Errorf("expected log file size [%v] actual [%v]", expected.Logging.MaxSize, config.Logging.MaxSize)
 	}
 }

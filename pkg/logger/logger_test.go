@@ -7,14 +7,13 @@ import (
 	"github.com/zhongxic/sellbot/config"
 )
 
-var logging = config.Logging{
-	Level:   "debug",
-	File:    "log.log",
-	MaxAge:  7,
-	MaxSize: 1024,
-}
-
 func TestLogging(t *testing.T) {
+	logging := config.Logging{
+		Level:   "debug",
+		File:    "log.log",
+		MaxAge:  7,
+		MaxSize: 1024,
+	}
 	if err := Init(logging); err != nil {
 		t.Fatal(err)
 	}
