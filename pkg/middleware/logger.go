@@ -9,7 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/zhongxic/sellbot/pkg/errorcode"
-	"github.com/zhongxic/sellbot/pkg/model"
+	"github.com/zhongxic/sellbot/pkg/result"
 )
 
 type ResponseWriterWrapper struct {
@@ -39,7 +39,7 @@ func Logger() gin.HandlerFunc {
 		body, err := c.GetRawData()
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError,
-				model.FailedWithCode(errorcode.SystemError, "dump request failed"))
+				result.FailedWithCode(errorcode.SystemError, "dump request failed"))
 		}
 		c.Request.Body = io.NopCloser(bytes.NewBuffer(body))
 

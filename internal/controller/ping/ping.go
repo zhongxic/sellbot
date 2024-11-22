@@ -4,12 +4,12 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/zhongxic/sellbot/pkg/model"
+	"github.com/zhongxic/sellbot/pkg/result"
 )
 
 type Controller struct {
 }
 
 func (p *Controller) Ping(c *gin.Context) {
-	c.JSON(http.StatusOK, model.SuccessWithData("pong"))
+	c.JSON(http.StatusOK, result.SuccessWithData("pong"))
 }

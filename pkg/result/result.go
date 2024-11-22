@@ -1,4 +1,4 @@
-package model
+package result
 
 import "github.com/zhongxic/sellbot/pkg/errorcode"
 
