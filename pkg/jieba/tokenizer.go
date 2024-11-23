@@ -43,6 +43,9 @@ func initialize(scanner *bufio.Scanner) (tokenizer *Tokenizer, err error) {
 	var start = time.Now()
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())
+		if line == "" {
+			continue
+		}
 		split := strings.Split(line, " ")
 		word := split[0]
 		freq, err := strconv.ParseInt(split[1], 10, 64)
