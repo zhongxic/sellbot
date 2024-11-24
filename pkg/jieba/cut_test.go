@@ -28,3 +28,17 @@ func TestGetDAG(t *testing.T) {
 		t.Errorf("expected dag [%v] actual [%v]", DAG, dag)
 	}
 }
+
+func TestCutAll(t *testing.T) {
+	TestBefore(t)
+	tokenizer, err := NewTokenizer(filepath.Join("testdata", "dict.txt"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	sentence := "我在学习结巴分词"
+	expected := []string{"我", "在", "学习", "结巴", "结巴分词", "分词"}
+	cuts := tokenizer.cutAll(sentence)
+	if !reflect.DeepEqual(cuts, expected) {
+		t.Errorf("expected cut [%v] actual [%v]", expected, cuts)
+	}
+}
