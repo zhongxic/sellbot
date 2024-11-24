@@ -11,7 +11,7 @@ import (
 	"testing"
 )
 
-// TestBefore generate dict in testdata dir before test
+// TestBefore generate dict in testdata dir before test.
 func TestBefore(t *testing.T) {
 	dict := `
 	我 123
@@ -25,7 +25,7 @@ func TestBefore(t *testing.T) {
 	结 234
 	`
 	filename := filepath.Join("testdata", "dict.txt")
-	f, err := os.OpenFile(filename, os.O_CREATE, 0644)
+	f, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
 		t.Fatal(err)
 	}

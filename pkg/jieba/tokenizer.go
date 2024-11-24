@@ -20,7 +20,7 @@ type Tokenizer struct {
 	total int64
 }
 
-// NewTokenizer create a tokenizer with specific dict
+// NewTokenizer create a tokenizer with specific dict.
 func NewTokenizer(dict string) (tokenizer *Tokenizer, err error) {
 	f, err := os.Open(dict)
 	if err != nil {
@@ -31,7 +31,7 @@ func NewTokenizer(dict string) (tokenizer *Tokenizer, err error) {
 	return initialize(scanner)
 }
 
-// NewDefaultTokenizer create a tokenizer with embedded dict
+// NewDefaultTokenizer create a tokenizer with embedded dict.
 func NewDefaultTokenizer() (tokenizer *Tokenizer, err error) {
 	scanner := bufio.NewScanner(strings.NewReader(dict))
 	return initialize(scanner)
