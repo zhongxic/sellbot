@@ -5,6 +5,8 @@ import (
 	"regexp"
 	"sort"
 	"strings"
+
+	"github.com/zhongxic/sellbot/pkg/regex"
 )
 
 var (
@@ -38,7 +40,7 @@ func (s edgeSlice) Swap(i, j int) {
 // those parts who not appear in dictionary will be cut into single character.
 func (t *Tokenizer) CutAll(sentence string) []string { //NOSONAR
 	res := make([]string, 0)
-	blocks := Split(sentence, reHan)
+	blocks := regex.Split(sentence, reHan)
 	for _, blk := range blocks {
 		if blk == "" {
 			continue
@@ -49,7 +51,7 @@ func (t *Tokenizer) CutAll(sentence string) []string { //NOSONAR
 				res = append(res, word)
 			}
 		} else {
-			ss := Split(blk, reSkip)
+			ss := regex.Split(blk, reSkip)
 			for _, s := range ss {
 				if reSkip.MatchString(s) {
 					res = append(res, s)
@@ -138,7 +140,7 @@ func (t *Tokenizer) getDAG(sentence string) map[int][]int {
 // CutDAGNoHMM slices sentence into separated words without HMM.
 func (t *Tokenizer) CutDAGNoHMM(sentence string) []string { //NOSONAR
 	res := make([]string, 0)
-	blocks := Split(sentence, reHan)
+	blocks := regex.Split(sentence, reHan)
 	for _, blk := range blocks {
 		if blk == "" {
 			continue
@@ -149,7 +151,7 @@ func (t *Tokenizer) CutDAGNoHMM(sentence string) []string { //NOSONAR
 				res = append(res, word)
 			}
 		} else {
-			ss := Split(blk, reSkip)
+			ss := regex.Split(blk, reSkip)
 			for _, s := range ss {
 				if reSkip.MatchString(s) {
 					res = append(res, s)
