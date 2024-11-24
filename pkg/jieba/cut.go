@@ -1,7 +1,9 @@
 package jieba
 
 import (
+	"math"
 	"regexp"
+	"sort"
 	"strings"
 )
 
@@ -10,6 +12,25 @@ var (
 	reEng  = regexp.MustCompile(`[a-zA-Z0-9]`)
 	reSkip = regexp.MustCompile(`(\r\n|\s)`)
 )
+
+type edge struct {
+	weight float64
+	index  int
+}
+
+type edgeSlice []edge
+
+func (s edgeSlice) Len() int {
+	return len(s)
+}
+
+func (s edgeSlice) Less(i, j int) bool {
+	return s[i].weight < s[j].weight
+}
+
+func (s edgeSlice) Swap(i, j int) {
+	s[i], s[j] = s[j], s[i]
+}
 
 // CutAll slices sentence into separated words.
 //
@@ -112,4 +133,28 @@ func (t *Tokenizer) getDAG(sentence string) map[int][]int {
 		DAG[k] = tmplist
 	}
 	return DAG
+}
+
+func (t *Tokenizer) calc(sentence string, DAG map[int][]int) map[int]edge {
+	runes := []rune(sentence)
+	N := len(runes)
+	route := map[int]edge{
+		N: {0, 0},
+	}
+	logtotal := math.Log(float64(t.total))
+	for idx := N - 1; idx >= 0; idx-- {
+		edges := make(edgeSlice, 0)
+		for _, x := range DAG[idx] {
+			frag := string(runes[idx : x+1])
+			freq, ok := t.freq[frag]
+			if !ok {
+				freq = 1
+			}
+			weight := math.Log(float64(freq)) - logtotal + route[x+1].weight
+			edges = append(edges, edge{weight, x})
+		}
+		sort.Sort(edges)
+		route[idx] = edges[len(edges)-1]
+	}
+	return route
 }

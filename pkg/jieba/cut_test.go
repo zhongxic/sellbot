@@ -29,6 +29,32 @@ func TestGetDAG(t *testing.T) {
 	}
 }
 
+func TestCalc(t *testing.T) {
+	TestBefore(t)
+	sentence := "我在学习结巴分词"
+	expected := map[int]edge{
+		8: {0, 0},
+		7: {-8.351846738828245, 7},
+		6: {-2.2293539293138585, 7},
+		5: {-10.581200668142102, 5},
+		4: {-4.737656251110743, 5},
+		3: {-13.089502989938989, 3},
+		2: {-6.967010180424602, 3},
+		1: {-9.863535803895145, 1},
+		0: {-13.403198187350974, 0},
+	}
+
+	tokenizer, err := NewTokenizer(filepath.Join("testdata", "dict.txt"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	DAG := tokenizer.getDAG(sentence)
+	calc := tokenizer.calc(sentence, DAG)
+	if !reflect.DeepEqual(calc, expected) {
+		t.Errorf("expected calc [%v] actual [%v]", expected, calc)
+	}
+}
+
 func TestCutAll(t *testing.T) {
 	TestBefore(t)
 	tokenizer, err := NewTokenizer(filepath.Join("testdata", "dict.txt"))
