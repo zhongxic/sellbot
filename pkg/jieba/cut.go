@@ -135,6 +135,59 @@ func (t *Tokenizer) getDAG(sentence string) map[int][]int {
 	return DAG
 }
 
+// CutDAGNoHMM slices sentence into separated words without HMM.
+func (t *Tokenizer) CutDAGNoHMM(sentence string) []string { //NOSONAR
+	res := make([]string, 0)
+	blocks := Split(sentence, reHan)
+	for _, blk := range blocks {
+		if blk == "" {
+			continue
+		}
+		if reHan.MatchString(blk) {
+			words := t.cutDAGNoHHM(blk)
+			for _, word := range words {
+				res = append(res, word)
+			}
+		} else {
+			ss := Split(blk, reSkip)
+			for _, s := range ss {
+				if reSkip.MatchString(s) {
+					res = append(res, s)
+				} else {
+					for _, x := range s {
+						res = append(res, string(x))
+					}
+				}
+			}
+		}
+	}
+	return res
+}
+
+func (t *Tokenizer) cutDAGNoHHM(sentence string) []string {
+	words := make([]string, 0)
+	DAG := t.getDAG(sentence)
+	route := t.calc(sentence, DAG)
+	engBuf := &strings.Builder{}
+	runes := []rune(sentence)
+	N := len(runes)
+	for x := 0; x < N; {
+		y := route[x].index + 1
+		word := string(runes[x:y])
+		if reEng.MatchString(word) {
+			engBuf.WriteString(word)
+		} else {
+			if engBuf.Len() > 0 {
+				words = append(words, engBuf.String())
+				engBuf.Reset()
+			}
+			words = append(words, word)
+		}
+		x = y
+	}
+	return words
+}
+
 func (t *Tokenizer) calc(sentence string, DAG map[int][]int) map[int]edge {
 	runes := []rune(sentence)
 	N := len(runes)
