@@ -6,6 +6,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/zhongxic/sellbot/pkg/jieba/finalseg"
 	"github.com/zhongxic/sellbot/pkg/regex"
 )
 
@@ -100,6 +101,62 @@ func (t *Tokenizer) cutAll(sentence string) []string { //NOSONAR
 	}
 	if engScan {
 		words = append(words, engBuf.String())
+	}
+	return words
+}
+
+func (t *Tokenizer) cutDAG(sentence string) []string { //NOSONAR
+	words := make([]string, 0)
+	DAG := t.getDAG(sentence)
+	route := t.calc(sentence, DAG)
+	buf := &strings.Builder{}
+	runes := []rune(sentence)
+	N := len(runes)
+	for x := 0; x < N; {
+		y := route[x].index + 1
+		word := string(runes[x:y])
+		if y-x == 1 {
+			buf.WriteString(word)
+		} else {
+			if buf.Len() > 0 {
+				if buf.Len() == 1 {
+					words = append(words, buf.String())
+				} else {
+					s := buf.String()
+					if _, ok := t.freq[s]; !ok {
+						recognized := finalseg.Cut(s)
+						for _, w := range recognized {
+							words = append(words, w)
+						}
+					} else {
+						for _, w := range s {
+							words = append(words, string(w))
+						}
+					}
+				}
+				buf.Reset()
+			}
+			words = append(words, word)
+		}
+		x = y
+	}
+	if buf.Len() > 0 {
+		if buf.Len() == 1 {
+			words = append(words, buf.String())
+		} else {
+			s := buf.String()
+			if _, ok := t.freq[s]; !ok {
+				recognized := finalseg.Cut(s)
+				for _, w := range recognized {
+					words = append(words, w)
+				}
+			} else {
+				for _, w := range s {
+					words = append(words, string(w))
+				}
+			}
+		}
+		buf.Reset()
 	}
 	return words
 }

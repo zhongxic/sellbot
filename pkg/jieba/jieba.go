@@ -15,6 +15,11 @@ func (t *Tokenizer) CutAll(sentence string) []string {
 	return t.cut(sentence, reHan, reSkip, t.cutAll)
 }
 
+// CutDAG slices sentence into separated words with HMM.
+func (t *Tokenizer) CutDAG(sentence string) []string {
+	return t.cut(sentence, reHan, reSkip, t.cutDAG)
+}
+
 // CutDAGNoHMM slices sentence into separated words without HMM.
 func (t *Tokenizer) CutDAGNoHMM(sentence string) []string {
 	return t.cut(sentence, reHan, reSkip, t.cutDAGNoHHM)
