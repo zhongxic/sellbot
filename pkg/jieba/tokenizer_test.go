@@ -25,6 +25,10 @@ func TestBefore(t *testing.T) {
 	结 234
 	`
 	filename := filepath.Join("testdata", "dict.txt")
+	err := os.MkdirAll(filepath.Dir(filename), 0644)
+	if err != nil {
+		t.Fatal(err)
+	}
 	f, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
 		t.Fatal(err)
