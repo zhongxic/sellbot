@@ -9,16 +9,14 @@ import (
 	"github.com/zhongxic/sellbot/pkg/regex"
 )
 
-var (
-	reHan  = regexp.MustCompile(`([\p{Han}a-zA-Z0-9+#&._%\-]+)`)
-	reEng  = regexp.MustCompile(`[a-zA-Z0-9]`)
-	reSkip = regexp.MustCompile(`(\r\n|\s)`)
-)
+var reEng = regexp.MustCompile(`[a-zA-Z0-9]`)
 
 type edge struct {
 	weight float64
 	index  int
 }
+
+type cutFunc func(string) []string
 
 type edgeSlice []edge
 
@@ -34,11 +32,10 @@ func (s edgeSlice) Swap(i, j int) {
 	s[i], s[j] = s[j], s[i]
 }
 
-// CutAll slices sentence into separated words.
+// cut is a preprocessing method that uses regular expressions to split this sentence into blocks.
 //
-// This method try to match all words contained in the dictionary,
-// those parts who not appear in dictionary will be cut into single character.
-func (t *Tokenizer) CutAll(sentence string) []string { //NOSONAR
+// Cutting block into chinese words is delegated to cutFunc.
+func (t *Tokenizer) cut(sentence string, reHan, reSkip *regexp.Regexp, cutFunc cutFunc) []string { //NOSONAR
 	res := make([]string, 0)
 	blocks := regex.Split(sentence, reHan)
 	for _, blk := range blocks {
@@ -46,10 +43,8 @@ func (t *Tokenizer) CutAll(sentence string) []string { //NOSONAR
 			continue
 		}
 		if reHan.MatchString(blk) {
-			words := t.cutAll(blk)
-			for _, word := range words {
-				res = append(res, word)
-			}
+			words := cutFunc(blk)
+			res = append(res, words...)
 		} else {
 			ss := regex.Split(blk, reSkip)
 			for _, s := range ss {
@@ -109,6 +104,30 @@ func (t *Tokenizer) cutAll(sentence string) []string { //NOSONAR
 	return words
 }
 
+func (t *Tokenizer) cutDAGNoHHM(sentence string) []string {
+	words := make([]string, 0)
+	DAG := t.getDAG(sentence)
+	route := t.calc(sentence, DAG)
+	engBuf := &strings.Builder{}
+	runes := []rune(sentence)
+	N := len(runes)
+	for x := 0; x < N; {
+		y := route[x].index + 1
+		word := string(runes[x:y])
+		if reEng.MatchString(word) {
+			engBuf.WriteString(word)
+		} else {
+			if engBuf.Len() > 0 {
+				words = append(words, engBuf.String())
+				engBuf.Reset()
+			}
+			words = append(words, word)
+		}
+		x = y
+	}
+	return words
+}
+
 func (t *Tokenizer) getDAG(sentence string) map[int][]int {
 	DAG := map[int][]int{}
 	runes := []rune(sentence)
@@ -135,59 +154,6 @@ func (t *Tokenizer) getDAG(sentence string) map[int][]int {
 		DAG[k] = tmplist
 	}
 	return DAG
-}
-
-// CutDAGNoHMM slices sentence into separated words without HMM.
-func (t *Tokenizer) CutDAGNoHMM(sentence string) []string { //NOSONAR
-	res := make([]string, 0)
-	blocks := regex.Split(sentence, reHan)
-	for _, blk := range blocks {
-		if blk == "" {
-			continue
-		}
-		if reHan.MatchString(blk) {
-			words := t.cutDAGNoHHM(blk)
-			for _, word := range words {
-				res = append(res, word)
-			}
-		} else {
-			ss := regex.Split(blk, reSkip)
-			for _, s := range ss {
-				if reSkip.MatchString(s) {
-					res = append(res, s)
-				} else {
-					for _, x := range s {
-						res = append(res, string(x))
-					}
-				}
-			}
-		}
-	}
-	return res
-}
-
-func (t *Tokenizer) cutDAGNoHHM(sentence string) []string {
-	words := make([]string, 0)
-	DAG := t.getDAG(sentence)
-	route := t.calc(sentence, DAG)
-	engBuf := &strings.Builder{}
-	runes := []rune(sentence)
-	N := len(runes)
-	for x := 0; x < N; {
-		y := route[x].index + 1
-		word := string(runes[x:y])
-		if reEng.MatchString(word) {
-			engBuf.WriteString(word)
-		} else {
-			if engBuf.Len() > 0 {
-				words = append(words, engBuf.String())
-				engBuf.Reset()
-			}
-			words = append(words, word)
-		}
-		x = y
-	}
-	return words
 }
 
 func (t *Tokenizer) calc(sentence string, DAG map[int][]int) map[int]edge {
