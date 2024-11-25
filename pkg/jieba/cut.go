@@ -125,9 +125,7 @@ func (t *Tokenizer) cutDAG(sentence string) []string { //NOSONAR
 					s := buf.String()
 					if _, ok := t.freq[s]; !ok {
 						recognized := finalseg.Cut(s)
-						for _, w := range recognized {
-							words = append(words, w)
-						}
+						words = append(words, recognized...)
 					} else {
 						for _, w := range s {
 							words = append(words, string(w))
@@ -147,9 +145,7 @@ func (t *Tokenizer) cutDAG(sentence string) []string { //NOSONAR
 			s := buf.String()
 			if _, ok := t.freq[s]; !ok {
 				recognized := finalseg.Cut(s)
-				for _, w := range recognized {
-					words = append(words, w)
-				}
+				words = append(words, recognized...)
 			} else {
 				for _, w := range s {
 					words = append(words, string(w))
