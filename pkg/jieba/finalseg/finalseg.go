@@ -118,8 +118,8 @@ func viterbi(obs []rune, states []byte) (prob float64, positions []byte) { // NO
 				p := stateProb{x, V[t-1][x] + trans + emit}
 				ps = append(ps, p)
 			}
-			sort.Sort(ps)
-			mp := ps[len(ps)-1]
+			sort.Sort(sort.Reverse(ps))
+			mp := ps[0]
 			V[t][y] = mp.p
 			tp := make([]byte, len(path[mp.state]))
 			copy(tp, path[mp.state])
@@ -133,7 +133,7 @@ func viterbi(obs []rune, states []byte) (prob float64, positions []byte) { // NO
 	for _, y := range stats {
 		ps = append(ps, stateProb{y, V[N-1][y]})
 	}
-	sort.Sort(ps)
-	mp := ps[len(ps)-1]
+	sort.Sort(sort.Reverse(ps))
+	mp := ps[0]
 	return mp.p, path[mp.state]
 }

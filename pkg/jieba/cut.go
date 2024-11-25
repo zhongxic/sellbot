@@ -227,8 +227,8 @@ func (t *Tokenizer) calc(sentence string, DAG map[int][]int) map[int]edge {
 			weight := math.Log(float64(freq)) - logtotal + route[x+1].weight
 			edges = append(edges, edge{weight, x})
 		}
-		sort.Sort(edges)
-		route[idx] = edges[len(edges)-1]
+		sort.Sort(sort.Reverse(edges))
+		route[idx] = edges[0]
 	}
 	return route
 }
