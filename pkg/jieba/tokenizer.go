@@ -72,6 +72,36 @@ func initialize(scanner *bufio.Scanner) (tokenizer *Tokenizer, err error) {
 	return seg, nil
 }
 
+// AddWord add a word with specific frequency into the dict held by this tokenizer.
+func (t *Tokenizer) AddWord(word string, frequency int64) {
+	freq := t.freq[word]
+	if freq+frequency <= 0 {
+		t.freq[word] = 0
+		t.total -= freq
+	} else {
+		t.freq[word] = freq + frequency
+		t.total += frequency
+	}
+	runes := []rune(word)
+	N := len(runes)
+	for i := 0; i < N; i++ {
+		frag := string(runes[:i+1])
+		if _, ok := t.freq[frag]; !ok {
+			t.freq[frag] = 0
+		}
+	}
+}
+
+// DelWord del a word from the dict held by this tokenizer.
+//
+// If you want to decrease the frequency of this word rather than remove it from the dict entirely,
+// please call AddWord with a negative frequency argument.
+func (t *Tokenizer) DelWord(word string) {
+	freq := t.freq[word]
+	t.freq[word] = 0
+	t.total -= freq
+}
+
 func (t *Tokenizer) MarshalJSON() ([]byte, error) {
 	m := map[string]any{}
 	m["freq"] = t.freq
