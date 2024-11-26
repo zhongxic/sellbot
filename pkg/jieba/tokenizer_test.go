@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"reflect"
 	"strings"
+	"sync"
 	"testing"
 )
 
@@ -70,9 +70,12 @@ func TestNewTokenizer(t *testing.T) {
 	if tokenizer.freq == nil {
 		t.Error("freq in tokenizer expected not nil")
 	}
-	if !reflect.DeepEqual(tokenizer.freq, freq) {
-		t.Errorf("expected freq in tokenizer [%v] actual [%v]", freq, tokenizer.freq)
-	}
+	tokenizer.freq.Range(func(key, value any) bool {
+		if value.(int64) != freq[key.(string)] {
+			t.Errorf("expected freq of word [%v] is [%v] actual [%v]", key, freq[key.(string)], value)
+		}
+		return true
+	})
 	if tokenizer.total != total {
 		t.Errorf("expected total in tokenizer [%v] actual [%v]", total, tokenizer.total)
 	}
@@ -105,7 +108,40 @@ func TestUnMarshalJSON(t *testing.T) {
 	if err := json.Unmarshal(data, seg); err != nil {
 		t.Fatal(err)
 	}
-	if !reflect.DeepEqual(seg, tokenizer) {
-		t.Fatal("tokenizer not deep equal after unmarshal")
+	seg.freq.Range(func(key, value any) bool {
+		expected, _ := tokenizer.freq.Get(key.(string))
+		if value.(int64) != expected {
+			t.Errorf("expected freq of word [%v] is [%v] actual [%v]", key, expected, value.(int64))
+		}
+		return true
+	})
+	if seg.total != tokenizer.total {
+		t.Errorf("expected total in tokenizer [%v] actual [%v]", tokenizer.total, seg.total)
 	}
+}
+
+func TestAddDelWordConcurrent(t *testing.T) {
+	TestBefore(t)
+	tokenizer, err := NewTokenizer(filepath.Join("testdata", "dict.txt"))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	wg := &sync.WaitGroup{}
+	N := 100
+	for i := 0; i < N; i++ {
+		wg.Add(1)
+		go func() {
+			tokenizer.AddWord("结巴", 1)
+			wg.Done()
+		}()
+	}
+	for i := 0; i < N; i++ {
+		wg.Add(1)
+		go func() {
+			tokenizer.DelWord("结巴")
+			wg.Done()
+		}()
+	}
+	wg.Wait()
 }

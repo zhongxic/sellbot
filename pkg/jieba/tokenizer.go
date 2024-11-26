@@ -10,13 +10,15 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/zhongxic/sellbot/pkg/container"
 )
 
 //go:embed dict.txt
 var dict string
 
 type Tokenizer struct {
-	freq  map[string]int64
+	freq  *container.ConcurrentMap[string, int64]
 	total int64
 }
 
@@ -38,7 +40,7 @@ func NewDefaultTokenizer() (tokenizer *Tokenizer, err error) {
 }
 
 func initialize(scanner *bufio.Scanner) (tokenizer *Tokenizer, err error) {
-	var lfreq = map[string]int64{}
+	var lfreq = container.NewConcurrentMap[string, int64]()
 	var ltotal int64 = 0
 	var start = time.Now()
 	for scanner.Scan() {
@@ -52,14 +54,14 @@ func initialize(scanner *bufio.Scanner) (tokenizer *Tokenizer, err error) {
 		if err != nil {
 			return nil, err
 		}
-		lfreq[word] = freq
+		lfreq.Put(word, freq)
 		ltotal += freq
 		runes := []rune(word)
 		length := len(runes)
 		for i := 0; i < length; i++ {
 			wfrag := string(runes[:i+1])
-			if _, ok := lfreq[wfrag]; !ok {
-				lfreq[wfrag] = 0
+			if _, ok := lfreq.Get(wfrag); !ok {
+				lfreq.Put(wfrag, 0)
 			}
 		}
 	}
@@ -74,20 +76,20 @@ func initialize(scanner *bufio.Scanner) (tokenizer *Tokenizer, err error) {
 
 // AddWord add a word with specific frequency into the dict held by this tokenizer.
 func (t *Tokenizer) AddWord(word string, frequency int64) {
-	freq := t.freq[word]
+	freq, _ := t.freq.Get(word)
 	if freq+frequency <= 0 {
-		t.freq[word] = 0
+		t.freq.Put(word, 0)
 		t.total -= freq
 	} else {
-		t.freq[word] = freq + frequency
+		t.freq.Put(word, freq+frequency)
 		t.total += frequency
 	}
 	runes := []rune(word)
 	N := len(runes)
 	for i := 0; i < N; i++ {
 		frag := string(runes[:i+1])
-		if _, ok := t.freq[frag]; !ok {
-			t.freq[frag] = 0
+		if _, ok := t.freq.Get(frag); !ok {
+			t.freq.Put(frag, 0)
 		}
 	}
 }
@@ -97,14 +99,19 @@ func (t *Tokenizer) AddWord(word string, frequency int64) {
 // If you want to decrease the frequency of this word rather than remove it from the dict entirely,
 // please call AddWord with a negative frequency argument.
 func (t *Tokenizer) DelWord(word string) {
-	freq := t.freq[word]
-	t.freq[word] = 0
+	freq, _ := t.freq.Get(word)
+	t.freq.Put(word, 0)
 	t.total -= freq
 }
 
 func (t *Tokenizer) MarshalJSON() ([]byte, error) {
 	m := map[string]any{}
-	m["freq"] = t.freq
+	freq := make(map[string]int64)
+	t.freq.Range(func(key, value any) bool {
+		freq[key.(string)] = value.(int64)
+		return true
+	})
+	m["freq"] = freq
 	m["total"] = t.total
 	data, err := json.Marshal(m)
 	if err != nil {
@@ -121,13 +128,13 @@ func (t *Tokenizer) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	wfreq := m["freq"].(map[string]any)
-	lfreq := make(map[string]int64, len(wfreq))
+	lfreq := container.NewConcurrentMap[string, int64]()
 	for word, freq := range wfreq {
 		n, err := freq.(json.Number).Int64()
 		if err != nil {
 			return err
 		}
-		lfreq[word] = n
+		lfreq.Put(word, n)
 	}
 	ltotal, err := m["total"].(json.Number).Int64()
 	if err != nil {
