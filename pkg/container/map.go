@@ -3,12 +3,12 @@ package container
 import "sync"
 
 type ConcurrentMap[K comparable, V any] struct {
-	m sync.Map
+	m *sync.Map
 }
 
 func NewConcurrentMap[K comparable, V any]() *ConcurrentMap[K, V] {
 	return &ConcurrentMap[K, V]{
-		m: sync.Map{},
+		m: &sync.Map{},
 	}
 }
 
