@@ -21,7 +21,9 @@ func TestLogging(t *testing.T) {
 		t.Fatal("the writer has not been initialized")
 	}
 
-	defer Close()
+	defer func() {
+		_ = Close()
+	}()
 
 	slog.Debug("this is a debug message")
 	slog.Info("this is an info message")
