@@ -6,10 +6,10 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
+	"syscall"
 
 	"github.com/zhongxic/sellbot/config"
 	"github.com/zhongxic/sellbot/internal/routes"
@@ -32,7 +32,7 @@ func init() {
 func main() {
 	if showVersion {
 		fmt.Println(version)
-		os.Exit(0)
+		return
 	}
 
 	cfg, err := config.Parse(configFile)
@@ -42,7 +42,9 @@ func main() {
 	if err := logger.Init(cfg.Logging); err != nil {
 		log.Fatal(err)
 	}
-	defer logger.Close()
+	defer func() {
+		_ = logger.Close()
+	}()
 	r := routes.Init()
 
 	srv := &http.Server{
@@ -53,17 +55,17 @@ func main() {
 	idleConnsClosed := make(chan struct{})
 	go func() {
 		sigint := make(chan os.Signal, 1)
-		signal.Notify(sigint, os.Interrupt)
+		signal.Notify(sigint, syscall.SIGTERM, syscall.SIGINT)
 		<-sigint
 
-		slog.Info("server is shutting down")
+		log.Println("server shutting down")
 		if err := srv.Shutdown(context.Background()); err != nil {
-			slog.Info("server shutdown", slog.Any("error", err))
+			log.Printf("server shutdown: %v", err)
 		}
 		close(idleConnsClosed)
 	}()
 
-	slog.Info("server started", slog.Any("config", cfg))
+	log.Printf("server started with config: %+v", cfg)
 
 	if err := srv.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
 		log.Fatalf("server listen and serve: %v", err)
