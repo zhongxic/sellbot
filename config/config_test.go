@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"testing"
@@ -20,6 +21,15 @@ func TestParse(t *testing.T) {
 			MaxSize: 1024,
 		},
 	}
+	_, err := os.Stat("testdata")
+	if errors.Is(err, os.ErrNotExist) {
+		if err := os.Mkdir("testdata", 0644); err != nil {
+			t.Fatal(err)
+		}
+	} else if err != nil {
+		t.Fatal(err)
+	}
+
 	filename := filepath.Join("testdata", "config.yaml")
 	data, err := yaml.Marshal(expected)
 	if err != nil {
