@@ -3,11 +3,9 @@ package jieba
 import (
 	"bufio"
 	_ "embed"
-	"log/slog"
 	"os"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/zhongxic/sellbot/pkg/container"
 )
@@ -16,8 +14,8 @@ import (
 var dict string
 
 type Tokenizer struct {
-	freq  *container.ConcurrentMap[string, int64]
-	total int64
+	freq  *container.ConcurrentMap[string, int]
+	total int
 }
 
 // NewTokenizer create a tokenizer with specific dict.
@@ -38,9 +36,8 @@ func NewDefaultTokenizer() (tokenizer *Tokenizer, err error) {
 }
 
 func initialize(scanner *bufio.Scanner) (tokenizer *Tokenizer, err error) {
-	var lfreq = container.NewConcurrentMap[string, int64]()
-	var ltotal int64 = 0
-	var start = time.Now()
+	lfreq := container.NewConcurrentMap[string, int]()
+	ltotal := 0
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())
 		if line == "" {
@@ -48,7 +45,7 @@ func initialize(scanner *bufio.Scanner) (tokenizer *Tokenizer, err error) {
 		}
 		split := strings.Split(line, " ")
 		word := split[0]
-		freq, err := strconv.ParseInt(split[1], 10, 64)
+		freq, err := strconv.Atoi(split[1])
 		if err != nil {
 			return nil, err
 		}
@@ -67,19 +64,19 @@ func initialize(scanner *bufio.Scanner) (tokenizer *Tokenizer, err error) {
 	if err := scanner.Err(); err != nil {
 		return nil, err
 	}
-	slog.Info("tokenizer initialized", "cost", time.Since(start).Milliseconds())
 	seg := &Tokenizer{freq: lfreq, total: ltotal}
 	return seg, nil
 }
 
 // AddWord add a word with specific frequency into the dict held by this tokenizer.
-func (t *Tokenizer) AddWord(word string, frequency int64) {
+func (t *Tokenizer) AddWord(word string, frequency int) {
 	freq, _ := t.freq.Get(word)
-	if freq+frequency <= 0 {
+	nfreq := freq + frequency
+	if nfreq <= 0 {
 		t.freq.Put(word, 0)
 		t.total -= freq
 	} else {
-		t.freq.Put(word, freq+frequency)
+		t.freq.Put(word, nfreq)
 		t.total += frequency
 	}
 	runes := []rune(word)

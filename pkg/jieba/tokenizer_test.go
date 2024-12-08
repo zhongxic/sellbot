@@ -43,7 +43,7 @@ func TestBefore(t *testing.T) {
 
 func TestNewTokenizer(t *testing.T) {
 	TestBefore(t)
-	freq := map[string]int64{
+	freq := map[string]int{
 		"我":    123,
 		"在":    234,
 		"学":    2344,
@@ -55,7 +55,7 @@ func TestNewTokenizer(t *testing.T) {
 		"分":    23,
 		"分词":   456,
 	}
-	var total int64
+	total := 0
 	for _, v := range freq {
 		total += v
 	}
@@ -70,7 +70,7 @@ func TestNewTokenizer(t *testing.T) {
 		t.Error("freq in tokenizer expected not nil")
 	}
 	tokenizer.freq.Range(func(key, value any) bool {
-		if value.(int64) != freq[key.(string)] {
+		if value.(int) != freq[key.(string)] {
 			t.Errorf("expected freq of word [%v] is [%v] actual [%v]", key, freq[key.(string)], value)
 		}
 		return true
