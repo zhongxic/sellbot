@@ -69,9 +69,9 @@ func TestNewTokenizer(t *testing.T) {
 	if tokenizer.freq == nil {
 		t.Error("freq in tokenizer expected not nil")
 	}
-	tokenizer.freq.Range(func(key, value any) bool {
-		if value.(int) != freq[key.(string)] {
-			t.Errorf("expected freq of word [%v] is [%v] actual [%v]", key, freq[key.(string)], value)
+	tokenizer.freq.Range(func(key string, value int) bool {
+		if value != freq[key] {
+			t.Errorf("expected freq of word [%v] is [%v] actual [%v]", key, freq[key], value)
 		}
 		return true
 	})
