@@ -2,9 +2,7 @@ package jieba
 
 import (
 	"bufio"
-	"bytes"
 	_ "embed"
-	"encoding/json"
 	"log/slog"
 	"os"
 	"strconv"
@@ -102,45 +100,4 @@ func (t *Tokenizer) DelWord(word string) {
 	freq, _ := t.freq.Get(word)
 	t.freq.Put(word, 0)
 	t.total -= freq
-}
-
-func (t *Tokenizer) MarshalJSON() ([]byte, error) {
-	m := map[string]any{}
-	freq := make(map[string]int64)
-	t.freq.Range(func(key, value any) bool {
-		freq[key.(string)] = value.(int64)
-		return true
-	})
-	m["freq"] = freq
-	m["total"] = t.total
-	data, err := json.Marshal(m)
-	if err != nil {
-		return nil, err
-	}
-	return data, nil
-}
-
-func (t *Tokenizer) UnmarshalJSON(data []byte) error {
-	dec := json.NewDecoder(bytes.NewBuffer(data))
-	dec.UseNumber()
-	m := map[string]any{}
-	if err := dec.Decode(&m); err != nil {
-		return err
-	}
-	wfreq := m["freq"].(map[string]any)
-	lfreq := container.NewConcurrentMap[string, int64]()
-	for word, freq := range wfreq {
-		n, err := freq.(json.Number).Int64()
-		if err != nil {
-			return err
-		}
-		lfreq.Put(word, n)
-	}
-	ltotal, err := m["total"].(json.Number).Int64()
-	if err != nil {
-		return err
-	}
-	t.freq = lfreq
-	t.total = ltotal
-	return nil
 }

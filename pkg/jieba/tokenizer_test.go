@@ -2,7 +2,6 @@ package jieba
 
 import (
 	"bufio"
-	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -91,32 +90,6 @@ func TestNewDefaultTokenizer(t *testing.T) {
 	}
 	if tokenizer.freq == nil {
 		t.Error("freq in tokenizer expected not nil")
-	}
-}
-
-func TestUnMarshalJSON(t *testing.T) {
-	tokenizer, err := NewDefaultTokenizer()
-	if err != nil {
-		t.Fatal(err)
-	}
-	data, err := json.Marshal(tokenizer)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	seg := &Tokenizer{}
-	if err := json.Unmarshal(data, seg); err != nil {
-		t.Fatal(err)
-	}
-	seg.freq.Range(func(key, value any) bool {
-		expected, _ := tokenizer.freq.Get(key.(string))
-		if value.(int64) != expected {
-			t.Errorf("expected freq of word [%v] is [%v] actual [%v]", key, expected, value.(int64))
-		}
-		return true
-	})
-	if seg.total != tokenizer.total {
-		t.Errorf("expected total in tokenizer [%v] actual [%v]", tokenizer.total, seg.total)
 	}
 }
 
