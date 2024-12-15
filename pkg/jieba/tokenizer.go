@@ -36,7 +36,7 @@ func NewDefaultTokenizer() (tokenizer *Tokenizer, err error) {
 }
 
 func initialize(scanner *bufio.Scanner) (tokenizer *Tokenizer, err error) {
-	lfreq := container.NewConcurrentMap[string, int]()
+	lfreq := container.NewConcurrentMap[int]()
 	ltotal := 0
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())

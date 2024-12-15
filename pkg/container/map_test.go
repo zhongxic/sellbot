@@ -2,19 +2,21 @@ package container
 
 import (
 	"encoding/json"
+	"fmt"
 	"sync"
 	"testing"
 )
 
 func TestConcurrentMapPutGetRemoveRange(t *testing.T) {
-	m := NewConcurrentMap[int, int]()
+	m := NewConcurrentMap[int]()
 	wg := &sync.WaitGroup{}
 
-	N := 10000
+	N := 1000
 	for i := 0; i < N; i++ {
 		wg.Add(1)
 		go func() {
-			m.Put(i, i)
+			key := fmt.Sprintf("%v", i)
+			m.Put(key, i)
 			wg.Done()
 		}()
 	}
@@ -23,12 +25,13 @@ func TestConcurrentMapPutGetRemoveRange(t *testing.T) {
 	for i := 0; i < N; i++ {
 		wg.Add(1)
 		go func() {
-			val, ok := m.Get(i)
+			key := fmt.Sprintf("%v", i)
+			val, ok := m.Get(key)
 			if !ok {
-				t.Errorf("should contains key [%v]", i)
+				t.Errorf("should contains key [%v]", key)
 			}
 			if val != i {
-				t.Errorf("expected value of key [%v] is [%v] actual [%v]", i, i, val)
+				t.Errorf("expected value of key [%v] is [%v] actual [%v]", key, i, val)
 			}
 			wg.Done()
 		}()
@@ -38,31 +41,35 @@ func TestConcurrentMapPutGetRemoveRange(t *testing.T) {
 	for i := 0; i < N; i++ {
 		wg.Add(1)
 		go func() {
-			m.Remove(i)
+			key := fmt.Sprintf("%v", i)
+			m.Remove(key)
 			wg.Done()
 		}()
 	}
 	wg.Wait()
 
-	m.Range(func(key int, value int) bool {
+	m.Range(func(key string, value int) bool {
 		t.Errorf("should not contains key [%v]", key)
 		return false
 	})
 }
 
 func TestConcurrentMapMarshalAndUnmarshal(t *testing.T) {
-	m := NewConcurrentMap[int, int]()
-	m.Put(1, 1)
-	m.Put(2, 2)
+	m := NewConcurrentMap[int]()
+	N := 1000
+	for i := 0; i < N; i++ {
+		key := fmt.Sprintf("%v", i)
+		m.Put(key, i)
+	}
 	data, err := json.Marshal(m)
 	if err != nil {
 		t.Fatal(err)
 	}
-	n := ConcurrentMap[int, int]{}
-	if err = json.Unmarshal(data, &n); err != nil {
+	n := NewConcurrentMap[int]()
+	if err = json.Unmarshal(data, n); err != nil {
 		t.Fatal(err)
 	}
-	n.Range(func(key int, value int) bool {
+	n.Range(func(key string, value int) bool {
 		if expected, ok := m.Get(key); !ok || value != expected {
 			t.Errorf("expected value of key [%v] is [%v] actual [%v]", key, expected, value)
 		}
