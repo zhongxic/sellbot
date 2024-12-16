@@ -49,6 +49,7 @@ func NewStringerConcurrentMap[K Stringer, V any](shardCount ...int) *ConcurrentM
 	}
 	return cm
 }
+
 func determineShardCount(shardCount []int) int {
 	count := defaultShardCount
 	if len(shardCount) > 0 && shardCount[0] > 0 {
@@ -74,6 +75,19 @@ func (c *ConcurrentMap[K, V]) getShard(key K) *mapShard[K, V] {
 	return c.shards[int(hash)%c.shardCount]
 }
 
+func (c *ConcurrentMap[K, V]) snapshot() map[K]V {
+	m := make(map[K]V)
+	for i := 0; i < c.shardCount; i++ {
+		shard := c.shards[i]
+		shard.RLock()
+		for key, value := range shard.items {
+			m[key] = value
+		}
+		shard.RUnlock()
+	}
+	return m
+}
+
 func (c *ConcurrentMap[K, V]) Put(key K, value V) {
 	shard := c.getShard(key)
 	shard.Lock()
@@ -97,16 +111,9 @@ func (c *ConcurrentMap[K, V]) Remove(key K) {
 }
 
 func (c *ConcurrentMap[K, V]) Range(f func(key K, value V) bool) {
-	for i := 0; i < c.shardCount; i++ {
-		shard := c.shards[i]
-		shard.RLock()
-		for key, value := range shard.items {
-			if !f(key, value) {
-				shard.RUnlock()
-				return
-			}
-		}
-		shard.RUnlock()
+	snapshot := c.snapshot()
+	for key, value := range snapshot {
+		f(key, value)
 	}
 }
 
