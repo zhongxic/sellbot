@@ -4,7 +4,9 @@ import (
 	"sync"
 
 	"github.com/gin-gonic/gin"
+	botctl "github.com/zhongxic/sellbot/internal/controller/bot"
 	"github.com/zhongxic/sellbot/internal/controller/ping"
+	botserve "github.com/zhongxic/sellbot/internal/service/bot"
 	"github.com/zhongxic/sellbot/pkg/middleware"
 )
 
@@ -35,4 +37,6 @@ func registerMiddleware(r *gin.Engine) {
 func registerRoutes(r *gin.Engine) {
 	pingController := &ping.Controller{}
 	r.GET("/ping", pingController.Ping)
+	botController := botctl.NewController(botserve.NewService())
+	r.POST("/prologue", botController.Prologue)
 }
