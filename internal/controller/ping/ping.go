@@ -10,6 +10,6 @@ import (
 type Controller struct {
 }
 
-func (p *Controller) Ping(c *gin.Context) {
-	c.JSON(http.StatusOK, result.SuccessWithData("pong"))
+func (c *Controller) Ping(ctx *gin.Context) {
+	ctx.JSON(http.StatusOK, result.SuccessWithData("pong"))
 }
