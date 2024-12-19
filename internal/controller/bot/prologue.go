@@ -1,21 +1,26 @@
 package bot
 
 import (
+	"log/slog"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/zhongxic/sellbot/pkg/errorcode"
 	"github.com/zhongxic/sellbot/pkg/result"
-	"log/slog"
-	"net/http"
 )
 
 func (c *Controller) Prologue(ctx *gin.Context) {
 	request := &PrologueRequest{}
 	if err := ctx.ShouldBindJSON(request); err != nil {
-		slog.Error("process prologue request failed", "error", err.Error())
+		slog.Error("bind prologue request failed", "error", err.Error())
 		ctx.JSON(http.StatusBadRequest, result.FailedWithErrorCode(errorcode.ParamsError, errorcode.MessageRequestBodyNotBindable))
 		return
 	}
 	slog.Info("prologue request received", "body", request)
+	if request.ProcessId == "" {
+		ctx.JSON(http.StatusBadRequest, result.FailedWithErrorCode(errorcode.ParamsError, "processId is required"))
+		return
+	}
 	prologueDTO := convertPrologueRequestToPrologueDTO(request)
 	interactiveRespond, err := c.botService.Prologue(prologueDTO)
 	if err != nil {
