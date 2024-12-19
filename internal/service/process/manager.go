@@ -5,10 +5,17 @@ type Manager struct {
 	ReleaseLoader Loader
 }
 
-func (manager *Manager) Load(processId string, test bool) (*Process, error) {
+func NewManager(testLoader Loader, releaseLoader Loader) *Manager {
+	return &Manager{
+		TestLoader:    testLoader,
+		ReleaseLoader: releaseLoader,
+	}
+}
+
+func (m *Manager) Load(processId string, test bool) (*Process, error) {
 	if test {
-		return manager.TestLoader.Load(processId)
+		return m.TestLoader.Load(processId)
 	} else {
-		return manager.ReleaseLoader.Load(processId)
+		return m.ReleaseLoader.Load(processId)
 	}
 }
