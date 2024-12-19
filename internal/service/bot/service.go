@@ -4,9 +4,9 @@ type Service interface {
 	Prologue(prologueDTO *PrologueDTO) (*InteractiveRespond, error)
 }
 
-type ServiceImpl struct {
+type serviceImpl struct {
 }
 
 func NewService() Service {
-	return &ServiceImpl{}
+	return &serviceImpl{}
 }
