@@ -17,7 +17,12 @@ func (c *Controller) Prologue(ctx *gin.Context) {
 	}
 	slog.Info("prologue request received", "body", request)
 	prologueDTO := convertPrologueRequestToPrologueDTO(request)
-	interactiveRespond := c.botService.Prologue(prologueDTO)
+	interactiveRespond, err := c.botService.Prologue(prologueDTO)
+	if err != nil {
+		slog.Error("process prologue request failed", "error", err.Error())
+		ctx.JSON(http.StatusInternalServerError, result.FailedWithErrorCode(errorcode.SystemError, http.StatusText(http.StatusInternalServerError)))
+		return
+	}
 	interactiveResponse := convertInteractiveRespondToInteractiveResponse(interactiveRespond)
 	ctx.JSON(http.StatusOK, result.SuccessWithData(interactiveResponse))
 }

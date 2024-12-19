@@ -1,7 +1,7 @@
 package bot
 
 type Service interface {
-	Prologue(prologueDTO *PrologueDTO) *InteractiveRespond
+	Prologue(prologueDTO *PrologueDTO) (*InteractiveRespond, error)
 }
 
 type ServiceImpl struct {
