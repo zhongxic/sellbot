@@ -5,6 +5,8 @@ import (
 	"strings"
 )
 
+const MessageRequestBodyNotBindable = "request body not bindable"
+
 var (
 	ParamsError = New("ERR0001", "params error: {0}")
 	SystemError = New("ERR0002", "system error: {0}")
