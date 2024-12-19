@@ -13,12 +13,16 @@ type Loader interface {
 	LastModified(processId string) (time.Time, error)
 }
 
-type FileLoader struct {
-	Dir string
+func NewFileLoader(dir string) Loader {
+	return &fileLoader{dir}
 }
 
-func (loader *FileLoader) Load(processId string) (*Process, error) {
-	path := filepath.Join(loader.Dir, processId, fmt.Sprintf("%v.json", processId))
+type fileLoader struct {
+	dir string
+}
+
+func (loader *fileLoader) Load(processId string) (*Process, error) {
+	path := filepath.Join(loader.dir, processId, fmt.Sprintf("%v.json", processId))
 	file, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
@@ -31,8 +35,8 @@ func (loader *FileLoader) Load(processId string) (*Process, error) {
 	return process, nil
 }
 
-func (loader *FileLoader) LastModified(processId string) (time.Time, error) {
-	path := filepath.Join(loader.Dir, processId, fmt.Sprintf("%v.json", processId))
+func (loader *fileLoader) LastModified(processId string) (time.Time, error) {
+	path := filepath.Join(loader.dir, processId, fmt.Sprintf("%v.json", processId))
 	stat, err := os.Stat(path)
 	if err != nil {
 		return time.Now(), err
