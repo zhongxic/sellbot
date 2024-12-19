@@ -35,7 +35,7 @@ func registerMiddleware(r *gin.Engine) {
 }
 
 func registerRoutes(r *gin.Engine) {
-	pingController := &ping.Controller{}
+	pingController := ping.NewController()
 	r.GET("/ping", pingController.Ping)
 	botController := botctl.NewController(botserve.NewService())
 	r.POST("/prologue", botController.Prologue)
