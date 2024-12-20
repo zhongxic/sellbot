@@ -36,6 +36,7 @@ func registerMiddleware(r *gin.Engine) {
 
 func registerRoutes(r *gin.Engine) {
 	pingController := ping.NewController()
+	// TODO replace with configured process path
 	botOptions := botserve.Options{
 		TestProcessDir:    "",
 		ReleaseProcessDir: "",

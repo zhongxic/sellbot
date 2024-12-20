@@ -16,6 +16,7 @@ type Options struct {
 }
 
 func NewService(options Options) Service {
+	// TODO add cached loader impl
 	testLoader := process.NewFileLoader(options.TestProcessDir)
 	releaseLoader := process.NewFileLoader(options.ReleaseProcessDir)
 	return &serviceImpl{
