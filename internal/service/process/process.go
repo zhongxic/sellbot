@@ -1,5 +1,9 @@
 package process
 
+const (
+	DomainTypeStart string = "start"
+)
+
 type Process struct {
 	Id        string            `json:"id"`
 	Name      string            `json:"name"`
@@ -12,6 +16,7 @@ type Process struct {
 
 type Domain struct {
 	Name            string            `json:"name"`
+	Type            string            `json:"type"`
 	Branches        map[string]Branch `json:"branches"`
 	MatchOrders     []MatchPath       `json:"matchOrders"`
 	IgnoreConfig    IgnoreConfig      `json:"ignoreConfig"`
