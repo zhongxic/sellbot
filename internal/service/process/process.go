@@ -1,7 +1,11 @@
 package process
 
 const (
-	DomainTypeStart string = "start"
+	DomainTypeStart = "start"
+)
+
+const (
+	BranchNameEnter = "enter"
 )
 
 type Process struct {
