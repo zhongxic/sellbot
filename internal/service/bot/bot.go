@@ -1,9 +1,13 @@
 package bot
 
-import "github.com/zhongxic/sellbot/internal/service/process"
+import (
+	"context"
+
+	"github.com/zhongxic/sellbot/internal/service/process"
+)
 
 type Service interface {
-	Prologue(prologueDTO *PrologueDTO) (*InteractiveRespond, error)
+	Prologue(ctx context.Context, prologueDTO *PrologueDTO) (*InteractiveRespond, error)
 }
 
 type serviceImpl struct {
