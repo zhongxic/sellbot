@@ -1,8 +1,6 @@
 package bot
 
-import (
-	"github.com/zhongxic/sellbot/internal/service/bot"
-)
+import "github.com/zhongxic/sellbot/internal/service/bot"
 
 type Controller struct {
 	botService bot.Service
