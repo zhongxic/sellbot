@@ -5,3 +5,7 @@ logging:
   file: log.log
   max-age: 7
   max-size: 1024
+process:
+  directory:
+    test: /opt/deployments/process/test/
+    release: /opt/deployments/process/release/

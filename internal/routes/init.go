@@ -4,6 +4,7 @@ import (
 	"sync"
 
 	"github.com/gin-gonic/gin"
+	"github.com/zhongxic/sellbot/config"
 	botctl "github.com/zhongxic/sellbot/internal/controller/bot"
 	"github.com/zhongxic/sellbot/internal/controller/ping"
 	botserve "github.com/zhongxic/sellbot/internal/service/bot"
@@ -15,17 +16,17 @@ var (
 	engine   *gin.Engine
 )
 
-func Init() *gin.Engine {
+func Init(cfg *config.Config) *gin.Engine {
 	initOnce.Do(func() {
-		engine = initRoutes()
+		engine = initRoutes(cfg)
 	})
 	return engine
 }
 
-func initRoutes() *gin.Engine {
+func initRoutes(cfg *config.Config) *gin.Engine {
 	r := gin.New()
 	registerMiddleware(r)
-	registerRoutes(r)
+	registerRoutes(r, cfg)
 	return r
 }
 
@@ -34,12 +35,11 @@ func registerMiddleware(r *gin.Engine) {
 	r.Use(middleware.Recover())
 }
 
-func registerRoutes(r *gin.Engine) {
+func registerRoutes(r *gin.Engine, cfg *config.Config) {
 	pingController := ping.NewController()
-	// TODO replace with configured process path
 	botOptions := botserve.Options{
-		TestProcessDir:    "",
-		ReleaseProcessDir: "",
+		TestProcessDir:    cfg.Process.Directory.Test,
+		ReleaseProcessDir: cfg.Process.Directory.Release,
 	}
 	botController := botctl.NewController(botserve.NewService(botOptions))
 	r.GET("/ping", pingController.Ping)

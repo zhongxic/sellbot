@@ -45,7 +45,7 @@ func main() {
 	defer func() {
 		_ = logger.Close()
 	}()
-	r := routes.Init()
+	r := routes.Init(cfg)
 
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%v", cfg.Server.Port),

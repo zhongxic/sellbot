@@ -3,6 +3,7 @@ package config
 import (
 	"os"
 	"path/filepath"
+	"reflect"
 	"testing"
 
 	"gopkg.in/yaml.v3"
@@ -18,6 +19,12 @@ func TestParse(t *testing.T) {
 			File:    "log.log",
 			MaxAge:  7,
 			MaxSize: 1024,
+		},
+		Process: Process{
+			Directory: ProcessDirectory{
+				Test:    "/opt/deployments/process/test/",
+				Release: "/opt/deployments/process/release/",
+			},
 		},
 	}
 
@@ -38,19 +45,7 @@ func TestParse(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if config.Server.Port != expected.Server.Port {
-		t.Errorf("expected server port [%v] actual [%v]", expected.Server.Port, config.Server.Port)
-	}
-	if config.Logging.Level != expected.Logging.Level {
-		t.Errorf("expected log level [%v] actual [%v]", expected.Logging.Level, config.Logging.Level)
-	}
-	if config.Logging.File != expected.Logging.File {
-		t.Errorf("expected log file [%v] actual [%v]", expected.Logging.File, config.Logging.File)
-	}
-	if config.Logging.MaxAge != expected.Logging.MaxAge {
-		t.Errorf("expected log file age [%v] actual [%v]", expected.Logging.MaxAge, config.Logging.MaxAge)
-	}
-	if config.Logging.MaxSize != expected.Logging.MaxSize {
-		t.Errorf("expected log file size [%v] actual [%v]", expected.Logging.MaxSize, config.Logging.MaxSize)
+	if !reflect.DeepEqual(config, expected) {
+		t.Errorf("expected [%v] actual[%v]", expected, config)
 	}
 }
