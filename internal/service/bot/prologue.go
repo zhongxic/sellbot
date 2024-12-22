@@ -7,7 +7,9 @@ import (
 	"log/slog"
 	"strings"
 
+	"github.com/zhongxic/sellbot/internal/service/bot/matcher"
 	"github.com/zhongxic/sellbot/internal/service/process"
+	"github.com/zhongxic/sellbot/internal/service/process/helper"
 )
 
 func (s *serviceImpl) Prologue(ctx context.Context, prologueDTO *PrologueDTO) (*InteractiveRespond, error) {
@@ -22,7 +24,17 @@ func (s *serviceImpl) Prologue(ctx context.Context, prologueDTO *PrologueDTO) (*
 	if err := validateVariables(prologueDTO.Variables, loadedProcess.Variables); err != nil {
 		return nil, err
 	}
-	return &InteractiveRespond{}, nil
+	processHelper := helper.New(loadedProcess)
+	startDomain, err := processHelper.FindStartDomain()
+	if err != nil {
+		return nil, err
+	}
+	currentSession := s.initSession(prologueDTO)
+	matchContext := matcher.NewContext(currentSession, loadedProcess)
+	matchContext.AddMatchedPath(matcher.MatchedPath{Domain: startDomain.Name, Branch: process.BranchNameEnter})
+	answerDTO := makeAnswer(matchContext)
+	intentionRules := []process.IntentionRule{processHelper.GetDefaultIntentionRule()}
+	return makeRespond(matchContext, answerDTO, intentionRules), nil
 }
 
 func validateVariables(actual map[string]string, expected []process.Variable) error {
