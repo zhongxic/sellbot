@@ -63,11 +63,7 @@ func convertHitsDTOToHitsResponse(hitsDTO bot.HitsDTO) HitsResponse {
 	} else {
 		hitsResponse.Segments = hitsDTO.Segments
 	}
-	if len(hitsDTO.HitPaths) == 0 {
-		hitsResponse.HitPaths = make([]HitPathResponse, 0)
-	} else {
-		hitsResponse.HitPaths = convertHitPathDTOListToHitPathResponseList(hitsDTO.HitPaths)
-	}
+	hitsResponse.HitPaths = convertHitPathDTOListToHitPathResponseList(hitsDTO.HitPaths)
 	return hitsResponse
 }
 
@@ -76,9 +72,8 @@ func convertHitPathDTOListToHitPathResponseList(hitPathDTOList []bot.HitPathDTO)
 		return make([]HitPathResponse, 0)
 	}
 	hitPathResponseList := make([]HitPathResponse, len(hitPathDTOList))
-	for _, hitPathDTO := range hitPathDTOList {
-		hitPathResponse := convertHitPathDTOToHitPathResponse(hitPathDTO)
-		hitPathResponseList = append(hitPathResponseList, hitPathResponse)
+	for i, hitPathDTO := range hitPathDTOList {
+		hitPathResponseList[i] = convertHitPathDTOToHitPathResponse(hitPathDTO)
 	}
 	return hitPathResponseList
 }
@@ -107,9 +102,8 @@ func convertIntentionDTOListToIntentionResponseList(intentionDTOList []bot.Inten
 		return make([]IntentionResponse, 0)
 	}
 	intentionResponseList := make([]IntentionResponse, len(intentionDTOList))
-	for _, intentionDTO := range intentionDTOList {
-		intentionResponse := convertIntentionListToIntentionResponse(intentionDTO)
-		intentionResponseList = append(intentionResponseList, intentionResponse)
+	for i, intentionDTO := range intentionDTOList {
+		intentionResponseList[i] = convertIntentionListToIntentionResponse(intentionDTO)
 	}
 	return intentionResponseList
 }
