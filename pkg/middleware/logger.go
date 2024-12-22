@@ -13,7 +13,10 @@ import (
 	"github.com/zhongxic/sellbot/pkg/result"
 )
 
-const TraceId = "X-Trace-Id"
+const (
+	ContextKeyTraceId    = "traceId"
+	RequestHeaderTraceId = "X-Trace-Id"
+)
 
 type ResponseWriterWrapper struct {
 	gin.ResponseWriter
@@ -36,11 +39,11 @@ func (w ResponseWriterWrapper) WriteString(s string) (int, error) {
 
 func Logger() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		requestId := c.Request.Header.Get(TraceId)
-		if requestId == "" {
-			requestId = uuid.New().String()
+		traceId := c.Request.Header.Get(RequestHeaderTraceId)
+		if traceId == "" {
+			traceId = uuid.New().String()
 		}
-		c.Set(TraceId, requestId)
+		c.Set(ContextKeyTraceId, traceId)
 		start := time.Now()
 		path := c.Request.URL.Path
 		query := c.Request.URL.RawQuery
@@ -61,7 +64,7 @@ func Logger() gin.HandlerFunc {
 		response, _ := io.ReadAll(writer.Body)
 
 		slog.Info("completed",
-			slog.String("traceId", requestId),
+			slog.String("traceId", traceId),
 			slog.Group("request",
 				slog.String("path", path),
 				slog.String("query", query),

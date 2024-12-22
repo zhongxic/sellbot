@@ -10,10 +10,11 @@ import (
 	"github.com/zhongxic/sellbot/internal/service/bot/matcher"
 	"github.com/zhongxic/sellbot/internal/service/process"
 	"github.com/zhongxic/sellbot/internal/service/process/helper"
+	"github.com/zhongxic/sellbot/internal/traceid"
 )
 
 func (s *serviceImpl) Prologue(ctx context.Context, prologueDTO *PrologueDTO) (*InteractiveRespond, error) {
-	slog.Info("start process prologue", "traceId", ctx.Value("traceId"))
+	slog.Info("start process prologue", "traceId", ctx.Value(traceid.TraceId{}))
 	loadedProcess, err := s.processManager.Load(prologueDTO.ProcessId, prologueDTO.Test)
 	if err != nil {
 		return nil, err

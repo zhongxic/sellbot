@@ -6,13 +6,14 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/zhongxic/sellbot/internal/traceid"
 	"github.com/zhongxic/sellbot/pkg/errorcode"
 	"github.com/zhongxic/sellbot/pkg/middleware"
 	"github.com/zhongxic/sellbot/pkg/result"
 )
 
 func (c *Controller) Prologue(ctx *gin.Context) {
-	traceId := ctx.GetString(middleware.TraceId)
+	traceId := ctx.GetString(middleware.ContextKeyTraceId)
 	request := &PrologueRequest{}
 	if err := ctx.ShouldBindJSON(request); err != nil {
 		slog.Error("bind prologue request failed", "traceId", traceId, "error", err)
@@ -25,7 +26,7 @@ func (c *Controller) Prologue(ctx *gin.Context) {
 		return
 	}
 	prologueDTO := convertPrologueRequestToPrologueDTO(request)
-	traceContext := context.WithValue(context.Background(), "traceId", traceId)
+	traceContext := context.WithValue(context.Background(), traceid.TraceId{}, traceId)
 	interactiveRespond, err := c.botService.Prologue(traceContext, prologueDTO)
 	if err != nil {
 		slog.Error("process prologue request failed", "traceId", traceId, "error", err)
