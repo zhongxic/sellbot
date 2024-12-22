@@ -2,7 +2,13 @@ package helper
 
 import (
 	"fmt"
+
 	"github.com/zhongxic/sellbot/internal/service/process"
+)
+
+const (
+	DefaultIntentionName   = "default"
+	DefaultIntentionReason = "default intention"
 )
 
 type Helper struct {
@@ -24,4 +30,12 @@ func (h *Helper) FindStartDomain() (process.Domain, error) {
 		return process.Domain{}, fmt.Errorf("expected one start domain but found [%d]", len(domains))
 	}
 	return domains[0], nil
+}
+
+func (h *Helper) GetDefaultIntentionRule() process.IntentionRule {
+	return process.IntentionRule{
+		Code:        h.hold.Intentions.DefaultIntention,
+		DisplayName: DefaultIntentionName,
+		Reason:      DefaultIntentionReason,
+	}
 }
