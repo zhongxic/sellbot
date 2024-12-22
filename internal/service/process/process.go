@@ -9,13 +9,13 @@ const (
 )
 
 type Process struct {
-	Id        string            `json:"id"`
-	Name      string            `json:"name"`
-	Version   string            `json:"version"`
-	Domains   map[string]Domain `json:"domains"`
-	Intention Intention         `json:"intention"`
-	Options   Options           `json:"options"`
-	Variables []Variable        `json:"variables"`
+	Id         string            `json:"id"`
+	Name       string            `json:"name"`
+	Version    string            `json:"version"`
+	Domains    map[string]Domain `json:"domains"`
+	Intentions Intentions        `json:"intentions"`
+	Options    Options           `json:"options"`
+	Variables  []Variable        `json:"variables"`
 }
 
 type Domain struct {
@@ -64,7 +64,7 @@ type MissMatchConfig struct {
 	ShortTextMissMatchJumpTo string `json:"shortTextMissMatchJumpTo"`
 }
 
-type Intention struct {
+type Intentions struct {
 	DefaultIntention string          `json:"defaultIntention"`
 	IntentionRules   []IntentionRule `json:"intentionRules"`
 }
