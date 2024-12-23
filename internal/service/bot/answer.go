@@ -1,6 +1,8 @@
 package bot
 
 import (
+	"strings"
+
 	"github.com/zhongxic/sellbot/internal/service/bot/matcher"
 	"github.com/zhongxic/sellbot/internal/service/process"
 )
@@ -13,16 +15,15 @@ func makeAnswer(matchContext *matcher.Context) AnswerDTO {
 func makeRespond(matchContext *matcher.Context, answerDTO AnswerDTO, intentionRules []process.IntentionRule) *InteractiveRespond {
 	interactiveRespond := &InteractiveRespond{}
 	interactiveRespond.SessionId = matchContext.Session.SessionId
-	hitsDTO := HitsDTO{}
-	hitsDTO.Sentence = matchContext.Sentence
+	interactiveRespond.Hits.Sentence = matchContext.Sentence
 	if len(matchContext.Segments) == 0 {
-		hitsDTO.Segments = make([]string, 0)
+		interactiveRespond.Hits.Segments = make([]string, 0)
 	} else {
-		hitsDTO.Segments = matchContext.Segments
+		interactiveRespond.Hits.Segments = matchContext.Segments
 	}
-	hitsDTO.HitPaths = convertMatchedPathListToHitPathDTOList(matchContext.MatchedPaths)
-	interactiveRespond.Hits = hitsDTO
-	interactiveRespond.Answer = answerDTO
+	interactiveRespond.Hits.HitPaths = convertMatchedPathListToHitPathDTOList(matchContext.MatchedPaths)
+	interactiveRespond.Answer.Text = replaceVariables(answerDTO.Text, matchContext.Session.Variables)
+	interactiveRespond.Answer.Audio = answerDTO.Audio
 	interactiveRespond.Intentions = convertIntentionRuleListToIntentionDTOList(intentionRules)
 	return interactiveRespond
 }
@@ -49,6 +50,17 @@ func convertMatchedPathToHitPathDTO(matchedPath matcher.MatchedPath) HitPathDTO 
 		hitPathDTO.MatchedWords = matchedPath.MatchedWords
 	}
 	return hitPathDTO
+}
+
+func replaceVariables(text string, variables map[string]string) string {
+	if len(variables) == 0 {
+		return text
+	}
+	replacements := make([]string, 0)
+	for code, value := range variables {
+		replacements = append(replacements, code, value)
+	}
+	return strings.NewReplacer(replacements...).Replace(text)
 }
 
 func convertIntentionRuleListToIntentionDTOList(intentionRules []process.IntentionRule) []IntentionDTO {
