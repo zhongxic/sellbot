@@ -44,20 +44,35 @@ func makeAnswer(ctx context.Context, matchContext *matcher.Context) (AnswerDTO, 
 		}
 		slog.Info(fmt.Sprintf("sessionId [%v]: jump to domain [%v] due to hitCount exceed",
 			matchContext.Session.SessionId, matchedPath.Branch), traceId)
-		return autoJump(matchContext, nextDomain)
+		return autoJump(ctx, matchContext, nextDomain)
 	}
 	response := branch.Responses[hitCount%len(branch.Responses)]
 	if response.EnableAutoJump && response.Next != "" {
 		slog.Info(fmt.Sprintf("sessionId [%v]: jump to domain [%v] due to domain [%v] branch [%v] auto jump enabled",
 			matchContext.Session.SessionId, response.Next, matchedPath.Domain, matchedPath.Branch), traceId)
-		return autoJump(matchContext, response.Next)
+		return autoJump(ctx, matchContext, response.Next)
 	}
 	return AnswerDTO{Text: response.Text, Audio: response.Audio}, nil
 }
 
-func autoJump(matchContext *matcher.Context, nextDomain string) (AnswerDTO, error) {
-	// TODO impl-me
-	return AnswerDTO{}, nil
+func autoJump(ctx context.Context, matchContext *matcher.Context, nextDomain string) (AnswerDTO, error) {
+	matchedPath := matcher.MatchedPath{Domain: nextDomain, Branch: process.BranchNameEnter}
+	if matchedPath.Domain == "" {
+		processHelper := helper.New(matchContext.Process)
+		endFailDomain, err := processHelper.FindCommonDialogDomain(process.DomainTypeDialogEndFail)
+		if err != nil {
+			return AnswerDTO{}, err
+		}
+		matchedPath.Domain = endFailDomain.Name
+	}
+	if matchedPath.Domain == process.DomainNameRepeat {
+		matchedPath.Domain = matchContext.Session.CurrentDomain
+		matchedPath.Branch = matchContext.Session.CurrentBranch
+	}
+	slog.Info(fmt.Sprintf("sessionId [%v]: expected jump to [%v] actaul jump to domain [%v] branch [%v]",
+		matchContext.Session.SessionId, nextDomain, matchedPath.Domain, matchedPath.Branch),
+		slog.Any("traceId", ctx.Value(traceid.TraceId{})))
+	return makeAnswer(ctx, matchContext)
 }
 
 func makeRespond(matchContext *matcher.Context, answerDTO AnswerDTO, intentionRules []process.IntentionRule) *InteractiveRespond {
