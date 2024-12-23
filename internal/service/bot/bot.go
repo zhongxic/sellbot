@@ -12,6 +12,7 @@ type Service interface {
 }
 
 type serviceImpl struct {
+	options        Options
 	processManager *process.Manager
 }
 
@@ -25,15 +26,14 @@ func (s *serviceImpl) initSession(prologueDTO *PrologueDTO) *session.Session {
 }
 
 type Options struct {
+	DictFile          string
 	TestProcessDir    string
 	ReleaseProcessDir string
 }
 
-func NewService(options Options) Service {
-	// TODO add cached loader impl
-	testLoader := process.NewFileLoader(options.TestProcessDir)
-	releaseLoader := process.NewFileLoader(options.ReleaseProcessDir)
+func NewService(options Options, processManager *process.Manager) Service {
 	return &serviceImpl{
-		processManager: process.NewManager(testLoader, releaseLoader),
+		options:        options,
+		processManager: processManager,
 	}
 }

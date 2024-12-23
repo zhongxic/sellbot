@@ -8,6 +8,7 @@ import (
 	botctl "github.com/zhongxic/sellbot/internal/controller/bot"
 	"github.com/zhongxic/sellbot/internal/controller/ping"
 	botserve "github.com/zhongxic/sellbot/internal/service/bot"
+	"github.com/zhongxic/sellbot/internal/service/process"
 	"github.com/zhongxic/sellbot/pkg/middleware"
 )
 
@@ -38,10 +39,14 @@ func registerMiddleware(r *gin.Engine) {
 func registerRoutes(r *gin.Engine, cfg *config.Config) {
 	pingController := ping.NewController()
 	botOptions := botserve.Options{
+		DictFile:          cfg.Tokenizer.DictFile,
 		TestProcessDir:    cfg.Process.Directory.Test,
 		ReleaseProcessDir: cfg.Process.Directory.Release,
 	}
-	botController := botctl.NewController(botserve.NewService(botOptions))
+	testLoader := process.NewFileLoader(cfg.Process.Directory.Test)
+	releaseLoader := process.NewFileLoader(cfg.Process.Directory.Release)
+	processManager := process.NewManager(testLoader, releaseLoader)
+	botController := botctl.NewController(botserve.NewService(botOptions, processManager))
 	r.GET("/ping", pingController.Ping)
 	r.POST("/prologue", botController.Prologue)
 }
