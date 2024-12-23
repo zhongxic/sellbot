@@ -18,7 +18,8 @@ const (
 )
 
 const (
-	BranchNameEnter = "enter"
+	DomainNameRepeat = "repeat"
+	BranchNameEnter  = "enter"
 )
 
 type Process struct {
