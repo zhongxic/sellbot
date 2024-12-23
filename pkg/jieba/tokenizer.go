@@ -3,6 +3,7 @@ package jieba
 import (
 	"bufio"
 	_ "embed"
+	"errors"
 	"os"
 	"strconv"
 	"strings"
@@ -102,6 +103,27 @@ func (t *Tokenizer) DelWord(word string) {
 
 // LoadUserDict append personalized dict specific by userDict into this tokenizer.
 func (t *Tokenizer) LoadUserDict(userDict string) error {
-	// TODO impl-me load user dict
+	f, err := os.Open(userDict)
+	if errors.Is(err, os.ErrNotExist) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+		if line == "" {
+			continue
+		}
+		split := strings.Split(line, " ")
+		word := split[0]
+		freq, err := strconv.Atoi(split[1])
+		if err != nil {
+			return err
+		}
+		t.AddWord(word, freq)
+	}
 	return nil
 }
