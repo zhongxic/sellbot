@@ -1,7 +1,20 @@
 package process
 
 const (
-	DomainTypeStart = "start"
+	DomainCategoryMainProcess  = "main_process"
+	DomainCategoryBusinessQA   = "business_qa"
+	DomainCategoryCommonDialog = "common_dialog"
+)
+
+const (
+	DomainTypeStart  = "start"
+	DomainTypeNormal = "normal"
+	DomainTypeEnd    = "end"
+	DomainTypeAgent  = "agent"
+)
+
+const (
+	DomainTypeDialogEndFail = "end_fail"
 )
 
 const (
@@ -21,6 +34,7 @@ type Process struct {
 type Domain struct {
 	Name            string            `json:"name"`
 	Type            string            `json:"type"`
+	Category        string            `json:"category"`
 	Branches        map[string]Branch `json:"branches"`
 	MatchOrders     []MatchPath       `json:"matchOrders"`
 	IgnoreConfig    IgnoreConfig      `json:"ignoreConfig"`
