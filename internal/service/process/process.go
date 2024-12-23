@@ -22,6 +22,8 @@ const (
 	BranchNameEnter  = "enter"
 )
 
+const UserDictFile = "user_dict.txt"
+
 type Process struct {
 	Id         string            `json:"id"`
 	Name       string            `json:"name"`
