@@ -98,3 +98,9 @@ func (t *Tokenizer) DelWord(word string) {
 	t.freq.Put(word, 0)
 	t.total -= freq
 }
+
+// LoadUserDict append personalized dict specific by userDict into this tokenizer.
+func (t *Tokenizer) LoadUserDict(userDict string) error {
+	// TODO impl-me load user dict
+	return nil
+}
