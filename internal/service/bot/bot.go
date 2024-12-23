@@ -12,8 +12,16 @@ type Service interface {
 }
 
 type serviceImpl struct {
-	options        Options
-	processManager *process.Manager
+	options       Options
+	testLoader    process.Loader
+	releaseLoader process.Loader
+}
+
+func (s *serviceImpl) Load(processId string, test bool) (*process.Process, error) {
+	if test {
+		return s.testLoader.Load(processId)
+	}
+	return s.releaseLoader.Load(processId)
 }
 
 func (s *serviceImpl) initSession(prologueDTO *PrologueDTO) *session.Session {
@@ -31,9 +39,10 @@ type Options struct {
 	ReleaseProcessDir string
 }
 
-func NewService(options Options, processManager *process.Manager) Service {
+func NewService(options Options, testLoader, releaseLoader process.Loader) Service {
 	return &serviceImpl{
-		options:        options,
-		processManager: processManager,
+		options:       options,
+		testLoader:    testLoader,
+		releaseLoader: releaseLoader,
 	}
 }

@@ -45,8 +45,7 @@ func registerRoutes(r *gin.Engine, cfg *config.Config) {
 	}
 	testLoader := process.NewFileLoader(cfg.Process.Directory.Test)
 	releaseLoader := process.NewFileLoader(cfg.Process.Directory.Release)
-	processManager := process.NewManager(testLoader, releaseLoader)
-	botController := botctl.NewController(botserve.NewService(botOptions, processManager))
+	botController := botctl.NewController(botserve.NewService(botOptions, testLoader, releaseLoader))
 	r.GET("/ping", pingController.Ping)
 	r.POST("/prologue", botController.Prologue)
 }
