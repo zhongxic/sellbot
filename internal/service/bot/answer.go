@@ -1,15 +1,63 @@
 package bot
 
 import (
+	"context"
+	"errors"
+	"fmt"
+	"log/slog"
 	"strings"
 
 	"github.com/zhongxic/sellbot/internal/service/bot/matcher"
 	"github.com/zhongxic/sellbot/internal/service/process"
+	"github.com/zhongxic/sellbot/internal/service/process/helper"
+	"github.com/zhongxic/sellbot/internal/traceid"
 )
 
-func makeAnswer(matchContext *matcher.Context) AnswerDTO {
-	// TODO 实现 answer 逻辑
-	return AnswerDTO{}
+func makeAnswer(ctx context.Context, matchContext *matcher.Context) (AnswerDTO, error) {
+	if matchContext == nil {
+		return AnswerDTO{}, errors.New("make answer failed due to nil match context")
+	}
+	matchedPath, err := matchContext.GetLastMatchedPath()
+	if err != nil {
+		return AnswerDTO{}, err
+	}
+	traceId := slog.Any("traceId", ctx.Value(traceid.TraceId{}))
+	slog.Info(fmt.Sprintf("sessionId [%v]: matched domain [%v] branch [%v]",
+		matchContext.Session.SessionId, matchedPath.Domain, matchedPath.Branch), traceId)
+	processHelper := helper.New(matchContext.Process)
+	domain, err := processHelper.GetDomain(matchedPath.Domain)
+	if err != nil {
+		return AnswerDTO{}, err
+	}
+	branch, err := processHelper.GetBranch(matchedPath.Domain, matchedPath.Branch)
+	if err != nil {
+		return AnswerDTO{}, err
+	}
+	hitCount := matchContext.Session.GetDomainBranchHitCount(matchedPath.Domain, matchedPath.Branch)
+	isExceed := hitCount >= len(branch.Responses) && domain.Category != process.DomainCategoryMainProcess
+	slog.Info(fmt.Sprintf("sessionId [%v]: domain [%v] branch [%v] hitCount [%v] isExceed [%v]",
+		matchContext.Session.SessionId, matchedPath.Domain, matchedPath.Branch, hitCount, isExceed), traceId)
+	if isExceed {
+		nextDomain := ""
+		if branch.EnableExceedJump && branch.Next != "" {
+			nextDomain = branch.Next
+		}
+		slog.Info(fmt.Sprintf("sessionId [%v]: jump to domain [%v] due to hitCount exceed",
+			matchContext.Session.SessionId, matchedPath.Branch), traceId)
+		return autoJump(matchContext, nextDomain)
+	}
+	response := branch.Responses[hitCount%len(branch.Responses)]
+	if response.EnableAutoJump && response.Next != "" {
+		slog.Info(fmt.Sprintf("sessionId [%v]: jump to domain [%v] due to domain [%v] branch [%v] auto jump enabled",
+			matchContext.Session.SessionId, response.Next, matchedPath.Domain, matchedPath.Branch), traceId)
+		return autoJump(matchContext, response.Next)
+	}
+	return AnswerDTO{Text: response.Text, Audio: response.Audio}, nil
+}
+
+func autoJump(matchContext *matcher.Context, nextDomain string) (AnswerDTO, error) {
+	// TODO impl-me
+	return AnswerDTO{}, nil
 }
 
 func makeRespond(matchContext *matcher.Context, answerDTO AnswerDTO, intentionRules []process.IntentionRule) *InteractiveRespond {

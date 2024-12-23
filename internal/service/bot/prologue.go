@@ -33,7 +33,10 @@ func (s *serviceImpl) Prologue(ctx context.Context, prologueDTO *PrologueDTO) (*
 	currentSession := s.initSession(prologueDTO)
 	matchContext := matcher.NewContext(currentSession, loadedProcess)
 	matchContext.AddMatchedPath(matcher.MatchedPath{Domain: startDomain.Name, Branch: process.BranchNameEnter})
-	answerDTO := makeAnswer(matchContext)
+	answerDTO, err := makeAnswer(ctx, matchContext)
+	if err != nil {
+		return nil, err
+	}
 	intentionRules := []process.IntentionRule{processHelper.GetDefaultIntentionRule()}
 	return makeRespond(matchContext, answerDTO, intentionRules), nil
 }
