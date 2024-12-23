@@ -80,3 +80,8 @@ func (h *Helper) FindCommonDialogDomain(domainDialogType string) (process.Domain
 	}
 	return domains[0], nil
 }
+
+func (h *Helper) GetDomainKeywords(domainName string) []string {
+	// TODO impl-me get domain keywords
+	return make([]string, 0)
+}
