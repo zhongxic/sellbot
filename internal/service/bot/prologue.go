@@ -31,6 +31,14 @@ func (s *serviceImpl) Prologue(ctx context.Context, prologueDTO *PrologueDTO) (*
 		return nil, err
 	}
 	currentSession := s.initSession(prologueDTO)
+	tokenizer, err := s.initTokenizer(ctx, prologueDTO.ProcessId, prologueDTO.Test)
+	if err != nil {
+		return nil, err
+	}
+	keywords := processHelper.GetDomainKeywords(startDomain.Name)
+	for _, keyword := range keywords {
+		tokenizer.AddWord(keyword, 1)
+	}
 	matchContext := matcher.NewContext(currentSession, loadedProcess)
 	matchContext.AddMatchedPath(matcher.MatchedPath{Domain: startDomain.Name, Branch: process.BranchNameEnter})
 	answerDTO, err := makeAnswer(ctx, matchContext)
