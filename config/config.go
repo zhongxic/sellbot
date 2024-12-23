@@ -7,18 +7,17 @@ import (
 )
 
 const (
-	defaultLogLevel                = "debug"
-	defaultLogFile                 = "log.log"
-	defaultLogFileAge              = 7
-	defaultLogFileSize             = 1024
-	defaultProcessTestDirectory    = "/opt/deployments/process/test/"
-	defaultProcessReleaseDirectory = "/opt/deployments/process/release/"
+	defaultLogLevel    = "debug"
+	defaultLogFile     = "log.log"
+	defaultLogFileAge  = 7
+	defaultLogFileSize = 1024
 )
 
 type Config struct {
-	Server  Server  `yaml:"server"`
-	Logging Logging `yaml:"logging"`
-	Process Process `yaml:"process"`
+	Server    Server    `yaml:"server"`
+	Logging   Logging   `yaml:"logging"`
+	Process   Process   `yaml:"process"`
+	Tokenizer Tokenizer `yaml:"tokenizer"`
 }
 
 type Server struct {
@@ -33,12 +32,16 @@ type Logging struct {
 }
 
 type Process struct {
-	Directory ProcessDirectory `yaml:"directory"`
+	Directory Directory `yaml:"directory"`
 }
 
-type ProcessDirectory struct {
+type Directory struct {
 	Test    string `yaml:"test"`
 	Release string `yaml:"release"`
+}
+
+type Tokenizer struct {
+	DictFile string `yaml:"dict-file"`
 }
 
 func Parse(file string) (*Config, error) {
@@ -70,11 +73,5 @@ func applyDefault(config *Config) {
 	}
 	if config.Logging.MaxSize == 0 {
 		config.Logging.MaxSize = defaultLogFileSize
-	}
-	if config.Process.Directory.Test == "" {
-		config.Process.Directory.Test = defaultProcessTestDirectory
-	}
-	if config.Process.Directory.Release == "" {
-		config.Process.Directory.Release = defaultProcessReleaseDirectory
 	}
 }

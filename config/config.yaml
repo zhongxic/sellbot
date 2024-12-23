@@ -9,3 +9,5 @@ process:
   directory:
     test: /opt/deployments/process/test/
     release: /opt/deployments/process/release/
+tokenizer:
+  dict-file: data/dict/dict.txt.small

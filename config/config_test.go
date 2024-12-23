@@ -21,10 +21,13 @@ func TestParse(t *testing.T) {
 			MaxSize: 1024,
 		},
 		Process: Process{
-			Directory: ProcessDirectory{
+			Directory: Directory{
 				Test:    "/opt/deployments/process/test/",
 				Release: "/opt/deployments/process/release/",
 			},
+		},
+		Tokenizer: Tokenizer{
+			DictFile: "data/dict/dict.txt.small",
 		},
 	}
 
@@ -40,7 +43,6 @@ func TestParse(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-
 	config, err := Parse(filename)
 	if err != nil {
 		t.Fatal(err)
