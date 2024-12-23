@@ -1,0 +1,67 @@
+{
+  "id": "sample",
+  "name": "测试话术",
+  "version": "1",
+  "domains": {
+    "开场白": {
+      "name": "开场白",
+      "type": "start",
+      "category": "main_process",
+      "branches": {
+        "enter": {
+          "name": "enter",
+          "keywords": {
+            "simple": [],
+            "combination": [],
+            "exact": []
+          },
+          "responses": [
+            {
+              "text": "你好这里是招商银行你的专属客户经理，请问你是$0001吗",
+              "audio": "1",
+              "enableAutoJump": false,
+              "next": ""
+            }
+          ],
+          "enableExceedJump": false,
+          "next": ""
+        }
+      }
+    },
+    "结束_失败": {
+      "name": "结束_失败",
+      "type": "end_fail",
+      "category": "common_dialog",
+      "branches": {
+        "enter": {
+          "name": "enter",
+          "keywords": {
+            "simple": [],
+            "combination": [],
+            "exact": []
+          },
+          "responses": [
+            {
+              "text": "好的那就不打扰你了，祝你生活愉快再见",
+              "audio": "2",
+              "enableAutoJump": false,
+              "next": ""
+            }
+          ],
+          "enableExceedJump": false,
+          "next": ""
+        }
+      }
+    }
+  },
+  "intentions": {
+    "defaultIntention": "T"
+  },
+  "variables": [
+    {
+      "code": "$0001",
+      "name": "客户姓名",
+      "nickname": "cust_name"
+    }
+  ]
+}

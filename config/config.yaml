@@ -7,7 +7,7 @@ logging:
   max-size: 1024
 process:
   directory:
-    test: /opt/deployments/process/test/
-    release: /opt/deployments/process/release/
+    test: data/process/test/
+    release: data/process/release/
 tokenizer:
   dict-file: data/dict/dict.txt.small

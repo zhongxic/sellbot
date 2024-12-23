@@ -22,8 +22,8 @@ func TestParse(t *testing.T) {
 		},
 		Process: Process{
 			Directory: Directory{
-				Test:    "/opt/deployments/process/test/",
-				Release: "/opt/deployments/process/release/",
+				Test:    "data/process/test/",
+				Release: "data/process/release/",
 			},
 		},
 		Tokenizer: Tokenizer{
