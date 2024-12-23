@@ -69,6 +69,7 @@ func initialize(scanner *bufio.Scanner) (tokenizer *Tokenizer, err error) {
 }
 
 // AddWord add a word with specific frequency into the dict held by this tokenizer.
+// FIXME this method is not atomic.
 func (t *Tokenizer) AddWord(word string, frequency int) {
 	freq, _ := t.freq.Get(word)
 	nfreq := freq + frequency
