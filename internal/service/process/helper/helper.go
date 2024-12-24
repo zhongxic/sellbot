@@ -82,6 +82,46 @@ func (h *Helper) FindCommonDialogDomain(domainDialogType string) (process.Domain
 }
 
 func (h *Helper) GetDomainKeywords(domainName string) []string {
-	// TODO impl-me get domain keywords
-	return make([]string, 0)
+	keywords := make([]string, 0)
+	if len(h.hold.Domains) == 0 {
+		return keywords
+	}
+	domain, ok := h.hold.Domains[domainName]
+	if !ok || len(domain.Branches) == 0 {
+		return keywords
+	}
+	for branchName := range domain.Branches {
+		flatMapKeywords := h.GetBranchKeywords(domainName, branchName)
+		keywords = append(keywords, flatMapKeywords...)
+	}
+	return keywords
+}
+
+func (h *Helper) GetBranchKeywords(domainName, branchName string) []string {
+	keywords := make([]string, 0)
+	if len(h.hold.Domains) == 0 {
+		return keywords
+	}
+	domain, ok := h.hold.Domains[domainName]
+	if !ok || len(domain.Branches) == 0 {
+		return keywords
+	}
+	branch, ok := domain.Branches[branchName]
+	if !ok {
+		return keywords
+	}
+	if len(branch.Keywords.Simple) > 0 {
+		keywords = append(keywords, branch.Keywords.Simple...)
+	}
+	if len(branch.Keywords.Combination) > 0 {
+		for _, words := range branch.Keywords.Combination {
+			if len(words) > 0 {
+				keywords = append(keywords, words...)
+			}
+		}
+	}
+	if len(branch.Keywords.Exact) > 0 {
+		keywords = append(keywords, branch.Keywords.Exact...)
+	}
+	return keywords
 }
