@@ -2,6 +2,9 @@ package session
 
 import "github.com/google/uuid"
 
+type StatPath struct {
+}
+
 type Session struct {
 	SessionId             string
 	ProcessId             string
@@ -30,4 +33,8 @@ func (s *Session) GetDomainBranchHitCount(domainName, branchName string) int {
 		return 0
 	}
 	return branchHitCount[branchName]
+}
+
+func (s *Session) UpdateStat(statPath []StatPath) {
+	// TODO impl-me update session stat
 }
