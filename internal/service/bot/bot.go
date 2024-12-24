@@ -29,11 +29,13 @@ func (s *serviceImpl) Load(processId string, test bool) (*process.Process, error
 	return s.releaseLoader.Load(processId)
 }
 
-func (s *serviceImpl) initSession(prologueDTO *PrologueDTO) *session.Session {
+func (s *serviceImpl) initSession(ctx context.Context, prologueDTO *PrologueDTO) *session.Session {
 	sess := session.New()
 	sess.ProcessId = prologueDTO.ProcessId
 	sess.Variables = prologueDTO.Variables
 	sess.Test = prologueDTO.Test
+	slog.Debug(fmt.Sprintf("init session [%v]", sess.SessionId),
+		"traceId", ctx.Value(traceid.TraceId{}), "prologueDTO", prologueDTO)
 	return sess
 }
 

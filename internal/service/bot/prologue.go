@@ -26,7 +26,7 @@ func (s *serviceImpl) Prologue(ctx context.Context, prologueDTO *PrologueDTO) (*
 	if err := validateVariables(prologueDTO.Variables, loadedProcess.Variables); err != nil {
 		return nil, err
 	}
-	currentSession := s.initSession(prologueDTO)
+	currentSession := s.initSession(ctx, prologueDTO)
 	tokenizer, err := s.initTokenizer(ctx)
 	if err != nil {
 		return nil, err
