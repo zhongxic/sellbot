@@ -6,9 +6,10 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"sync"
 	"testing"
 )
+
+var testDict = "dict.txt"
 
 // TestBefore generate dict in testdata dir before test.
 func TestBefore(t *testing.T) {
@@ -23,7 +24,7 @@ func TestBefore(t *testing.T) {
 	分 23
 	结 234
 	`
-	filename := filepath.Join("testdata", "dict.txt") // NOSONAR
+	filename := filepath.Join("testdata", testDict)
 	err := os.MkdirAll(filepath.Dir(filename), 0644)
 	if err != nil {
 		t.Fatal(err)
@@ -59,7 +60,7 @@ func TestNewTokenizer(t *testing.T) {
 	for _, v := range freq {
 		total += v
 	}
-	tokenizer, err := NewTokenizer(filepath.Join("testdata", "dict.txt"))
+	tokenizer, err := NewTokenizer(filepath.Join("testdata", testDict))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -69,12 +70,11 @@ func TestNewTokenizer(t *testing.T) {
 	if tokenizer.freq == nil {
 		t.Error("freq in tokenizer expected not nil")
 	}
-	tokenizer.freq.Range(func(key string, value int) bool {
+	for key, value := range tokenizer.freq {
 		if value != freq[key] {
 			t.Errorf("expected freq of word [%v] is [%v] actual [%v]", key, freq[key], value)
 		}
-		return true
-	})
+	}
 	if tokenizer.total != total {
 		t.Errorf("expected total in tokenizer [%v] actual [%v]", total, tokenizer.total)
 	}
@@ -91,32 +91,6 @@ func TestNewDefaultTokenizer(t *testing.T) {
 	if tokenizer.freq == nil {
 		t.Error("freq in tokenizer expected not nil")
 	}
-}
-
-func TestAddDelWordConcurrent(t *testing.T) {
-	TestBefore(t)
-	tokenizer, err := NewTokenizer(filepath.Join("testdata", "dict.txt"))
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	wg := &sync.WaitGroup{}
-	N := 100
-	for i := 0; i < N; i++ {
-		wg.Add(1)
-		go func() {
-			tokenizer.AddWord("结巴", 1)
-			wg.Done()
-		}()
-	}
-	for i := 0; i < N; i++ {
-		wg.Add(1)
-		go func() {
-			tokenizer.DelWord("结巴")
-			wg.Done()
-		}()
-	}
-	wg.Wait()
 }
 
 func TestLoadUserDict(t *testing.T) {
@@ -151,10 +125,9 @@ func TestLoadUserDict(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	tokenizer.freq.Range(func(key string, value int) bool {
+	for key, value := range tokenizer.freq {
 		if value != userDict[key] {
 			t.Errorf("expected freq of word [%v] is [%v] actual [%v]", key, userDict[key], value)
 		}
-		return true
-	})
+	}
 }

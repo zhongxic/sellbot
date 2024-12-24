@@ -7,15 +7,15 @@ import (
 	"os"
 	"strconv"
 	"strings"
-
-	"github.com/zhongxic/sellbot/pkg/container"
 )
 
 //go:embed dict.txt
 var dict string
 
+// Tokenizer provides segmentation and dictionary management methods.
+// It is not thread safe for multi goroutines.
 type Tokenizer struct {
-	freq  *container.ConcurrentMap[string, int]
+	freq  map[string]int
 	total int
 }
 
@@ -37,7 +37,7 @@ func NewDefaultTokenizer() (tokenizer *Tokenizer, err error) {
 }
 
 func initialize(scanner *bufio.Scanner) (tokenizer *Tokenizer, err error) {
-	lfreq := container.NewConcurrentMap[int]()
+	lfreq := make(map[string]int, 0)
 	ltotal := 0
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())
@@ -50,18 +50,17 @@ func initialize(scanner *bufio.Scanner) (tokenizer *Tokenizer, err error) {
 		if err != nil {
 			return nil, err
 		}
-		lfreq.Put(word, freq)
+		lfreq[word] = freq
 		ltotal += freq
 		runes := []rune(word)
 		length := len(runes)
 		for i := 0; i < length; i++ {
 			wfrag := string(runes[:i+1])
-			if _, ok := lfreq.Get(wfrag); !ok {
-				lfreq.Put(wfrag, 0)
+			if _, ok := lfreq[wfrag]; !ok {
+				lfreq[wfrag] = 0
 			}
 		}
 	}
-
 	if err := scanner.Err(); err != nil {
 		return nil, err
 	}
@@ -70,23 +69,22 @@ func initialize(scanner *bufio.Scanner) (tokenizer *Tokenizer, err error) {
 }
 
 // AddWord add a word with specific frequency into the dict held by this tokenizer.
-// FIXME this method is not atomic.
 func (t *Tokenizer) AddWord(word string, frequency int) {
-	freq, _ := t.freq.Get(word)
+	freq := t.freq[word]
 	nfreq := freq + frequency
 	if nfreq <= 0 {
-		t.freq.Put(word, 0)
+		t.freq[word] = 0
 		t.total -= freq
 	} else {
-		t.freq.Put(word, nfreq)
+		t.freq[word] = nfreq
 		t.total += frequency
 	}
 	runes := []rune(word)
 	N := len(runes)
 	for i := 0; i < N; i++ {
 		frag := string(runes[:i+1])
-		if _, ok := t.freq.Get(frag); !ok {
-			t.freq.Put(frag, 0)
+		if _, ok := t.freq[frag]; !ok {
+			t.freq[frag] = 0
 		}
 	}
 }
@@ -96,8 +94,8 @@ func (t *Tokenizer) AddWord(word string, frequency int) {
 // If you want to decrease the frequency of this word rather than remove it from the dict entirely,
 // please call AddWord with a negative frequency argument.
 func (t *Tokenizer) DelWord(word string) {
-	freq, _ := t.freq.Get(word)
-	t.freq.Put(word, 0)
+	freq := t.freq[word]
+	t.freq[word] = 0
 	t.total -= freq
 }
 
@@ -106,8 +104,7 @@ func (t *Tokenizer) LoadUserDict(userDict string) error {
 	f, err := os.Open(userDict)
 	if errors.Is(err, os.ErrNotExist) {
 		return nil
-	}
-	if err != nil {
+	} else if err != nil {
 		return err
 	}
 	defer f.Close()

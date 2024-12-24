@@ -123,7 +123,7 @@ func (t *Tokenizer) cutDAG(sentence string) []string { //NOSONAR
 					words = append(words, buf.String())
 				} else {
 					s := buf.String()
-					if _, ok := t.freq.Get(s); !ok {
+					if _, ok := t.freq[s]; !ok {
 						recognized := finalseg.Cut(s)
 						words = append(words, recognized...)
 					} else {
@@ -143,7 +143,7 @@ func (t *Tokenizer) cutDAG(sentence string) []string { //NOSONAR
 			words = append(words, buf.String())
 		} else {
 			s := buf.String()
-			if _, ok := t.freq.Get(s); !ok {
+			if _, ok := t.freq[s]; !ok {
 				recognized := finalseg.Cut(s)
 				words = append(words, recognized...)
 			} else {
@@ -189,7 +189,7 @@ func (t *Tokenizer) getDAG(sentence string) map[int][]int {
 		tmplist := make([]int, 0)
 		i := k
 		frag := string(runes[k])
-		freq, ok := t.freq.Get(frag)
+		freq, ok := t.freq[frag]
 		for i < N && ok {
 			if freq > 0 {
 				tmplist = append(tmplist, i)
@@ -199,7 +199,7 @@ func (t *Tokenizer) getDAG(sentence string) map[int][]int {
 				break
 			}
 			frag = string(runes[k : i+1])
-			freq, ok = t.freq.Get(frag)
+			freq, ok = t.freq[frag]
 		}
 		if len(tmplist) == 0 {
 			tmplist = append(tmplist, k)
@@ -220,7 +220,7 @@ func (t *Tokenizer) calc(sentence string, DAG map[int][]int) map[int]edge {
 		edges := make(edgeSlice, 0)
 		for _, x := range DAG[idx] {
 			frag := string(runes[idx : x+1])
-			freq, ok := t.freq.Get(frag)
+			freq, ok := t.freq[frag]
 			if !ok {
 				freq = 1
 			}

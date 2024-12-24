@@ -19,7 +19,7 @@ func TestGetDAG(t *testing.T) {
 		6: {6, 7},
 		7: {7},
 	}
-	tokenizer, err := NewTokenizer(filepath.Join("testdata", "dict.txt"))
+	tokenizer, err := NewTokenizer(filepath.Join("testdata", testDict))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -44,7 +44,7 @@ func TestCalc(t *testing.T) {
 		0: {-13.403198187350974, 0},
 	}
 
-	tokenizer, err := NewTokenizer(filepath.Join("testdata", "dict.txt"))
+	tokenizer, err := NewTokenizer(filepath.Join("testdata", testDict))
 	if err != nil {
 		t.Fatal(err)
 	}
