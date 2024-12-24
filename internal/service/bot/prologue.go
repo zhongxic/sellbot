@@ -11,6 +11,7 @@ import (
 	"github.com/zhongxic/sellbot/internal/service/process"
 	"github.com/zhongxic/sellbot/internal/service/process/helper"
 	"github.com/zhongxic/sellbot/internal/traceid"
+	"github.com/zhongxic/sellbot/pkg/jieba"
 )
 
 func (s *serviceImpl) Prologue(ctx context.Context, prologueDTO *PrologueDTO) (*InteractiveRespond, error) {
@@ -25,20 +26,17 @@ func (s *serviceImpl) Prologue(ctx context.Context, prologueDTO *PrologueDTO) (*
 	if err := validateVariables(prologueDTO.Variables, loadedProcess.Variables); err != nil {
 		return nil, err
 	}
+	currentSession := s.initSession(prologueDTO)
+	tokenizer, err := s.initTokenizer(ctx)
+	if err != nil {
+		return nil, err
+	}
 	processHelper := helper.New(loadedProcess)
 	startDomain, err := processHelper.FindStartDomain()
 	if err != nil {
 		return nil, err
 	}
-	currentSession := s.initSession(prologueDTO)
-	tokenizer, err := s.initTokenizer(ctx, prologueDTO.ProcessId, prologueDTO.Test)
-	if err != nil {
-		return nil, err
-	}
-	keywords := processHelper.GetDomainKeywords(startDomain.Name)
-	for _, keyword := range keywords {
-		tokenizer.AddWord(keyword, 1)
-	}
+	loadUserDict(tokenizer, processHelper)
 	matchContext := matcher.NewContext(currentSession, loadedProcess)
 	matchContext.AddMatchedPath(matcher.MatchedPath{Domain: startDomain.Name, Branch: process.BranchNameEnter})
 	answerDTO, err := makeAnswer(ctx, matchContext)
@@ -70,6 +68,26 @@ func validateVariables(actual map[string]string, expected []process.Variable) er
 	}
 	if len(messages) > 0 {
 		return errors.New(strings.Join(messages, ", "))
+	}
+	return nil
+}
+
+func loadUserDict(tokenizer *jieba.Tokenizer, processHelper *helper.Helper) error {
+	globalKeywords := processHelper.GetGlobalKeywords()
+	for _, keyword := range globalKeywords {
+		tokenizer.AddWord(keyword, 1)
+	}
+	startDomain, err := processHelper.FindStartDomain()
+	if err != nil {
+		return nil
+	}
+	startDomainKeywords := processHelper.GetDomainKeywords(startDomain.Name)
+	for _, keyword := range startDomainKeywords {
+		tokenizer.AddWord(keyword, 1)
+	}
+	intentionKeyword := processHelper.GetIntentionKeywords()
+	for _, keyword := range intentionKeyword {
+		tokenizer.AddWord(keyword, 1)
 	}
 	return nil
 }
