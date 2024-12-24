@@ -10,6 +10,7 @@ import (
 	"github.com/zhongxic/sellbot/internal/service/bot/matcher"
 	"github.com/zhongxic/sellbot/internal/service/process"
 	"github.com/zhongxic/sellbot/internal/service/process/helper"
+	"github.com/zhongxic/sellbot/internal/service/session"
 	"github.com/zhongxic/sellbot/internal/traceid"
 	"github.com/zhongxic/sellbot/pkg/jieba"
 )
@@ -43,6 +44,8 @@ func (s *serviceImpl) Prologue(ctx context.Context, prologueDTO *PrologueDTO) (*
 	if err != nil {
 		return nil, err
 	}
+	statPaths := convertMatchedPathsToStatPaths(matchContext.MatchedPaths)
+	currentSession.UpdateStat(statPaths)
 	intentionRules := []process.IntentionRule{processHelper.GetDefaultIntentionRule()}
 	return makeRespond(matchContext, answerDTO, intentionRules), nil
 }
@@ -90,4 +93,9 @@ func loadUserDict(tokenizer *jieba.Tokenizer, processHelper *helper.Helper) erro
 		tokenizer.AddWord(keyword, 1)
 	}
 	return nil
+}
+
+func convertMatchedPathsToStatPaths(matchedPaths []matcher.MatchedPath) []session.StatPath {
+	// TODO impl-me convertMatchedPathToStatPath
+	return make([]session.StatPath, 0)
 }
