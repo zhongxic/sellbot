@@ -2,6 +2,7 @@ package routes
 
 import (
 	"sync"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/zhongxic/sellbot/config"
@@ -9,6 +10,7 @@ import (
 	"github.com/zhongxic/sellbot/internal/controller/ping"
 	botserve "github.com/zhongxic/sellbot/internal/service/bot"
 	"github.com/zhongxic/sellbot/internal/service/process"
+	"github.com/zhongxic/sellbot/pkg/cache"
 	"github.com/zhongxic/sellbot/pkg/middleware"
 )
 
@@ -43,8 +45,16 @@ func registerRoutes(r *gin.Engine, cfg *config.Config) {
 		TestProcessDir:    cfg.Process.Directory.Test,
 		ReleaseProcessDir: cfg.Process.Directory.Release,
 	}
-	testLoader := process.NewFileLoader(cfg.Process.Directory.Test)
-	releaseLoader := process.NewFileLoader(cfg.Process.Directory.Release)
+	testProcessStorage := cache.NewCache[*process.Process](cache.Options{
+		DefaultExpiration: time.Duration(cfg.Process.Cache.Expiration) * time.Second,
+		CleanupInterval:   time.Duration(cfg.Process.Cache.CleanupInterval) * time.Second,
+	})
+	releaseProcessStorage := cache.NewCache[*process.Process](cache.Options{
+		DefaultExpiration: time.Duration(cfg.Process.Cache.Expiration) * time.Second,
+		CleanupInterval:   time.Duration(cfg.Process.Cache.CleanupInterval) * time.Second,
+	})
+	testLoader := process.NewCachedLoader(process.NewFileLoader(cfg.Process.Directory.Test), testProcessStorage)
+	releaseLoader := process.NewCachedLoader(process.NewFileLoader(cfg.Process.Directory.Release), releaseProcessStorage)
 	botController := botctl.NewController(botserve.NewService(botOptions, testLoader, releaseLoader))
 	r.GET("/ping", pingController.Ping)
 	r.POST("/prologue", botController.Prologue)

@@ -21,6 +21,10 @@ func TestParse(t *testing.T) {
 			MaxSize: 1024,
 		},
 		Process: Process{
+			Cache: Cache{
+				Expiration:      1800,
+				CleanupInterval: 900,
+			},
 			Directory: Directory{
 				Test:    "data/process/test/",
 				Release: "data/process/release/",

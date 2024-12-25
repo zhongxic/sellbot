@@ -6,6 +6,9 @@ logging:
   max-age: 7
   max-size: 1024
 process:
+  cache:
+    expiration: 1800
+    cleanup-interval: 900
   directory:
     test: data/process/test/
     release: data/process/release/

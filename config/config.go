@@ -32,12 +32,18 @@ type Logging struct {
 }
 
 type Process struct {
+	Cache     Cache     `yaml:"cache"`
 	Directory Directory `yaml:"directory"`
 }
 
 type Directory struct {
 	Test    string `yaml:"test"`
 	Release string `yaml:"release"`
+}
+
+type Cache struct {
+	Expiration      int `yaml:"expiration"`
+	CleanupInterval int `yaml:"cleanup-interval"`
 }
 
 type Tokenizer struct {
