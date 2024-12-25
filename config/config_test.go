@@ -33,6 +33,12 @@ func TestParse(t *testing.T) {
 		Tokenizer: Tokenizer{
 			ExtraDict: "data/dict/dict.txt.small",
 		},
+		Session: Session{
+			Cache: Cache{
+				Expiration:      1800,
+				CleanupInterval: 900,
+			},
+		},
 	}
 
 	filename := filepath.Join("testdata", "config.yaml")

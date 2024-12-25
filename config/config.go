@@ -18,6 +18,7 @@ type Config struct {
 	Logging   Logging   `yaml:"logging"`
 	Process   Process   `yaml:"process"`
 	Tokenizer Tokenizer `yaml:"tokenizer"`
+	Session   Session   `yaml:"session"`
 }
 
 type Server struct {
@@ -48,6 +49,10 @@ type Cache struct {
 
 type Tokenizer struct {
 	ExtraDict string `yaml:"extra-dict"`
+}
+
+type Session struct {
+	Cache Cache `yaml:"cache"`
 }
 
 func Parse(file string) (*Config, error) {

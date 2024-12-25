@@ -14,3 +14,7 @@ process:
     release: data/process/release/
 tokenizer:
   extra-dict: data/dict/dict.txt.small
+session:
+  cache:
+    expiration: 1800
+    cleanup-interval: 900
