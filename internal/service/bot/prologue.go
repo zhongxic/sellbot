@@ -19,30 +19,30 @@ func (s *serviceImpl) Prologue(ctx context.Context, prologueDTO *PrologueDTO) (*
 	slog.Info("start process prologue", "traceId", ctx.Value(traceid.TraceId{}))
 	loadedProcess, err := s.Load(prologueDTO.ProcessId, prologueDTO.Test)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("load process failed: %w", err)
 	}
 	if err := loadedProcess.Validate(); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("process validate failed: %w", err)
 	}
 	if err := validateVariables(prologueDTO.Variables, loadedProcess.Variables); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("variables validate failed: %w ", err)
 	}
 	currentSession := s.initSession(ctx, prologueDTO)
 	tokenizer, err := s.initTokenizer(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("init tokenizer failed: %w", err)
 	}
 	processHelper := helper.New(loadedProcess)
 	startDomain, err := processHelper.FindStartDomain()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("find start domain failed: %w", err)
 	}
 	loadUserDict(tokenizer, processHelper)
 	matchContext := matcher.NewContext(currentSession, loadedProcess)
 	matchContext.AddMatchedPath(matcher.MatchedPath{Domain: startDomain.Name, Branch: process.BranchNameEnter})
 	answerDTO, err := makeAnswer(ctx, matchContext)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("make answer failed: %w", err)
 	}
 	statPaths := convertMatchedPathsToStatPaths(matchContext.MatchedPaths)
 	currentSession.UpdateStat(statPaths)
@@ -82,7 +82,7 @@ func loadUserDict(tokenizer *jieba.Tokenizer, processHelper *helper.Helper) erro
 	}
 	startDomain, err := processHelper.FindStartDomain()
 	if err != nil {
-		return nil
+		return fmt.Errorf("find start domain failed: %w", err)
 	}
 	startDomainKeywords := processHelper.GetDomainKeywords(startDomain.Name)
 	for _, keyword := range startDomainKeywords {

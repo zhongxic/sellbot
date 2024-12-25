@@ -2,7 +2,6 @@ package bot
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log/slog"
 	"strings"
@@ -15,11 +14,11 @@ import (
 
 func makeAnswer(ctx context.Context, matchContext *matcher.Context) (AnswerDTO, error) {
 	if matchContext == nil {
-		return AnswerDTO{}, errors.New("make answer failed due to nil match context")
+		return AnswerDTO{}, fmt.Errorf("make answer failed due to nil match context")
 	}
 	matchedPath, err := matchContext.GetLastMatchedPath()
 	if err != nil {
-		return AnswerDTO{}, err
+		return AnswerDTO{}, fmt.Errorf("get last matched path failed: %w", err)
 	}
 	traceId := slog.Any("traceId", ctx.Value(traceid.TraceId{}))
 	slog.Info(fmt.Sprintf("sessionId [%v]: matched domain [%v] branch [%v]",
@@ -27,11 +26,11 @@ func makeAnswer(ctx context.Context, matchContext *matcher.Context) (AnswerDTO, 
 	processHelper := helper.New(matchContext.Process)
 	domain, err := processHelper.GetDomain(matchedPath.Domain)
 	if err != nil {
-		return AnswerDTO{}, err
+		return AnswerDTO{}, fmt.Errorf("get domain failed: %w", err)
 	}
 	branch, err := processHelper.GetBranch(matchedPath.Domain, matchedPath.Branch)
 	if err != nil {
-		return AnswerDTO{}, err
+		return AnswerDTO{}, fmt.Errorf("get branch failed: %w", err)
 	}
 	hitCount := matchContext.Session.GetDomainBranchHitCount(matchedPath.Domain, matchedPath.Branch)
 	isExceed := hitCount >= len(branch.Responses) && domain.Category != process.DomainCategoryMainProcess
@@ -61,7 +60,7 @@ func autoJump(ctx context.Context, matchContext *matcher.Context, nextDomain str
 		processHelper := helper.New(matchContext.Process)
 		endFailDomain, err := processHelper.FindCommonDialogDomain(process.DomainTypeDialogEndFail)
 		if err != nil {
-			return AnswerDTO{}, err
+			return AnswerDTO{}, fmt.Errorf("find common dialog domain [%v] failed: %w", process.DomainTypeDialogEndFail, err)
 		}
 		matchedPath.Domain = endFailDomain.Name
 	}
@@ -69,7 +68,7 @@ func autoJump(ctx context.Context, matchContext *matcher.Context, nextDomain str
 		matchedPath.Domain = matchContext.Session.CurrentDomain
 		matchedPath.Branch = matchContext.Session.CurrentBranch
 	}
-	slog.Info(fmt.Sprintf("sessionId [%v]: expected jump to [%v] actaul jump to domain [%v] branch [%v]",
+	slog.Info(fmt.Sprintf("sessionId [%v]: expected jump to [%v] actual jump to domain [%v] branch [%v]",
 		matchContext.Session.SessionId, nextDomain, matchedPath.Domain, matchedPath.Branch),
 		slog.Any("traceId", ctx.Value(traceid.TraceId{})))
 	return makeAnswer(ctx, matchContext)
