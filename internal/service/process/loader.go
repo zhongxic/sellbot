@@ -27,16 +27,16 @@ func (loader *fileLoader) Load(processId string) (*Process, error) {
 	path := filepath.Join(loader.dir, processId, fmt.Sprintf("%v.json", processId))
 	file, err := os.ReadFile(path)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("process [%v] read file failed: %w", processId, err)
 	}
 	process := &Process{}
 	err = json.Unmarshal(file, process)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("process [%v] unmarshal failed: %w", processId, err)
 	}
 	lastModified, err := loader.LastModified(processId)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("process [%v] read stat failed: %w", processId, err)
 	}
 	process.lastModified = lastModified
 	return process, nil
