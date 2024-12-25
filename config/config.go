@@ -37,14 +37,14 @@ type Process struct {
 	Directory Directory `yaml:"directory"`
 }
 
-type Directory struct {
-	Test    string `yaml:"test"`
-	Release string `yaml:"release"`
-}
-
 type Cache struct {
 	Expiration      int `yaml:"expiration"`
 	CleanupInterval int `yaml:"cleanup-interval"`
+}
+
+type Directory struct {
+	Test    string `yaml:"test"`
+	Release string `yaml:"release"`
 }
 
 type Tokenizer struct {
