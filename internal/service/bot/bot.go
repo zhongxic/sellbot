@@ -17,7 +17,7 @@ type Service interface {
 }
 
 type serviceImpl struct {
-	options       Options
+	extraDict     string
 	testLoader    process.Loader
 	releaseLoader process.Loader
 }
@@ -42,25 +42,27 @@ func (s *serviceImpl) initSession(ctx context.Context, prologueDTO *PrologueDTO)
 func (s *serviceImpl) initTokenizer(ctx context.Context) (tokenizer *jieba.Tokenizer, err error) {
 	start := time.Now()
 	traceId := slog.Any("traceId", ctx.Value(traceid.TraceId{}))
-	if s.options.ExtraDict == "" {
+	if s.extraDict == "" {
 		tokenizer, err = jieba.NewDefaultTokenizer()
 		slog.Debug(fmt.Sprintf("init default tokenizer cost [%v] ms", time.Since(start).Milliseconds()), traceId)
 	} else {
-		tokenizer, err = jieba.NewTokenizer(s.options.ExtraDict)
+		tokenizer, err = jieba.NewTokenizer(s.extraDict)
 		slog.Debug(fmt.Sprintf("init tokenizer with extra dict [%v] cost [%v] ms",
-			s.options.ExtraDict, time.Since(start).Milliseconds()), traceId)
+			s.extraDict, time.Since(start).Milliseconds()), traceId)
 	}
 	return
 }
 
 type Options struct {
-	ExtraDict string
+	ExtraDict     string
+	TestLoader    process.Loader
+	ReleaseLoader process.Loader
 }
 
-func NewService(options Options, testLoader, releaseLoader process.Loader) Service {
+func NewService(options Options) Service {
 	return &serviceImpl{
-		options:       options,
-		testLoader:    testLoader,
-		releaseLoader: releaseLoader,
+		extraDict:     options.ExtraDict,
+		testLoader:    options.TestLoader,
+		releaseLoader: options.ReleaseLoader,
 	}
 }
