@@ -42,16 +42,16 @@ func registerMiddleware(r *gin.Engine) {
 
 func registerRoutes(r *gin.Engine, cfg *config.Config) {
 	pingController := ping.NewController()
-	testProcessStorage := cache.NewCache[*process.Process](cache.Options{
+	testProcessCache := cache.NewCache[*process.Process](cache.Options{
 		DefaultExpiration: time.Duration(cfg.Process.Cache.Expiration) * time.Second,
 		CleanupInterval:   time.Duration(cfg.Process.Cache.CleanupInterval) * time.Second,
 	})
-	releaseProcessStorage := cache.NewCache[*process.Process](cache.Options{
+	releaseProcessCache := cache.NewCache[*process.Process](cache.Options{
 		DefaultExpiration: time.Duration(cfg.Process.Cache.Expiration) * time.Second,
 		CleanupInterval:   time.Duration(cfg.Process.Cache.CleanupInterval) * time.Second,
 	})
-	testLoader := process.NewCachedLoader(process.NewFileLoader(cfg.Process.Directory.Test), testProcessStorage)
-	releaseLoader := process.NewCachedLoader(process.NewFileLoader(cfg.Process.Directory.Release), releaseProcessStorage)
+	testLoader := process.NewCachedLoader(process.NewFileLoader(cfg.Process.Directory.Test), testProcessCache)
+	releaseLoader := process.NewCachedLoader(process.NewFileLoader(cfg.Process.Directory.Release), releaseProcessCache)
 	sessionCache := cache.NewCache[*session.Session](cache.Options{
 		DefaultExpiration: time.Duration(cfg.Session.Cache.Expiration) * time.Second,
 		CleanupInterval:   time.Duration(cfg.Session.Cache.CleanupInterval) * time.Second,
