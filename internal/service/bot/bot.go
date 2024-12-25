@@ -39,26 +39,22 @@ func (s *serviceImpl) initSession(ctx context.Context, prologueDTO *PrologueDTO)
 	return sess
 }
 
-func (s *serviceImpl) initTokenizer(ctx context.Context) (*jieba.Tokenizer, error) {
-	var err error
-	var tokenizer *jieba.Tokenizer
+func (s *serviceImpl) initTokenizer(ctx context.Context) (tokenizer *jieba.Tokenizer, err error) {
 	start := time.Now()
 	traceId := slog.Any("traceId", ctx.Value(traceid.TraceId{}))
-	if s.options.DictFile == "" {
+	if s.options.ExtraDict == "" {
 		tokenizer, err = jieba.NewDefaultTokenizer()
+		slog.Debug(fmt.Sprintf("init default tokenizer cost [%v] ms", time.Since(start).Milliseconds()), traceId)
 	} else {
-		tokenizer, err = jieba.NewTokenizer(s.options.DictFile)
+		tokenizer, err = jieba.NewTokenizer(s.options.ExtraDict)
+		slog.Debug(fmt.Sprintf("init tokenizer with extra dict [%v] cost [%v] ms",
+			s.options.ExtraDict, time.Since(start).Milliseconds()), traceId)
 	}
-	if err != nil {
-		return nil, err
-	}
-	slog.Debug(fmt.Sprintf("init tokenizer with dict [%v] cost [%v] ms",
-		s.options.DictFile, time.Since(start).Milliseconds()), traceId)
-	return tokenizer, nil
+	return
 }
 
 type Options struct {
-	DictFile          string
+	ExtraDict         string
 	TestProcessDir    string
 	ReleaseProcessDir string
 }

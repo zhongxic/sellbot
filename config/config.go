@@ -47,7 +47,7 @@ type Cache struct {
 }
 
 type Tokenizer struct {
-	DictFile string `yaml:"dict-file"`
+	ExtraDict string `yaml:"extra-dict"`
 }
 
 func Parse(file string) (*Config, error) {

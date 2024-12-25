@@ -31,7 +31,7 @@ func TestParse(t *testing.T) {
 			},
 		},
 		Tokenizer: Tokenizer{
-			DictFile: "data/dict/dict.txt.small",
+			ExtraDict: "data/dict/dict.txt.small",
 		},
 	}
 

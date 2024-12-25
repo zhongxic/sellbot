@@ -13,4 +13,4 @@ process:
     test: data/process/test/
     release: data/process/release/
 tokenizer:
-  dict-file: data/dict/dict.txt.small
+  extra-dict: data/dict/dict.txt.small

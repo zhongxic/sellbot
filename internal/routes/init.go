@@ -41,7 +41,7 @@ func registerMiddleware(r *gin.Engine) {
 func registerRoutes(r *gin.Engine, cfg *config.Config) {
 	pingController := ping.NewController()
 	botOptions := botserve.Options{
-		DictFile:          cfg.Tokenizer.DictFile,
+		ExtraDict:         cfg.Tokenizer.ExtraDict,
 		TestProcessDir:    cfg.Process.Directory.Test,
 		ReleaseProcessDir: cfg.Process.Directory.Release,
 	}
