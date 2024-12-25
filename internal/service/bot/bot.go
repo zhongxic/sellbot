@@ -9,6 +9,7 @@ import (
 	"github.com/zhongxic/sellbot/internal/service/process"
 	"github.com/zhongxic/sellbot/internal/service/session"
 	"github.com/zhongxic/sellbot/internal/traceid"
+	"github.com/zhongxic/sellbot/pkg/cache"
 	"github.com/zhongxic/sellbot/pkg/jieba"
 )
 
@@ -17,9 +18,11 @@ type Service interface {
 }
 
 type serviceImpl struct {
-	extraDict     string
-	testLoader    process.Loader
-	releaseLoader process.Loader
+	extraDict      string
+	testLoader     process.Loader
+	releaseLoader  process.Loader
+	sessionCache   cache.Cache[string, *session.Session]
+	tokenizerCache cache.Cache[string, *jieba.Tokenizer]
 }
 
 func (s *serviceImpl) Load(processId string, test bool) (*process.Process, error) {
@@ -54,15 +57,19 @@ func (s *serviceImpl) initTokenizer(ctx context.Context) (tokenizer *jieba.Token
 }
 
 type Options struct {
-	ExtraDict     string
-	TestLoader    process.Loader
-	ReleaseLoader process.Loader
+	ExtraDict      string
+	TestLoader     process.Loader
+	ReleaseLoader  process.Loader
+	SessionCache   cache.Cache[string, *session.Session]
+	TokenizerCache cache.Cache[string, *jieba.Tokenizer]
 }
 
 func NewService(options Options) Service {
 	return &serviceImpl{
-		extraDict:     options.ExtraDict,
-		testLoader:    options.TestLoader,
-		releaseLoader: options.ReleaseLoader,
+		extraDict:      options.ExtraDict,
+		testLoader:     options.TestLoader,
+		releaseLoader:  options.ReleaseLoader,
+		sessionCache:   options.SessionCache,
+		tokenizerCache: options.TokenizerCache,
 	}
 }
