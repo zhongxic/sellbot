@@ -54,9 +54,7 @@ func (s *serviceImpl) initTokenizer(ctx context.Context) (tokenizer *jieba.Token
 }
 
 type Options struct {
-	ExtraDict         string
-	TestProcessDir    string
-	ReleaseProcessDir string
+	ExtraDict string
 }
 
 func NewService(options Options, testLoader, releaseLoader process.Loader) Service {

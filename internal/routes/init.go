@@ -41,9 +41,7 @@ func registerMiddleware(r *gin.Engine) {
 func registerRoutes(r *gin.Engine, cfg *config.Config) {
 	pingController := ping.NewController()
 	botOptions := botserve.Options{
-		ExtraDict:         cfg.Tokenizer.ExtraDict,
-		TestProcessDir:    cfg.Process.Directory.Test,
-		ReleaseProcessDir: cfg.Process.Directory.Release,
+		ExtraDict: cfg.Tokenizer.ExtraDict,
 	}
 	testProcessStorage := cache.NewCache[*process.Process](cache.Options{
 		DefaultExpiration: time.Duration(cfg.Process.Cache.Expiration) * time.Second,
