@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/zhongxic/sellbot/pkg/cache"
 )
 
 type Loader interface {
@@ -32,6 +34,11 @@ func (loader *fileLoader) Load(processId string) (*Process, error) {
 	if err != nil {
 		return nil, err
 	}
+	lastModified, err := loader.LastModified(processId)
+	if err != nil {
+		return nil, err
+	}
+	process.lastModified = lastModified
 	return process, nil
 }
 
@@ -42,4 +49,39 @@ func (loader *fileLoader) LastModified(processId string) (time.Time, error) {
 		return time.Now(), err
 	}
 	return stat.ModTime(), nil
+}
+
+type cachedLoader struct {
+	rawLoader Loader
+	storage   cache.Cache[string, *Process]
+}
+
+func (loader *cachedLoader) Load(processId string) (*Process, error) {
+	process, exist := loader.storage.Get(processId)
+	if exist {
+		lastModified, err := loader.rawLoader.LastModified(processId)
+		if err != nil || !process.lastModified.Equal(lastModified) {
+			exist = false
+		}
+	}
+	if !exist {
+		process, err := loader.rawLoader.Load(processId)
+		if err != nil {
+			return nil, err
+		}
+		loader.storage.Set(processId, process)
+		return process, nil
+	}
+	return process, nil
+}
+
+func (loader *cachedLoader) LastModified(processId string) (time.Time, error) {
+	return loader.rawLoader.LastModified(processId)
+}
+
+func NewCachedLoader(rawLoader Loader, storage cache.Cache[string, *Process]) Loader {
+	return &cachedLoader{
+		rawLoader: rawLoader,
+		storage:   storage,
+	}
 }

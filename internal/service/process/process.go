@@ -1,5 +1,7 @@
 package process
 
+import "time"
+
 const (
 	DomainCategoryMainProcess  = "main_process"
 	DomainCategoryBusinessQA   = "business_qa"
@@ -30,6 +32,8 @@ type Process struct {
 	Intentions Intentions        `json:"intentions"`
 	Options    Options           `json:"options"`
 	Variables  []Variable        `json:"variables"`
+
+	lastModified time.Time
 }
 
 type Domain struct {
