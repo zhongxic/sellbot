@@ -37,7 +37,9 @@ func (s *serviceImpl) Prologue(ctx context.Context, prologueDTO *PrologueDTO) (*
 	if err != nil {
 		return nil, fmt.Errorf("find start domain failed: %w", err)
 	}
-	loadUserDict(tokenizer, processHelper)
+	if err := loadUserDict(tokenizer, processHelper); err != nil {
+		return nil, fmt.Errorf("load user dict failed: %w", err)
+	}
 	matchContext := matcher.NewContext(currentSession, loadedProcess)
 	matchContext.AddMatchedPath(matcher.MatchedPath{Domain: startDomain.Name, Branch: process.BranchNameEnter})
 	answerDTO, err := makeAnswer(ctx, matchContext)
