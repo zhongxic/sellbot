@@ -13,7 +13,7 @@ func Recover() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		defer func() {
 			if err := recover(); err != nil {
-				slog.Error("recovered", "error", err)
+				slog.Error("recovered", "traceId", c.Value(ContextKeyTraceId), "error", err)
 				c.AbortWithStatusJSON(http.StatusInternalServerError,
 					result.FailedWithErrorCode(errorcode.SystemError, "internal server error"))
 			}
