@@ -46,6 +46,8 @@ func (s *serviceImpl) Prologue(ctx context.Context, prologueDTO *PrologueDTO) (*
 	}
 	statPaths := convertMatchedPathsToStatPaths(matchContext.MatchedPaths)
 	currentSession.UpdateStat(statPaths)
+	s.storeSession(currentSession.SessionId, currentSession)
+	s.storeTokenizer(currentSession.SessionId, tokenizer)
 	intentionRules := []process.IntentionRule{processHelper.GetDefaultIntentionRule()}
 	return makeRespond(matchContext, answerDTO, intentionRules), nil
 }

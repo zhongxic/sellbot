@@ -56,6 +56,14 @@ func (s *serviceImpl) initTokenizer(ctx context.Context) (tokenizer *jieba.Token
 	return
 }
 
+func (s *serviceImpl) storeSession(sessionId string, sess *session.Session) {
+	s.sessionCache.Set(sessionId, sess)
+}
+
+func (s *serviceImpl) storeTokenizer(sessionId string, tokenizer *jieba.Tokenizer) {
+	s.tokenizerCache.Set(sessionId, tokenizer)
+}
+
 type Options struct {
 	ExtraDict      string
 	TestLoader     process.Loader
