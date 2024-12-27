@@ -5,3 +5,7 @@ type Matcher interface {
 	// and abort match if return false
 	Match(matchContext *Context) bool
 }
+
+func Match(matchContext *Context) {
+	// TODO implement match
+}
