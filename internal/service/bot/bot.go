@@ -69,6 +69,22 @@ func (s *serviceImpl) storeTokenizer(sessionId string, tokenizer *jieba.Tokenize
 	s.tokenizerCache.Set(sessionId, tokenizer)
 }
 
+func (s *serviceImpl) retrieveSession(sessionId string) (*session.Session, error) {
+	sess, ok := s.sessionCache.Get(sessionId)
+	if !ok {
+		return nil, fmt.Errorf("sessionId [%v]: session not found", sessionId)
+	}
+	return sess, nil
+}
+
+func (s *serviceImpl) retrieveTokenizer(sessionId string) (*jieba.Tokenizer, error) {
+	tokenizer, ok := s.tokenizerCache.Get(sessionId)
+	if !ok {
+		return nil, fmt.Errorf("sessionId [%v]: tokenizer not found", sessionId)
+	}
+	return tokenizer, nil
+}
+
 type Options struct {
 	ExtraDict      string
 	StopWords      string
