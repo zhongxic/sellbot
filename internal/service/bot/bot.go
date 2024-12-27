@@ -1,10 +1,12 @@
 package bot
 
 import (
+	"bufio"
 	"context"
 	"fmt"
 	"log/slog"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/zhongxic/sellbot/internal/service/process"
@@ -21,7 +23,7 @@ type Service interface {
 
 type serviceImpl struct {
 	extraDict      string
-	stopWords      string
+	stopWords      []string
 	testLoader     process.Loader
 	releaseLoader  process.Loader
 	sessionCache   cache.Cache[string, *session.Session]
@@ -82,12 +84,26 @@ func NewService(options Options) (Service, error) {
 	}
 	serve := &serviceImpl{
 		extraDict:      options.ExtraDict,
-		stopWords:      options.StopWords,
 		testLoader:     options.TestLoader,
 		releaseLoader:  options.ReleaseLoader,
 		sessionCache:   options.SessionCache,
 		tokenizerCache: options.TokenizerCache,
 	}
+	stopWords := make([]string, 0)
+	if options.StopWords != "" {
+		f, err := os.Open(options.StopWords)
+		if err != nil {
+			return nil, fmt.Errorf("load stop words [%v] failed: %w", options.StopWords, err)
+		}
+		scanner := bufio.NewScanner(f)
+		for scanner.Scan() {
+			line := strings.TrimSpace(scanner.Text())
+			if line != "" {
+				stopWords = append(stopWords, line)
+			}
+		}
+	}
+	serve.stopWords = stopWords
 	return serve, nil
 }
 
