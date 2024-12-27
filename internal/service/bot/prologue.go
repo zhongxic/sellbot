@@ -33,12 +33,12 @@ func (s *serviceImpl) Prologue(ctx context.Context, prologueDTO *PrologueDTO) (*
 		return nil, fmt.Errorf("init tokenizer failed: %w", err)
 	}
 	processHelper := helper.New(loadedProcess)
+	if err := loadUserDict(tokenizer, processHelper); err != nil {
+		return nil, fmt.Errorf("load user dict failed: %w", err)
+	}
 	startDomain, err := processHelper.FindStartDomain()
 	if err != nil {
 		return nil, fmt.Errorf("find start domain failed: %w", err)
-	}
-	if err := loadUserDict(tokenizer, processHelper); err != nil {
-		return nil, fmt.Errorf("load user dict failed: %w", err)
 	}
 	matchContext := matcher.NewContext(currentSession, loadedProcess)
 	matchContext.AddMatchedPath(matcher.MatchedPath{Domain: startDomain.Name, Branch: process.BranchNameEnter})
