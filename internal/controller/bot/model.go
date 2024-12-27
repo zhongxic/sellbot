@@ -8,6 +8,13 @@ type PrologueRequest struct {
 	Test      bool              `json:"test"`
 }
 
+type ChatRequest struct {
+	SessionId    string `json:"sessionId"`
+	Sentence     string `json:"sentence"`
+	Silence      bool   `json:"silence"`
+	Interruption int    `json:"interruption"`
+}
+
 type InteractiveResponse struct {
 	SessionId  string              `json:"sessionId"`
 	Hits       HitsResponse        `json:"hits"`
@@ -43,6 +50,15 @@ func convertPrologueRequestToPrologueDTO(request *PrologueRequest) *bot.Prologue
 		ProcessId: request.ProcessId,
 		Variables: request.Variables,
 		Test:      request.Test,
+	}
+}
+
+func convertChatRequestToChatDTO(request *ChatRequest) *bot.ChatDTO {
+	return &bot.ChatDTO{
+		SessionId:    request.SessionId,
+		Sentence:     request.Sentence,
+		Silence:      request.Silence,
+		Interruption: request.Interruption,
 	}
 }
 

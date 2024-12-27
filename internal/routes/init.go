@@ -70,4 +70,5 @@ func registerRoutes(r *gin.Engine, cfg *config.Config) {
 	botController := botctl.NewController(botserve.NewService(botOptions))
 	r.GET("/ping", pingController.Ping)
 	r.POST("/prologue", botController.Prologue)
+	r.POST("/chat", botController.Chat)
 }

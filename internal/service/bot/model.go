@@ -6,6 +6,13 @@ type PrologueDTO struct {
 	Test      bool
 }
 
+type ChatDTO struct {
+	SessionId    string
+	Sentence     string
+	Silence      bool
+	Interruption int
+}
+
 type InteractiveRespond struct {
 	SessionId  string
 	Hits       HitsDTO

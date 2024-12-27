@@ -15,6 +15,7 @@ import (
 
 type Service interface {
 	Prologue(ctx context.Context, prologueDTO *PrologueDTO) (*InteractiveRespond, error)
+	Chat(ctx context.Context, chatDTO *ChatDTO) (*InteractiveRespond, error)
 }
 
 type serviceImpl struct {
