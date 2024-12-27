@@ -20,6 +20,7 @@ type Service interface {
 
 type serviceImpl struct {
 	extraDict      string
+	stopWords      string
 	testLoader     process.Loader
 	releaseLoader  process.Loader
 	sessionCache   cache.Cache[string, *session.Session]
@@ -67,6 +68,7 @@ func (s *serviceImpl) storeTokenizer(sessionId string, tokenizer *jieba.Tokenize
 
 type Options struct {
 	ExtraDict      string
+	StopWords      string
 	TestLoader     process.Loader
 	ReleaseLoader  process.Loader
 	SessionCache   cache.Cache[string, *session.Session]
@@ -76,6 +78,7 @@ type Options struct {
 func NewService(options Options) Service {
 	return &serviceImpl{
 		extraDict:      options.ExtraDict,
+		stopWords:      options.StopWords,
 		testLoader:     options.TestLoader,
 		releaseLoader:  options.ReleaseLoader,
 		sessionCache:   options.SessionCache,

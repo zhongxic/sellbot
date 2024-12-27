@@ -62,6 +62,7 @@ func registerRoutes(r *gin.Engine, cfg *config.Config) {
 	})
 	botOptions := botserve.Options{
 		ExtraDict:      cfg.Tokenizer.ExtraDict,
+		StopWords:      cfg.Tokenizer.StopWords,
 		TestLoader:     testLoader,
 		ReleaseLoader:  releaseLoader,
 		SessionCache:   sessionCache,

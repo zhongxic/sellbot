@@ -14,6 +14,7 @@ process:
     release: data/process/release/
 tokenizer:
   extra-dict: data/dict/dict.txt.small
+  stop-words: data/dict/stop_words.txt
 session:
   cache:
     expiration: 1800

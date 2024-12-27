@@ -32,6 +32,7 @@ func TestParse(t *testing.T) {
 		},
 		Tokenizer: Tokenizer{
 			ExtraDict: "data/dict/dict.txt.small",
+			StopWords: "data/dict/stop_words.txt",
 		},
 		Session: Session{
 			Cache: Cache{
