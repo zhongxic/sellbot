@@ -42,7 +42,7 @@ func (s *serviceImpl) initSession(ctx context.Context, prologueDTO *PrologueDTO)
 	sess.ProcessId = prologueDTO.ProcessId
 	sess.Variables = prologueDTO.Variables
 	sess.Test = prologueDTO.Test
-	slog.Debug(fmt.Sprintf("init session [%v]", sess.SessionId),
+	slog.Info(fmt.Sprintf("init session [%v]", sess.SessionId),
 		"traceId", ctx.Value(traceid.TraceId{}), "prologueDTO", prologueDTO)
 	return sess
 }
@@ -52,10 +52,10 @@ func (s *serviceImpl) initTokenizer(ctx context.Context) (tokenizer *jieba.Token
 	traceId := slog.Any("traceId", ctx.Value(traceid.TraceId{}))
 	if s.extraDict == "" {
 		tokenizer, err = jieba.NewDefaultTokenizer()
-		slog.Debug(fmt.Sprintf("init default tokenizer cost [%v] ms", time.Since(start).Milliseconds()), traceId)
+		slog.Info(fmt.Sprintf("init default tokenizer cost [%v] ms", time.Since(start).Milliseconds()), traceId)
 	} else {
 		tokenizer, err = jieba.NewTokenizer(s.extraDict)
-		slog.Debug(fmt.Sprintf("init tokenizer with extra dict [%v] cost [%v] ms",
+		slog.Info(fmt.Sprintf("init tokenizer with extra dict [%v] cost [%v] ms",
 			s.extraDict, time.Since(start).Milliseconds()), traceId)
 	}
 	return
