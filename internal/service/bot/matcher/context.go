@@ -18,6 +18,8 @@ type Context struct {
 	Process      *process.Process
 	Sentence     string
 	Segments     []string
+	Silence      bool
+	Interruption int
 	MatchedPaths []MatchedPath
 }
 
