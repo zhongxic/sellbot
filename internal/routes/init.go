@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -16,23 +15,18 @@ import (
 	"github.com/zhongxic/sellbot/pkg/middleware"
 )
 
-var (
-	initOnce sync.Once
-	engine   *gin.Engine
-)
-
-func Init(cfg *config.Config) *gin.Engine {
-	initOnce.Do(func() {
-		engine = initRoutes(cfg)
-	})
-	return engine
+func Init(cfg *config.Config) (*gin.Engine, error) {
+	return initRoutes(cfg)
 }
 
-func initRoutes(cfg *config.Config) *gin.Engine {
+func initRoutes(cfg *config.Config) (*gin.Engine, error) {
 	r := gin.New()
 	registerMiddleware(r)
-	registerRoutes(r, cfg)
-	return r
+	err := registerRoutes(r, cfg)
+	if err != nil {
+		return nil, err
+	}
+	return r, nil
 }
 
 func registerMiddleware(r *gin.Engine) {
@@ -40,7 +34,7 @@ func registerMiddleware(r *gin.Engine) {
 	r.Use(middleware.Recover())
 }
 
-func registerRoutes(r *gin.Engine, cfg *config.Config) {
+func registerRoutes(r *gin.Engine, cfg *config.Config) error {
 	pingController := ping.NewController()
 	testProcessCache := cache.NewCache[*process.Process](cache.Options{
 		DefaultExpiration: time.Duration(cfg.Process.Cache.Expiration) * time.Second,
@@ -68,8 +62,13 @@ func registerRoutes(r *gin.Engine, cfg *config.Config) {
 		SessionCache:   sessionCache,
 		TokenizerCache: tokenizerCache,
 	}
-	botController := botctl.NewController(botserve.NewService(botOptions))
+	botService, err := botserve.NewService(botOptions)
+	if err != nil {
+		return err
+	}
+	botController := botctl.NewController(botService)
 	r.GET("/ping", pingController.Ping)
 	r.POST("/prologue", botController.Prologue)
 	r.POST("/chat", botController.Chat)
+	return nil
 }

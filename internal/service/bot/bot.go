@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"os"
 	"time"
 
 	"github.com/zhongxic/sellbot/internal/service/process"
@@ -75,8 +76,11 @@ type Options struct {
 	TokenizerCache cache.Cache[string, *jieba.Tokenizer]
 }
 
-func NewService(options Options) Service {
-	return &serviceImpl{
+func NewService(options Options) (Service, error) {
+	if err := validate(options); err != nil {
+		return nil, fmt.Errorf("create bot service failed: %w", err)
+	}
+	serve := &serviceImpl{
 		extraDict:      options.ExtraDict,
 		stopWords:      options.StopWords,
 		testLoader:     options.TestLoader,
@@ -84,4 +88,33 @@ func NewService(options Options) Service {
 		sessionCache:   options.SessionCache,
 		tokenizerCache: options.TokenizerCache,
 	}
+	return serve, nil
+}
+
+func validate(options Options) error {
+	if options.ExtraDict != "" {
+		_, err := os.Stat(options.ExtraDict)
+		if err != nil {
+			return fmt.Errorf("extra dict [%v] not readable: %w", options.ExtraDict, err)
+		}
+	}
+	if options.StopWords != "" {
+		_, err := os.Stat(options.StopWords)
+		if err != nil {
+			return fmt.Errorf("stop words [%v] not readable: %w", options.StopWords, err)
+		}
+	}
+	if options.TestLoader == nil {
+		return fmt.Errorf("test loader is required")
+	}
+	if options.ReleaseLoader == nil {
+		return fmt.Errorf("release loader is required")
+	}
+	if options.SessionCache == nil {
+		return fmt.Errorf("session cache is required")
+	}
+	if options.TokenizerCache == nil {
+		return fmt.Errorf("tokenizer cache is required")
+	}
+	return nil
 }
