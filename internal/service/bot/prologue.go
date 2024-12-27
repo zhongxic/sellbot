@@ -17,7 +17,7 @@ import (
 
 func (s *serviceImpl) Prologue(ctx context.Context, prologueDTO *PrologueDTO) (*InteractiveRespond, error) {
 	slog.Info("start process prologue", "traceId", ctx.Value(traceid.TraceId{}))
-	loadedProcess, err := s.Load(prologueDTO.ProcessId, prologueDTO.Test)
+	loadedProcess, err := s.loadProcess(prologueDTO.ProcessId, prologueDTO.Test)
 	if err != nil {
 		return nil, fmt.Errorf("load process failed: %w", err)
 	}

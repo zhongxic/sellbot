@@ -30,7 +30,7 @@ type serviceImpl struct {
 	tokenizerCache cache.Cache[string, *jieba.Tokenizer]
 }
 
-func (s *serviceImpl) Load(processId string, test bool) (*process.Process, error) {
+func (s *serviceImpl) loadProcess(processId string, test bool) (*process.Process, error) {
 	if test {
 		return s.testLoader.Load(processId)
 	}
