@@ -55,7 +55,7 @@ func (h *Helper) GetBranch(domainName, branchName string) (process.Branch, error
 	}
 	domain, ok := h.hold.Domains[domainName]
 	if !ok {
-		return process.Branch{}, fmt.Errorf("process [%v]: domain [%s] not foun", h.hold.Id, domainName)
+		return process.Branch{}, fmt.Errorf("process [%v]: domain [%s] not found", h.hold.Id, domainName)
 	}
 	branch, ok := domain.Branches[branchName]
 	if !ok {
