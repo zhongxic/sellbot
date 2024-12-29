@@ -9,14 +9,12 @@ const (
 )
 
 const (
-	DomainTypeStart  = "start"
-	DomainTypeNormal = "normal"
-	DomainTypeEnd    = "end"
-	DomainTypeAgent  = "agent"
-)
-
-const (
-	DomainTypeDialogEndFail = "end_fail"
+	DomainTypeStart           = "start"
+	DomainTypeNormal          = "normal"
+	DomainTypeEnd             = "end"
+	DomainTypeAgent           = "agent"
+	DomainTypeDialogEndFail   = "end_fail"
+	DomainTypeDialogEndExceed = "end_exceed"
 )
 
 const (
