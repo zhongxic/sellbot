@@ -135,3 +135,8 @@ func (h *Helper) GetIntentionKeywords() []string {
 	// TODO impl-me load intention keywords
 	return make([]string, 0)
 }
+
+func (h *Helper) GetForceInterruptionJumpToDomain() (process.Domain, error) {
+	// TODO impl-me get force interruption jump to domain
+	return process.Domain{}, nil
+}
