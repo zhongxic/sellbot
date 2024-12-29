@@ -14,6 +14,7 @@ type Session struct {
 	CurrentBranch         string
 	LastMainProcessDomain string
 	LastMainProcessBranch string
+	ConversationCount     int
 	DomainBranchHitCount  map[string]map[string]int
 }
 
