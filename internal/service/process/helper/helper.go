@@ -19,7 +19,7 @@ func New(hold *process.Process) *Helper {
 	return &Helper{hold: hold}
 }
 
-func (h *Helper) FindStartDomain() (process.Domain, error) {
+func (h *Helper) GetStartDomain() (process.Domain, error) {
 	domains := make([]process.Domain, 0)
 	for _, domain := range h.hold.Domains {
 		if domain.Category == process.DomainCategoryMainProcess && domain.Type == process.DomainTypeStart {
@@ -64,7 +64,7 @@ func (h *Helper) GetBranch(domainName, branchName string) (process.Branch, error
 	return branch, nil
 }
 
-func (h *Helper) FindCommonDialogDomain(domainDialogType string) (process.Domain, error) {
+func (h *Helper) GetCommonDialogDomain(domainDialogType string) (process.Domain, error) {
 	if len(h.hold.Domains) == 0 {
 		return process.Domain{}, fmt.Errorf("process [%v]: empty domains", h.hold.Id)
 	}

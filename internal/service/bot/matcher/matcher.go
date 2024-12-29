@@ -25,7 +25,7 @@ func (matcher *OutOfMaxRoundsMatcher) Match(ctx context.Context, matchContext *C
 			matchContext.Session.SessionId, matchContext.Process.Options.MaxRounds),
 			slog.Any("traceId", ctx.Value(traceid.TraceId{})))
 		processHelper := helper.New(matchContext.Process)
-		domain, err := processHelper.FindCommonDialogDomain(process.DomainTypeDialogEndExceed)
+		domain, err := processHelper.GetCommonDialogDomain(process.DomainTypeDialogEndExceed)
 		if err != nil {
 			return true, fmt.Errorf("OutOfMaxRoundsMatcher find common dialog domain failed: %w", err)
 		}
@@ -69,7 +69,7 @@ func (matcher *ClarificationInterruptionMatcher) Match(ctx context.Context, matc
 		slog.Info(fmt.Sprintf("sessionId [%v]: ClarificationInterruptionMatcher detect clarification interruption", matchContext.Session.SessionId),
 			slog.Any("traceId", ctx.Value(traceid.TraceId{})))
 		processHelper := helper.New(matchContext.Process)
-		domain, err := processHelper.FindCommonDialogDomain(process.DomainTypeDialogClarification)
+		domain, err := processHelper.GetCommonDialogDomain(process.DomainTypeDialogClarification)
 		if err != nil {
 			return true, fmt.Errorf("ClarificationInterruptionMatcher find common dialog domain failed: %w", err)
 		}

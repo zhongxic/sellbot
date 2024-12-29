@@ -36,7 +36,7 @@ func (s *serviceImpl) Prologue(ctx context.Context, prologueDTO *PrologueDTO) (*
 	if err := loadUserDict(tokenizer, processHelper); err != nil {
 		return nil, fmt.Errorf("load user dict failed: %w", err)
 	}
-	startDomain, err := processHelper.FindStartDomain()
+	startDomain, err := processHelper.GetStartDomain()
 	if err != nil {
 		return nil, fmt.Errorf("find start domain failed: %w", err)
 	}
@@ -84,7 +84,7 @@ func loadUserDict(tokenizer *jieba.Tokenizer, processHelper *helper.Helper) erro
 	for _, keyword := range globalKeywords {
 		tokenizer.AddWord(keyword, 1)
 	}
-	startDomain, err := processHelper.FindStartDomain()
+	startDomain, err := processHelper.GetStartDomain()
 	if err != nil {
 		return fmt.Errorf("find start domain failed: %w", err)
 	}
