@@ -60,3 +60,25 @@ func (matcher *ForceInterruptionMatcher) Match(ctx context.Context, matchContext
 	}
 	return false, nil
 }
+
+type ClarificationInterruptionMatcher struct {
+}
+
+func (matcher *ClarificationInterruptionMatcher) Match(ctx context.Context, matchContext *Context) (bool, error) {
+	if matchContext.Interruption == process.InterruptionTypeClarification {
+		slog.Info(fmt.Sprintf("sessionId [%v]: ClarificationInterruptionMatcher detect clarification interruption", matchContext.Session.SessionId),
+			slog.Any("traceId", ctx.Value(traceid.TraceId{})))
+		processHelper := helper.New(matchContext.Process)
+		domain, err := processHelper.FindCommonDialogDomain(process.DomainTypeDialogClarification)
+		if err != nil {
+			return true, fmt.Errorf("ClarificationInterruptionMatcher find common dialog domain failed: %w", err)
+		}
+		matchedPath := MatchedPath{Domain: domain.Name, Branch: process.BranchNameEnter}
+		slog.Info(fmt.Sprintf("sessionId [%v]: ClarificationInterruptionMatcher matched domain [%v] branch [%v]",
+			matchContext.Session.SessionId, matchedPath.Domain, matchedPath.Branch),
+			slog.Any("traceId", ctx.Value(traceid.TraceId{})))
+		matchContext.AddMatchedPath(matchedPath)
+		return true, nil
+	}
+	return false, nil
+}
