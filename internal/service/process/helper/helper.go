@@ -19,19 +19,6 @@ func New(hold *process.Process) *Helper {
 	return &Helper{hold: hold}
 }
 
-func (h *Helper) GetStartDomain() (process.Domain, error) {
-	domains := make([]process.Domain, 0)
-	for _, domain := range h.hold.Domains {
-		if domain.Category == process.DomainCategoryMainProcess && domain.Type == process.DomainTypeStart {
-			domains = append(domains, domain)
-		}
-	}
-	if len(domains) != 1 {
-		return process.Domain{}, fmt.Errorf("process [%v]: expected one start domain but found [%v]", h.hold.Id, len(domains))
-	}
-	return domains[0], nil
-}
-
 func (h *Helper) GetDefaultIntentionRule() process.IntentionRule {
 	return process.IntentionRule{
 		Code:        h.hold.Intentions.DefaultIntention,
@@ -64,6 +51,19 @@ func (h *Helper) GetBranch(domainName, branchName string) (process.Branch, error
 	return branch, nil
 }
 
+func (h *Helper) GetStartDomain() (process.Domain, error) {
+	domains := make([]process.Domain, 0)
+	for _, domain := range h.hold.Domains {
+		if domain.Category == process.DomainCategoryMainProcess && domain.Type == process.DomainTypeStart {
+			domains = append(domains, domain)
+		}
+	}
+	if len(domains) != 1 {
+		return process.Domain{}, fmt.Errorf("process [%v]: expected one start domain but found [%v]", h.hold.Id, len(domains))
+	}
+	return domains[0], nil
+}
+
 func (h *Helper) GetCommonDialogDomain(domainDialogType string) (process.Domain, error) {
 	if len(h.hold.Domains) == 0 {
 		return process.Domain{}, fmt.Errorf("process [%v]: empty domains", h.hold.Id)
@@ -79,6 +79,11 @@ func (h *Helper) GetCommonDialogDomain(domainDialogType string) (process.Domain,
 			h.hold.Id, domainDialogType, len(domains))
 	}
 	return domains[0], nil
+}
+
+func (h *Helper) GetForceInterruptionJumpToDomain() (process.Domain, error) {
+	// TODO impl-me get force interruption jump to domain
+	return process.Domain{}, nil
 }
 
 func (h *Helper) GetDomainKeywords(domainName string) []string {
@@ -134,9 +139,4 @@ func (h *Helper) GetGlobalKeywords() []string {
 func (h *Helper) GetIntentionKeywords() []string {
 	// TODO impl-me load intention keywords
 	return make([]string, 0)
-}
-
-func (h *Helper) GetForceInterruptionJumpToDomain() (process.Domain, error) {
-	// TODO impl-me get force interruption jump to domain
-	return process.Domain{}, nil
 }
