@@ -11,12 +11,13 @@ const (
 
 // Domain types
 const (
-	DomainTypeStart           = "start"
-	DomainTypeNormal          = "normal"
-	DomainTypeEnd             = "end"
-	DomainTypeAgent           = "agent"
-	DomainTypeDialogEndFail   = "end_fail"
-	DomainTypeDialogEndExceed = "end_exceed"
+	DomainTypeStart               = "start"
+	DomainTypeNormal              = "normal"
+	DomainTypeEnd                 = "end"
+	DomainTypeAgent               = "agent"
+	DomainTypeDialogEndFail       = "end_fail"
+	DomainTypeDialogEndExceed     = "end_exceed"
+	DomainTypeDialogClarification = "clarification"
 )
 
 // Specific domain and branch names
