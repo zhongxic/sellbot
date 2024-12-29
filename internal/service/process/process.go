@@ -2,12 +2,14 @@ package process
 
 import "time"
 
+// Domain categories
 const (
 	DomainCategoryMainProcess  = "main_process"
 	DomainCategoryBusinessQA   = "business_qa"
 	DomainCategoryCommonDialog = "common_dialog"
 )
 
+// Domain types
 const (
 	DomainTypeStart           = "start"
 	DomainTypeNormal          = "normal"
@@ -17,9 +19,19 @@ const (
 	DomainTypeDialogEndExceed = "end_exceed"
 )
 
+// Specific domain and branch names
 const (
 	DomainNameRepeat = "repeat"
 	BranchNameEnter  = "enter"
+)
+
+// Interruption types
+const (
+	InterruptionTypeNone = iota
+	InterruptionTypeForce
+	InterruptionTypeQA
+	InterruptionTypeClarification
+	InterruptionTypePrologue
 )
 
 type Process struct {
