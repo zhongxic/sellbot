@@ -64,6 +64,11 @@ func (h *Helper) GetStartDomain() (process.Domain, error) {
 	return domains[0], nil
 }
 
+func (h *Helper) GetSilenceDomain() (process.Domain, error) {
+	// TODO impl-me get silence domain
+	return process.Domain{}, nil
+}
+
 func (h *Helper) GetCommonDialogDomain(domainDialogType string) (process.Domain, error) {
 	if len(h.hold.Domains) == 0 {
 		return process.Domain{}, fmt.Errorf("process [%v]: empty domains", h.hold.Id)

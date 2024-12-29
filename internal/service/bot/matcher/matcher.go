@@ -82,3 +82,25 @@ func (matcher *ClarificationInterruptionMatcher) Match(ctx context.Context, matc
 	}
 	return false, nil
 }
+
+type SilenceMatcher struct {
+}
+
+func (matcher *SilenceMatcher) Match(ctx context.Context, matchContext *Context) (bool, error) {
+	if matchContext.Silence {
+		slog.Info(fmt.Sprintf("sessionId [%v]: SilenceMatcher detect silence", matchContext.Session.SessionId),
+			slog.Any("traceId", ctx.Value(traceid.TraceId{})))
+		processHelper := helper.New(matchContext.Process)
+		domain, err := processHelper.GetSilenceDomain()
+		if err != nil {
+			return true, fmt.Errorf("SilenceMatcher get silence domain failed: %w", err)
+		}
+		matchedPath := MatchedPath{Domain: domain.Name, Branch: process.BranchNameEnter}
+		slog.Info(fmt.Sprintf("sessionId [%v]: SilenceMatcher matched domain [%v] branch [%v]",
+			matchContext.Session.SessionId, matchedPath.Domain, matchedPath.Branch),
+			slog.Any("traceId", ctx.Value(traceid.TraceId{})))
+		matchContext.AddMatchedPath(matchedPath)
+		return true, nil
+	}
+	return false, nil
+}

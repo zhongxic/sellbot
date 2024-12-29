@@ -7,6 +7,7 @@ const (
 	DomainCategoryMainProcess  = "main_process"
 	DomainCategoryBusinessQA   = "business_qa"
 	DomainCategoryCommonDialog = "common_dialog"
+	DomainCategorySilence      = "silence"
 )
 
 // Domain types
