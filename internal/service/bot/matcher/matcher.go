@@ -38,3 +38,25 @@ func (matcher *OutOfMaxRoundsMatcher) Match(ctx context.Context, matchContext *C
 	}
 	return false, nil
 }
+
+type ForceInterruptionMatcher struct {
+}
+
+func (matcher *ForceInterruptionMatcher) Match(ctx context.Context, matchContext *Context) (bool, error) {
+	if matchContext.Interruption == process.InterruptionTypeForce {
+		slog.Info(fmt.Sprintf("sessionId [%v]: ForceInterruptionMatcher detect force interruption", matchContext.Session.SessionId),
+			slog.Any("traceId", ctx.Value(traceid.TraceId{})))
+		processHelper := helper.New(matchContext.Process)
+		domain, err := processHelper.GetForceInterruptionJumpToDomain()
+		if err != nil {
+			return true, fmt.Errorf("ForceInterruptionMatcher get force interrupt jump to domain failed: %w", err)
+		}
+		matchedPath := MatchedPath{Domain: domain.Name, Branch: process.BranchNameEnter}
+		slog.Info(fmt.Sprintf("sessionId [%v]: ForceInterruptionMatcher matched domain [%v] branch [%v]",
+			matchContext.Session.SessionId, matchedPath.Domain, matchedPath.Branch),
+			slog.Any("traceId", ctx.Value(traceid.TraceId{})))
+		matchContext.AddMatchedPath(matchedPath)
+		return true, nil
+	}
+	return false, nil
+}
