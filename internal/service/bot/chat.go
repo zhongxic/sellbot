@@ -34,7 +34,7 @@ func (s *serviceImpl) Chat(ctx context.Context, chatDTO *ChatDTO) (*InteractiveR
 	matchContext.Segments = cutAll(ctx, tokenizer, s.stopWords, chatDTO.Sentence)
 	matchContext.Silence = chatDTO.Silence
 	matchContext.Interruption = chatDTO.Interruption
-	matcher.Match(matchContext)
+	// TODO match in process
 	answerDTO, err := makeAnswer(ctx, matchContext)
 	if err != nil {
 		return nil, fmt.Errorf("make answer failed: %w", err)
