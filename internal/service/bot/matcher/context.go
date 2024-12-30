@@ -8,9 +8,11 @@ import (
 )
 
 type MatchedPath struct {
-	Domain       string
-	Branch       string
-	MatchedWords []string
+	Domain         string
+	Branch         string
+	DomainType     string
+	DomainCategory string
+	MatchedWords   []string
 }
 
 type Context struct {
