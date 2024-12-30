@@ -140,8 +140,3 @@ func (h *Helper) GetGlobalKeywords() []string {
 	// TODO impl-me load global keywords
 	return make([]string, 0)
 }
-
-func (h *Helper) GetIntentionKeywords() []string {
-	// TODO impl-me load intention keywords
-	return make([]string, 0)
-}

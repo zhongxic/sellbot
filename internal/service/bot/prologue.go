@@ -92,10 +92,6 @@ func loadUserDict(tokenizer *jieba.Tokenizer, processHelper *helper.Helper) erro
 	for _, keyword := range startDomainKeywords {
 		tokenizer.AddWord(keyword, 1)
 	}
-	intentionKeyword := processHelper.GetIntentionKeywords()
-	for _, keyword := range intentionKeyword {
-		tokenizer.AddWord(keyword, 1)
-	}
 	return nil
 }
 
