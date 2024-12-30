@@ -20,6 +20,7 @@ const (
 	DomainTypeDialogEndExceed     = "end_exceed"
 	DomainTypeDialogClarification = "clarification"
 	DomainTypeDialogMissMatch     = "miss_match"
+	DomainTypeDialogRefuse        = "refuse"
 )
 
 // Branch semantics
