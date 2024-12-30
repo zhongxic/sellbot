@@ -106,3 +106,30 @@ func (matcher *SilenceMatcher) Match(ctx context.Context, matchContext *Context)
 	}
 	return false, nil
 }
+
+type PreIgnoreMatcher struct {
+}
+
+func (matcher *PreIgnoreMatcher) Match(ctx context.Context, matchContext *Context) (bool, error) {
+	processHelper := helper.New(matchContext.Process)
+	domain, err := processHelper.GetDomain(matchContext.Session.CurrentDomain)
+	if err != nil {
+		return true, fmt.Errorf("PreIgnoreMatcher get current domain failed: %w", err)
+	}
+	if domain.IgnoreConfig.IgnoreAny {
+		slog.Info(fmt.Sprintf("sessionId [%v]: PreIgnoreMatcher detect current domain [%v] turned on ignore any",
+			matchContext.Session.SessionId, domain.Name),
+			slog.Any("traceId", ctx.Value(traceid.TraceId{})))
+		branch, err := processHelper.GetDomainSemanticBranch(domain.Name, process.BranchSemanticPositive)
+		if err != nil {
+			return true, fmt.Errorf("PreIgnoreMatcher get current domain [%v] positive branch failed: %w",
+				matchContext.Session.CurrentDomain, err)
+		}
+		matchedPath := MatchedPath{Domain: domain.Name, Branch: branch.Name}
+		slog.Info(fmt.Sprintf("sessionId [%v]: PreIgnoreMatcher matched domain [%v] branch [%v]",
+			matchContext.Session.SessionId, matchedPath.Domain, matchedPath.Branch),
+			slog.Any("traceId", ctx.Value(traceid.TraceId{})))
+		return true, nil
+	}
+	return false, nil
+}
