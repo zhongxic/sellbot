@@ -91,6 +91,11 @@ func (h *Helper) GetBranch(domainName, branchName string) (process.Branch, error
 	return branch, nil
 }
 
+func (h *Helper) GetDomainSemanticBranch(domainName, semantic string) (process.Branch, error) {
+	// TODO impl-me get domain semantic branch
+	return process.Branch{}, nil
+}
+
 func (h *Helper) GetDomainKeywords(domainName string) []string {
 	keywords := make([]string, 0)
 	if len(h.hold.Domains) == 0 {
