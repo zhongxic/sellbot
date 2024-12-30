@@ -145,3 +145,8 @@ func (h *Helper) GetGlobalKeywords() []string {
 	// TODO impl-me load global keywords
 	return make([]string, 0)
 }
+
+func (h *Helper) GetMergeOrderedMatchPaths(domainName string) ([]process.MatchPath, error) {
+	// TODO impl-me get merged match order
+	return make([]process.MatchPath, 0), nil
+}
