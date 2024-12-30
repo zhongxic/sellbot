@@ -53,6 +53,7 @@ func cutAll(ctx context.Context, tokenizer *jieba.Tokenizer, stopWords []string,
 	words := tokenizer.CutAll(sentence)
 	slog.Info(fmt.Sprintf("cut sentence [%v] in to words [%v]", sentence, words), "traceId", ctx.Value(traceid.TraceId{}))
 	for _, word := range words {
+		// TODO remove stop words
 		contains := slices.Index(stopWords, word) == -1
 		if contains {
 			continue
