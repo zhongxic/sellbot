@@ -30,7 +30,12 @@ func (matcher *OutOfMaxRoundsMatcher) Match(ctx context.Context, matchContext *C
 		if err != nil {
 			return true, fmt.Errorf("OutOfMaxRoundsMatcher get common dialog domain failed: %w", err)
 		}
-		matchedPath := MatchedPath{Domain: domain.Name, Branch: process.BranchNameEnter}
+		matchedPath := MatchedPath{
+			Domain:         domain.Name,
+			Branch:         process.BranchNameEnter,
+			DomainType:     process.DomainTypeDialogEndFail,
+			DomainCategory: process.DomainCategoryCommonDialog,
+		}
 		slog.Info(fmt.Sprintf("sessionId [%v]: OutOfMaxRoundsMatcher matched domain [%v] branch [%v]",
 			matchContext.Session.SessionId, matchedPath.Domain, matchedPath.Branch),
 			slog.Any("traceId", ctx.Value(traceid.TraceId{})))
@@ -53,7 +58,12 @@ func (matcher *ForceInterruptionMatcher) Match(ctx context.Context, matchContext
 		if err != nil {
 			return true, fmt.Errorf("ForceInterruptionMatcher get force interrupt jump to domain failed: %w", err)
 		}
-		matchedPath := MatchedPath{Domain: domain.Name, Branch: process.BranchNameEnter}
+		matchedPath := MatchedPath{
+			Domain:         domain.Name,
+			Branch:         process.BranchNameEnter,
+			DomainType:     domain.Type,
+			DomainCategory: domain.Category,
+		}
 		slog.Info(fmt.Sprintf("sessionId [%v]: ForceInterruptionMatcher matched domain [%v] branch [%v]",
 			matchContext.Session.SessionId, matchedPath.Domain, matchedPath.Branch),
 			slog.Any("traceId", ctx.Value(traceid.TraceId{})))
@@ -76,7 +86,12 @@ func (matcher *ClarificationInterruptionMatcher) Match(ctx context.Context, matc
 		if err != nil {
 			return true, fmt.Errorf("ClarificationInterruptionMatcher get common dialog domain failed: %w", err)
 		}
-		matchedPath := MatchedPath{Domain: domain.Name, Branch: process.BranchNameEnter}
+		matchedPath := MatchedPath{
+			Domain:         domain.Name,
+			Branch:         process.BranchNameEnter,
+			DomainType:     process.DomainTypeDialogClarification,
+			DomainCategory: process.DomainCategoryCommonDialog,
+		}
 		slog.Info(fmt.Sprintf("sessionId [%v]: ClarificationInterruptionMatcher matched domain [%v] branch [%v]",
 			matchContext.Session.SessionId, matchedPath.Domain, matchedPath.Branch),
 			slog.Any("traceId", ctx.Value(traceid.TraceId{})))
@@ -98,7 +113,12 @@ func (matcher *SilenceMatcher) Match(ctx context.Context, matchContext *Context)
 		if err != nil {
 			return true, fmt.Errorf("SilenceMatcher get silence domain failed: %w", err)
 		}
-		matchedPath := MatchedPath{Domain: domain.Name, Branch: process.BranchNameEnter}
+		matchedPath := MatchedPath{
+			Domain:         domain.Name,
+			Branch:         process.BranchNameEnter,
+			DomainType:     process.DomainTypeNormal,
+			DomainCategory: process.DomainCategorySilence,
+		}
 		slog.Info(fmt.Sprintf("sessionId [%v]: SilenceMatcher matched domain [%v] branch [%v]",
 			matchContext.Session.SessionId, matchedPath.Domain, matchedPath.Branch),
 			slog.Any("traceId", ctx.Value(traceid.TraceId{})))
@@ -125,7 +145,12 @@ func (matcher *PreIgnoreMatcher) Match(ctx context.Context, matchContext *Contex
 		if err != nil {
 			return true, fmt.Errorf("PreIgnoreMatcher get current domain positive branch failed: %w", err)
 		}
-		matchedPath := MatchedPath{Domain: domain.Name, Branch: branch.Name}
+		matchedPath := MatchedPath{
+			Domain:         domain.Name,
+			Branch:         branch.Name,
+			DomainType:     domain.Type,
+			DomainCategory: domain.Category,
+		}
 		slog.Info(fmt.Sprintf("sessionId [%v]: PreIgnoreMatcher matched domain [%v] branch [%v]",
 			matchContext.Session.SessionId, matchedPath.Domain, matchedPath.Branch),
 			slog.Any("traceId", ctx.Value(traceid.TraceId{})))
@@ -175,10 +200,16 @@ func (matcher *TextMatcher) Match(ctx context.Context, matchContext *Context) (b
 			matchContext.Session.SessionId, matchContext.Session.LastMainProcessDomain,
 			bestMatchedPath.DomainName, bestMatchedPath.BranchName),
 			slog.Any("traceId", ctx.Value(traceid.TraceId{})))
+		domain, err := processHelper.GetDomain(bestMatchedPath.DomainName)
+		if err != nil {
+			return true, fmt.Errorf("TextMatcher get best matched domain failed: %w", err)
+		}
 		matchContext.AddMatchedPath(MatchedPath{
-			Domain:       bestMatchedPath.DomainName,
-			Branch:       bestMatchedPath.BranchName,
-			MatchedWords: maxSimilarity.matches,
+			Domain:         bestMatchedPath.DomainName,
+			Branch:         bestMatchedPath.BranchName,
+			DomainType:     domain.Type,
+			DomainCategory: domain.Category,
+			MatchedWords:   maxSimilarity.matches,
 		})
 	} else {
 		slog.Info(fmt.Sprintf("sessionId [%v]: TextMatcher lastDomain [%v] detect miss match",
@@ -189,9 +220,10 @@ func (matcher *TextMatcher) Match(ctx context.Context, matchContext *Context) (b
 			return true, fmt.Errorf("TextMatcher get common dialog domain failed: %w", err)
 		}
 		matchedPath := MatchedPath{
-			Domain:     domain.Name,
-			Branch:     process.BranchNameEnter,
-			DomainType: process.DomainTypeDialogMissMatch,
+			Domain:         domain.Name,
+			Branch:         process.BranchNameEnter,
+			DomainType:     process.DomainTypeDialogMissMatch,
+			DomainCategory: process.DomainCategoryCommonDialog,
 		}
 		slog.Info(fmt.Sprintf("sessionId [%v]: TextMatcher matched domain [%v] branch [%v]",
 			matchContext.Session.SessionId, matchedPath.Domain, matchedPath.Branch),
@@ -244,7 +276,12 @@ func (matcher *PostIgnoreMatcher) Match(ctx context.Context, matchContext *Conte
 			return true, fmt.Errorf("PostIgnoreMatcher get domain [%v] positive branch failed: %w",
 				matchContext.Session.CurrentDomain, err)
 		}
-		matchedPath := MatchedPath{Domain: matchContext.Session.CurrentDomain, Branch: branch.Name}
+		matchedPath := MatchedPath{
+			Domain:         matchContext.Session.CurrentDomain,
+			Branch:         branch.Name,
+			DomainType:     domain.Type,
+			DomainCategory: domain.Category,
+		}
 		slog.Info(fmt.Sprintf("sessionId [%v]: PostIgnoreMatcher matched domain [%v] branch [%v]",
 			matchContext.Session.SessionId, matchedPath.Domain, matchedPath.Branch),
 			slog.Any("traceId", ctx.Value(traceid.TraceId{})))
@@ -257,34 +294,47 @@ type MissMatchMatcher struct {
 }
 
 func (matcher *MissMatchMatcher) Match(ctx context.Context, matchContext *Context) (bool, error) {
-	lastMatchedBranch, err := matchContext.GetLastMatchedPath()
+	lastMatchedPath, err := matchContext.GetLastMatchedPath()
 	if err != nil {
 		return false, fmt.Errorf("MissMatchMatcher get last matched path failed: %w", err)
 	}
-	if lastMatchedBranch.DomainType == process.DomainTypeDialogMissMatch {
+	if lastMatchedPath.DomainType == process.DomainTypeDialogMissMatch {
 		processHelper := helper.New(matchContext.Process)
 		domain, err := processHelper.GetDomain(matchContext.Session.CurrentDomain)
 		if err != nil {
 			return true, fmt.Errorf("MissMatchMatcher get current domain failed: %w", err)
 		}
-		var matchedPath MatchedPath
+		jumpTo := ""
 		shortTextMissMatchJump := len(matchContext.Sentence) < 4 && domain.MissMatchConfig.ShortTextMissMatchJumpTo != ""
 		longTextMissMatchJump := len(matchContext.Sentence) >= 4 && domain.MissMatchConfig.LongTextMissMatchJumpTo != ""
 		if shortTextMissMatchJump {
-			matchedPath = MatchedPath{Domain: domain.MissMatchConfig.ShortTextMissMatchJumpTo,
-				Branch: process.BranchNameEnter}
-			slog.Info(fmt.Sprintf("sessionId [%v]: MissMatchMatcher [short text] matched domain [%v] branch [%v]",
-				matchContext.Session.SessionId, matchedPath.Domain, matchedPath.Branch),
+			slog.Info(fmt.Sprintf("sessionId [%v]: MissMatchMatcher domain [%v] detect miss match [short text] jump to [%v]",
+				matchContext.Session.SessionId, matchContext.Session.CurrentDomain, domain.MissMatchConfig.ShortTextMissMatchJumpTo),
 				slog.Any("traceId", ctx.Value(traceid.TraceId{})))
+			jumpTo = domain.MissMatchConfig.ShortTextMissMatchJumpTo
 		}
 		if longTextMissMatchJump {
-			matchedPath = MatchedPath{Domain: domain.MissMatchConfig.LongTextMissMatchJumpTo,
-				Branch: process.BranchNameEnter}
-			slog.Info(fmt.Sprintf("sessionId [%v]: MissMatchMatcher [long text] matched domain [%v] branch [%v]",
+			slog.Info(fmt.Sprintf("sessionId [%v]: MissMatchMatcher domain [%v] detect miss match [long text] jump to [%v]",
+				matchContext.Session.SessionId, matchContext.Session.CurrentDomain, domain.MissMatchConfig.LongTextMissMatchJumpTo),
+				slog.Any("traceId", ctx.Value(traceid.TraceId{})))
+			jumpTo = domain.MissMatchConfig.LongTextMissMatchJumpTo
+		}
+		if jumpTo != "" {
+			jumpToDomain, err := processHelper.GetDomain(jumpTo)
+			if err != nil {
+				return true, fmt.Errorf("MissMatchMatcher get miss match jump to domain [%v] failed: %w", jumpTo, err)
+			}
+			matchedPath := MatchedPath{
+				Domain:         jumpToDomain.Name,
+				Branch:         process.BranchNameEnter,
+				DomainType:     jumpToDomain.Type,
+				DomainCategory: jumpToDomain.Category,
+			}
+			slog.Info(fmt.Sprintf("sessionId [%v]: MissMatchMatcher matched domain [%v] branch [%v]",
 				matchContext.Session.SessionId, matchedPath.Domain, matchedPath.Branch),
 				slog.Any("traceId", ctx.Value(traceid.TraceId{})))
+			matchContext.AddMatchedPath(matchedPath)
 		}
-		matchContext.AddMatchedPath(matchedPath)
 	}
 	return true, nil
 }
