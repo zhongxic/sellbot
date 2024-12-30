@@ -21,6 +21,13 @@ const (
 	DomainTypeDialogClarification = "clarification"
 )
 
+// Branch semantics
+const (
+	BranchSemanticPositive = "positive"
+	BranchSemanticNegative = "negative"
+	BranchSemanticSpecial  = "special"
+)
+
 // Specific domain and branch names
 const (
 	DomainNameRepeat = "repeat"
