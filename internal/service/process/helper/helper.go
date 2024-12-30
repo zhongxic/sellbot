@@ -36,21 +36,6 @@ func (h *Helper) GetDomain(domainName string) (process.Domain, error) {
 	return process.Domain{}, fmt.Errorf("process [%v]: domain [%v] not found", h.hold.Id, domainName)
 }
 
-func (h *Helper) GetBranch(domainName, branchName string) (process.Branch, error) {
-	if len(h.hold.Domains) == 0 {
-		return process.Branch{}, fmt.Errorf("process [%v]: empty domains", h.hold.Id)
-	}
-	domain, ok := h.hold.Domains[domainName]
-	if !ok {
-		return process.Branch{}, fmt.Errorf("process [%v]: domain [%s] not found", h.hold.Id, domainName)
-	}
-	branch, ok := domain.Branches[branchName]
-	if !ok {
-		return process.Branch{}, fmt.Errorf("process [%v]: branch [%s] not found", h.hold.Id, branchName)
-	}
-	return branch, nil
-}
-
 func (h *Helper) GetStartDomain() (process.Domain, error) {
 	domains := make([]process.Domain, 0)
 	for _, domain := range h.hold.Domains {
@@ -89,6 +74,21 @@ func (h *Helper) GetCommonDialogDomain(domainDialogType string) (process.Domain,
 func (h *Helper) GetForceInterruptionJumpToDomain() (process.Domain, error) {
 	// TODO impl-me get force interruption jump to domain
 	return process.Domain{}, nil
+}
+
+func (h *Helper) GetBranch(domainName, branchName string) (process.Branch, error) {
+	if len(h.hold.Domains) == 0 {
+		return process.Branch{}, fmt.Errorf("process [%v]: empty domains", h.hold.Id)
+	}
+	domain, ok := h.hold.Domains[domainName]
+	if !ok {
+		return process.Branch{}, fmt.Errorf("process [%v]: domain [%s] not found", h.hold.Id, domainName)
+	}
+	branch, ok := domain.Branches[branchName]
+	if !ok {
+		return process.Branch{}, fmt.Errorf("process [%v]: branch [%s] not found", h.hold.Id, branchName)
+	}
+	return branch, nil
 }
 
 func (h *Helper) GetDomainKeywords(domainName string) []string {
