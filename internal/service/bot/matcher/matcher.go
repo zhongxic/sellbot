@@ -27,7 +27,7 @@ func (matcher *OutOfMaxRoundsMatcher) Match(ctx context.Context, matchContext *C
 		processHelper := helper.New(matchContext.Process)
 		domain, err := processHelper.GetCommonDialogDomain(process.DomainTypeDialogEndExceed)
 		if err != nil {
-			return true, fmt.Errorf("OutOfMaxRoundsMatcher find common dialog domain failed: %w", err)
+			return true, fmt.Errorf("OutOfMaxRoundsMatcher get common dialog domain failed: %w", err)
 		}
 		matchedPath := MatchedPath{Domain: domain.Name, Branch: process.BranchNameEnter}
 		slog.Info(fmt.Sprintf("sessionId [%v]: OutOfMaxRoundsMatcher matched domain [%v] branch [%v]",
@@ -44,7 +44,8 @@ type ForceInterruptionMatcher struct {
 
 func (matcher *ForceInterruptionMatcher) Match(ctx context.Context, matchContext *Context) (bool, error) {
 	if matchContext.Interruption == process.InterruptionTypeForce {
-		slog.Info(fmt.Sprintf("sessionId [%v]: ForceInterruptionMatcher detect force interruption", matchContext.Session.SessionId),
+		slog.Info(fmt.Sprintf("sessionId [%v]: ForceInterruptionMatcher detect force interruption",
+			matchContext.Session.SessionId),
 			slog.Any("traceId", ctx.Value(traceid.TraceId{})))
 		processHelper := helper.New(matchContext.Process)
 		domain, err := processHelper.GetForceInterruptionJumpToDomain()
@@ -66,12 +67,13 @@ type ClarificationInterruptionMatcher struct {
 
 func (matcher *ClarificationInterruptionMatcher) Match(ctx context.Context, matchContext *Context) (bool, error) {
 	if matchContext.Interruption == process.InterruptionTypeClarification {
-		slog.Info(fmt.Sprintf("sessionId [%v]: ClarificationInterruptionMatcher detect clarification interruption", matchContext.Session.SessionId),
+		slog.Info(fmt.Sprintf("sessionId [%v]: ClarificationInterruptionMatcher detect clarification interruption",
+			matchContext.Session.SessionId),
 			slog.Any("traceId", ctx.Value(traceid.TraceId{})))
 		processHelper := helper.New(matchContext.Process)
 		domain, err := processHelper.GetCommonDialogDomain(process.DomainTypeDialogClarification)
 		if err != nil {
-			return true, fmt.Errorf("ClarificationInterruptionMatcher find common dialog domain failed: %w", err)
+			return true, fmt.Errorf("ClarificationInterruptionMatcher get common dialog domain failed: %w", err)
 		}
 		matchedPath := MatchedPath{Domain: domain.Name, Branch: process.BranchNameEnter}
 		slog.Info(fmt.Sprintf("sessionId [%v]: ClarificationInterruptionMatcher matched domain [%v] branch [%v]",

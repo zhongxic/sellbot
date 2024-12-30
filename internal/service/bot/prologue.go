@@ -38,7 +38,7 @@ func (s *serviceImpl) Prologue(ctx context.Context, prologueDTO *PrologueDTO) (*
 	}
 	startDomain, err := processHelper.GetStartDomain()
 	if err != nil {
-		return nil, fmt.Errorf("find start domain failed: %w", err)
+		return nil, fmt.Errorf("get start domain failed: %w", err)
 	}
 	matchContext := matcher.NewContext(currentSession, loadedProcess)
 	matchContext.AddMatchedPath(matcher.MatchedPath{Domain: startDomain.Name, Branch: process.BranchNameEnter})
@@ -86,7 +86,7 @@ func loadUserDict(tokenizer *jieba.Tokenizer, processHelper *helper.Helper) erro
 	}
 	startDomain, err := processHelper.GetStartDomain()
 	if err != nil {
-		return fmt.Errorf("find start domain failed: %w", err)
+		return fmt.Errorf("get start domain failed: %w", err)
 	}
 	startDomainKeywords := processHelper.GetDomainKeywords(startDomain.Name)
 	for _, keyword := range startDomainKeywords {

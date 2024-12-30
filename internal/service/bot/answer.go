@@ -60,7 +60,7 @@ func autoJump(ctx context.Context, matchContext *matcher.Context, nextDomain str
 		processHelper := helper.New(matchContext.Process)
 		endFailDomain, err := processHelper.GetCommonDialogDomain(process.DomainTypeDialogEndFail)
 		if err != nil {
-			return AnswerDTO{}, fmt.Errorf("find common dialog domain [%v] failed: %w", process.DomainTypeDialogEndFail, err)
+			return AnswerDTO{}, fmt.Errorf("get common dialog domain [%v] failed: %w", process.DomainTypeDialogEndFail, err)
 		}
 		matchedPath.Domain = endFailDomain.Name
 	}
