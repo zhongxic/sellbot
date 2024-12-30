@@ -55,22 +55,46 @@ func makeAnswer(ctx context.Context, matchContext *matcher.Context) (AnswerDTO, 
 }
 
 func autoJump(ctx context.Context, matchContext *matcher.Context, nextDomain string) (AnswerDTO, error) {
-	matchedPath := matcher.MatchedPath{Domain: nextDomain, Branch: process.BranchNameEnter}
-	if matchedPath.Domain == "" {
-		processHelper := helper.New(matchContext.Process)
-		endFailDomain, err := processHelper.GetCommonDialogDomain(process.DomainTypeDialogEndFail)
+	var matchedPath matcher.MatchedPath
+	processHelper := helper.New(matchContext.Process)
+	if nextDomain == "" {
+		domain, err := processHelper.GetCommonDialogDomain(process.DomainTypeDialogEndFail)
 		if err != nil {
 			return AnswerDTO{}, fmt.Errorf("get common dialog domain [%v] failed: %w", process.DomainTypeDialogEndFail, err)
 		}
-		matchedPath.Domain = endFailDomain.Name
-	}
-	if matchedPath.Domain == process.DomainNameRepeat {
-		matchedPath.Domain = matchContext.Session.CurrentDomain
-		matchedPath.Branch = matchContext.Session.CurrentBranch
+		matchedPath = matcher.MatchedPath{
+			Domain:         domain.Name,
+			Branch:         process.BranchNameEnter,
+			DomainType:     process.DomainTypeDialogEndFail,
+			DomainCategory: process.DomainCategoryCommonDialog,
+		}
+	} else if nextDomain == process.DomainNameRepeat {
+		domain, err := processHelper.GetCommonDialogDomain(matchContext.Session.CurrentDomain)
+		if err != nil {
+			return AnswerDTO{}, fmt.Errorf("get repeated domain [%v] failed: %w", matchContext.Session.CurrentDomain, err)
+		}
+		matchedPath = matcher.MatchedPath{
+			Domain:         domain.Name,
+			Branch:         matchContext.Session.CurrentBranch,
+			DomainType:     domain.Type,
+			DomainCategory: domain.Category,
+		}
+	} else {
+		domain, err := processHelper.GetCommonDialogDomain(nextDomain)
+		if err != nil {
+			return AnswerDTO{}, fmt.Errorf("get jump to domain [%v] failed: %w", nextDomain, err)
+		}
+		matchedPath = matcher.MatchedPath{
+			Domain:         domain.Name,
+			Branch:         process.BranchNameEnter,
+			DomainType:     domain.Type,
+			DomainCategory: domain.Category,
+		}
 	}
 	slog.Info(fmt.Sprintf("sessionId [%v]: expected jump to [%v] actual jump to domain [%v] branch [%v]",
 		matchContext.Session.SessionId, nextDomain, matchedPath.Domain, matchedPath.Branch),
 		slog.Any("traceId", ctx.Value(traceid.TraceId{})))
+	matchContext.AddMatchedPath(matchedPath)
 	return makeAnswer(ctx, matchContext)
 }
 
