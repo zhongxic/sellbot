@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"slices"
 
 	"github.com/zhongxic/sellbot/internal/service/process"
 	"github.com/zhongxic/sellbot/internal/service/process/helper"
@@ -194,4 +195,55 @@ func (matcher *TextMatcher) Match(ctx context.Context, matchContext *Context) (b
 		matchContext.AddMatchedPath(matchedPath)
 	}
 	return false, nil
+}
+
+type PostIgnoreMatcher struct {
+}
+
+func (matcher *PostIgnoreMatcher) Match(ctx context.Context, matchContext *Context) (bool, error) {
+	lastMatchedPath, err := matchContext.GetLastMatchedPath()
+	if err != nil {
+		return false, fmt.Errorf("PostIgnoreMatcher get last matched path failed: %w", err)
+	}
+	processHelper := helper.New(matchContext.Process)
+	domain, err := processHelper.GetDomain(matchContext.Session.CurrentDomain)
+	if err != nil {
+		return true, fmt.Errorf("PostIgnoreMatcher get current domain failed: %w", err)
+	}
+	ignoreAnyExceptRefuse := domain.IgnoreConfig.IgnoreAnyExceptRefuse &&
+		lastMatchedPath.DomainType != process.DomainTypeDialogRefuse
+	nextDomain := ""
+	if lastMatchedPath.DomainCategory == process.DomainCategoryMainProcess {
+		branch, err := processHelper.GetBranch(lastMatchedPath.Domain, lastMatchedPath.Branch)
+		if err != nil {
+			return true, fmt.Errorf("PostIgnoreMatcher get domain [%v] branch [%v] failed: %w",
+				lastMatchedPath.Domain, lastMatchedPath.Branch, err)
+		}
+		nextDomain = branch.Next
+	}
+	if lastMatchedPath.DomainCategory == process.DomainCategoryBusinessQA {
+		nextDomain = lastMatchedPath.Domain + "." + lastMatchedPath.Branch
+	}
+	if lastMatchedPath.DomainCategory == process.DomainCategoryCommonDialog {
+		nextDomain = lastMatchedPath.Domain
+	}
+	ignoreAnyExceptDomains := false
+	if len(domain.IgnoreConfig.IgnoreAnyExceptDomains) >= 0 {
+		ignoreAnyExceptDomains = slices.Index(domain.IgnoreConfig.IgnoreAnyExceptDomains, nextDomain) == -1
+	}
+	shouldIgnore := ignoreAnyExceptRefuse || ignoreAnyExceptDomains
+	if shouldIgnore {
+		slog.Info(fmt.Sprintf("sessionId [%v]: PostIgnoreMatcher ignore", matchContext.Session.SessionId),
+			slog.Any("traceId", ctx.Value(traceid.TraceId{})))
+		branch, err := processHelper.GetDomainSemanticBranch(matchContext.Session.CurrentDomain, process.BranchSemanticPositive)
+		if err != nil {
+			return true, fmt.Errorf("PostIgnoreMatcher get domain [%v] positive branch failed: %w", matchContext.Session.CurrentDomain, err)
+		}
+		matchedPath := MatchedPath{Domain: matchContext.Session.CurrentDomain, Branch: branch.Name}
+		slog.Info(fmt.Sprintf("sessionId [%v]: PostIgnoreMatcher matched domain [%v] branch [%v]",
+			matchContext.Session.SessionId, matchedPath.Domain, matchedPath.Branch),
+			slog.Any("traceId", ctx.Value(traceid.TraceId{})))
+		matchContext.AddMatchedPath(matchedPath)
+	}
+	return shouldIgnore, nil
 }
