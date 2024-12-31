@@ -62,34 +62,11 @@ func autoJump(ctx context.Context, matchContext *matcher.Context, nextDomain str
 		if err != nil {
 			return AnswerDTO{}, fmt.Errorf("get common dialog domain [%v] failed: %w", process.DomainTypeDialogEndFail, err)
 		}
-		matchedPath = matcher.MatchedPath{
-			Domain:         domain.Name,
-			Branch:         process.BranchNameEnter,
-			DomainType:     process.DomainTypeDialogEndFail,
-			DomainCategory: process.DomainCategoryCommonDialog,
-		}
+		matchedPath = matcher.MatchedPath{Domain: domain.Name, Branch: process.BranchNameEnter}
 	} else if nextDomain == process.DomainNameRepeat {
-		domain, err := processHelper.GetCommonDialogDomain(matchContext.Session.CurrentDomain)
-		if err != nil {
-			return AnswerDTO{}, fmt.Errorf("get repeated domain [%v] failed: %w", matchContext.Session.CurrentDomain, err)
-		}
-		matchedPath = matcher.MatchedPath{
-			Domain:         domain.Name,
-			Branch:         matchContext.Session.CurrentBranch,
-			DomainType:     domain.Type,
-			DomainCategory: domain.Category,
-		}
+		matchedPath = matcher.MatchedPath{Domain: matchContext.Session.CurrentDomain, Branch: matchContext.Session.CurrentBranch}
 	} else {
-		domain, err := processHelper.GetCommonDialogDomain(nextDomain)
-		if err != nil {
-			return AnswerDTO{}, fmt.Errorf("get jump to domain [%v] failed: %w", nextDomain, err)
-		}
-		matchedPath = matcher.MatchedPath{
-			Domain:         domain.Name,
-			Branch:         process.BranchNameEnter,
-			DomainType:     domain.Type,
-			DomainCategory: domain.Category,
-		}
+		matchedPath = matcher.MatchedPath{Domain: nextDomain, Branch: process.BranchNameEnter}
 	}
 	slog.Info(fmt.Sprintf("sessionId [%v]: expected jump to [%v] actual jump to domain [%v] branch [%v]",
 		matchContext.Session.SessionId, nextDomain, matchedPath.Domain, matchedPath.Branch),
