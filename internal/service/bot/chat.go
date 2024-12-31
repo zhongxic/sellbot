@@ -9,6 +9,7 @@ import (
 
 	"github.com/zhongxic/sellbot/internal/service/bot/matcher"
 	"github.com/zhongxic/sellbot/internal/service/process"
+	"github.com/zhongxic/sellbot/internal/service/process/helper"
 	"github.com/zhongxic/sellbot/internal/traceid"
 	"github.com/zhongxic/sellbot/pkg/jieba"
 )
@@ -29,12 +30,26 @@ func (s *serviceImpl) Chat(ctx context.Context, chatDTO *ChatDTO) (*InteractiveR
 	if err != nil {
 		return nil, fmt.Errorf("load process failed: %w", err)
 	}
+	processHelper := helper.New(loadedProcess)
 	matchContext := matcher.NewContext(currentSession, loadedProcess)
 	matchContext.Sentence = chatDTO.Sentence
 	matchContext.Segments = cutAll(ctx, tokenizer, s.stopWords, chatDTO.Sentence)
 	matchContext.Silence = chatDTO.Silence
 	matchContext.Interruption = chatDTO.Interruption
-	// TODO match in process
+	_, err = s.matcher.Match(ctx, matchContext)
+	if err != nil {
+		slog.Error(fmt.Sprintf("sessionId [%v]: process matching failed: %v", currentSession.SessionId, err),
+			slog.Any("traceId", traceid.TraceId{}))
+		domain, err := processHelper.GetCommonDialogDomain(process.DomainTypeDialogEndException)
+		if err != nil {
+			return nil, fmt.Errorf("get common dialog domain [%v] failed: %w", process.DomainTypeDialogEndException, err)
+		}
+		matchedPath := matcher.MatchedPath{Domain: domain.Name, Branch: process.BranchNameEnter}
+		slog.Info(fmt.Sprintf("jump to domain [%v] branch [%v] due to match error occurred",
+			matchedPath.Domain, matchedPath.Branch),
+			slog.Any("traceId", ctx.Value(traceid.TraceId{})))
+		matchContext.AddMatchedPath(matchedPath)
+	}
 	answerDTO, err := makeAnswer(ctx, matchContext)
 	if err != nil {
 		return nil, fmt.Errorf("make answer failed: %w", err)
