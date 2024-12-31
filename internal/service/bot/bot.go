@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/zhongxic/sellbot/internal/service/bot/matcher"
 	"github.com/zhongxic/sellbot/internal/service/process"
 	"github.com/zhongxic/sellbot/internal/service/session"
 	"github.com/zhongxic/sellbot/internal/traceid"
@@ -28,6 +29,7 @@ type serviceImpl struct {
 	releaseLoader  process.Loader
 	sessionCache   cache.Cache[string, *session.Session]
 	tokenizerCache cache.Cache[string, *jieba.Tokenizer]
+	matcher        matcher.Matcher
 }
 
 func (s *serviceImpl) loadProcess(processId string, test bool) (*process.Process, error) {
@@ -92,6 +94,7 @@ type Options struct {
 	ReleaseLoader  process.Loader
 	SessionCache   cache.Cache[string, *session.Session]
 	TokenizerCache cache.Cache[string, *jieba.Tokenizer]
+	Matcher        matcher.Matcher
 }
 
 func NewService(options Options) (Service, error) {
@@ -104,12 +107,22 @@ func NewService(options Options) (Service, error) {
 		releaseLoader:  options.ReleaseLoader,
 		sessionCache:   options.SessionCache,
 		tokenizerCache: options.TokenizerCache,
+		matcher:        options.Matcher,
 	}
+	stopWords, err := loadStopWords(options.StopWords)
+	if err != nil {
+		return nil, fmt.Errorf("create bot service load stop words failed: %w", err)
+	}
+	serve.stopWords = stopWords
+	return serve, nil
+}
+
+func loadStopWords(stopWordsFile string) ([]string, error) {
 	stopWords := make([]string, 0)
-	if options.StopWords != "" {
-		f, err := os.Open(options.StopWords)
+	if stopWordsFile != "" {
+		f, err := os.Open(stopWordsFile)
 		if err != nil {
-			return nil, fmt.Errorf("load stop words [%v] failed: %w", options.StopWords, err)
+			return stopWords, fmt.Errorf("load stop words [%v] failed: %w", stopWordsFile, err)
 		}
 		scanner := bufio.NewScanner(f)
 		for scanner.Scan() {
@@ -119,8 +132,7 @@ func NewService(options Options) (Service, error) {
 			}
 		}
 	}
-	serve.stopWords = stopWords
-	return serve, nil
+	return stopWords, nil
 }
 
 func validate(options Options) error {
@@ -147,6 +159,9 @@ func validate(options Options) error {
 	}
 	if options.TokenizerCache == nil {
 		return fmt.Errorf("tokenizer cache is required")
+	}
+	if options.Matcher == nil {
+		return fmt.Errorf("matcher is required")
 	}
 	return nil
 }
