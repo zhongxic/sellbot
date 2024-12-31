@@ -11,6 +11,20 @@ import (
 	"github.com/zhongxic/sellbot/internal/traceid"
 )
 
+// DefaultChainedMatcher default matcher chain
+var DefaultChainedMatcher = &ChainedMatcher{
+	matchers: []Matcher{
+		&OutOfMaxRoundsMatcher{},
+		&ForceInterruptionMatcher{},
+		&ClarificationInterruptionMatcher{},
+		&SilenceMatcher{},
+		&PreIgnoreMatcher{},
+		&TextMatcher{},
+		&PostIgnoreMatcher{},
+		&MissMatchMatcher{},
+	},
+}
+
 type Matcher interface {
 	// Match find matched branches in process use this matchContext
 	// and abort match if return false
@@ -296,6 +310,26 @@ func (matcher *MissMatchMatcher) Match(ctx context.Context, matchContext *Contex
 				matchContext.Session.SessionId, matchedPath.Domain, matchedPath.Branch),
 				slog.Any("traceId", ctx.Value(traceid.TraceId{})))
 			matchContext.AddMatchedPath(matchedPath)
+		}
+	}
+	return true, nil
+}
+
+type ChainedMatcher struct {
+	matchers []Matcher
+}
+
+func (c *ChainedMatcher) Match(ctx context.Context, matchContext *Context) (bool, error) {
+	if len(c.matchers) == 0 {
+		return true, fmt.Errorf("no matchers provide in chained matcher")
+	}
+	for _, matcher := range c.matchers {
+		abort, err := matcher.Match(ctx, matchContext)
+		if err != nil {
+			return true, fmt.Errorf("chained matcher match failed: %w", err)
+		}
+		if abort {
+			return abort, nil
 		}
 	}
 	return true, nil
