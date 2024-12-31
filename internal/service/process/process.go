@@ -18,6 +18,7 @@ const (
 	DomainTypeAgent               = "agent"
 	DomainTypeDialogEndFail       = "end_fail"
 	DomainTypeDialogEndExceed     = "end_exceed"
+	DomainTypeDialogEndException  = "end_exception"
 	DomainTypeDialogClarification = "clarification"
 	DomainTypeDialogMissMatch     = "miss_match"
 	DomainTypeDialogRefuse        = "refuse"
