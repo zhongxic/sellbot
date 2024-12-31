@@ -8,6 +8,7 @@ import (
 	botctl "github.com/zhongxic/sellbot/internal/controller/bot"
 	"github.com/zhongxic/sellbot/internal/controller/ping"
 	botserve "github.com/zhongxic/sellbot/internal/service/bot"
+	"github.com/zhongxic/sellbot/internal/service/bot/matcher"
 	"github.com/zhongxic/sellbot/internal/service/process"
 	"github.com/zhongxic/sellbot/internal/service/session"
 	"github.com/zhongxic/sellbot/pkg/cache"
@@ -61,6 +62,7 @@ func registerRoutes(r *gin.Engine, cfg *config.Config) error {
 		ReleaseLoader:  releaseLoader,
 		SessionCache:   sessionCache,
 		TokenizerCache: tokenizerCache,
+		Matcher:        matcher.DefaultChainedMatcher,
 	}
 	botService, err := botserve.NewService(botOptions)
 	if err != nil {
