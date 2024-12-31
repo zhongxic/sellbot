@@ -124,7 +124,8 @@ type IntentionCondition struct {
 }
 
 type Options struct {
-	MaxRounds int `json:"maxRounds"`
+	MaxRounds              int    `json:"maxRounds"`
+	ForceInterruptedJumpTo string `json:"forceInterruptedJumpTo"`
 }
 
 type Variable struct {

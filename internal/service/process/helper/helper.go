@@ -71,11 +71,6 @@ func (h *Helper) GetCommonDialogDomain(domainDialogType string) (process.Domain,
 	return domains[0], nil
 }
 
-func (h *Helper) GetForceInterruptionJumpToDomain() (process.Domain, error) {
-	// TODO impl-me get force interruption jump to domain
-	return process.Domain{}, nil
-}
-
 func (h *Helper) GetBranch(domainName, branchName string) (process.Branch, error) {
 	if len(h.hold.Domains) == 0 {
 		return process.Branch{}, fmt.Errorf("process [%v]: empty domains", h.hold.Id)
