@@ -291,13 +291,13 @@ func (matcher *MissMatchMatcher) Match(ctx context.Context, matchContext *Contex
 	if matchedDomain.Type == process.DomainTypeDialogMissMatch {
 		jumpTo := ""
 		shortTextMissMatchJump := len(matchContext.Sentence) < 4 && domain.MissMatchConfig.ShortTextMissMatchJumpTo != ""
-		longTextMissMatchJump := len(matchContext.Sentence) >= 4 && domain.MissMatchConfig.LongTextMissMatchJumpTo != ""
 		if shortTextMissMatchJump {
 			slog.Info(fmt.Sprintf("sessionId [%v]: MissMatchMatcher current domain [%v] detect miss match [short text] jump to [%v]",
 				matchContext.Session.SessionId, matchContext.Session.CurrentDomain, domain.MissMatchConfig.ShortTextMissMatchJumpTo),
 				slog.Any("traceId", ctx.Value(traceid.TraceId{})))
 			jumpTo = domain.MissMatchConfig.ShortTextMissMatchJumpTo
 		}
+		longTextMissMatchJump := len(matchContext.Sentence) >= 4 && domain.MissMatchConfig.LongTextMissMatchJumpTo != ""
 		if longTextMissMatchJump {
 			slog.Info(fmt.Sprintf("sessionId [%v]: MissMatchMatcher current domain [%v] detect miss match [long text] jump to [%v]",
 				matchContext.Session.SessionId, matchContext.Session.CurrentDomain, domain.MissMatchConfig.LongTextMissMatchJumpTo),
@@ -329,7 +329,7 @@ func (c *ChainedMatcher) Match(ctx context.Context, matchContext *Context) (bool
 			return true, fmt.Errorf("chained matcher match failed: %w", err)
 		}
 		if abort {
-			return abort, nil
+			return true, nil
 		}
 	}
 	return true, nil
