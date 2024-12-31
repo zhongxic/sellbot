@@ -51,6 +51,9 @@ func score(ctx context.Context, text string, segments []string, Keywords process
 	if exactKeywordsSim.isBetterThan(maxSim) {
 		maxSim = exactKeywordsSim
 	}
+	slog.Info(fmt.Sprintf("text [%v] segments [%v]: best matched keywords similarity is [%v]",
+		text, segments, maxSim),
+		slog.Any("traceId", ctx.Value(traceid.TraceId{})))
 	return maxSim
 }
 

@@ -21,8 +21,9 @@ func makeAnswer(ctx context.Context, matchContext *matcher.Context) (AnswerDTO, 
 		return AnswerDTO{}, fmt.Errorf("get last matched path failed: %w", err)
 	}
 	traceId := slog.Any("traceId", ctx.Value(traceid.TraceId{}))
-	slog.Info(fmt.Sprintf("sessionId [%v]: matched domain [%v] branch [%v]",
-		matchContext.Session.SessionId, matchedPath.Domain, matchedPath.Branch), traceId)
+	slog.Info(fmt.Sprintf("sessionId [%v]: current domain [%v] last mainProcessDomain [%v] matched domain [%v] branch [%v]",
+		matchContext.Session.SessionId, matchContext.Session.CurrentDomain, matchContext.Session.LastMainProcessDomain,
+		matchedPath.Domain, matchedPath.Branch), traceId)
 	processHelper := helper.New(matchContext.Process)
 	domain, err := processHelper.GetDomain(matchedPath.Domain)
 	if err != nil {

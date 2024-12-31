@@ -253,7 +253,7 @@ func (matcher *PostIgnoreMatcher) Match(ctx context.Context, matchContext *Conte
 	}
 	shouldIgnore := ignoreAnyExceptRefuse || ignoreAnyExceptDomains
 	if shouldIgnore {
-		slog.Info(fmt.Sprintf("sessionId [%v]: PostIgnoreMatcher ignoreAnyExceptRefuse [%v] ignoreAnyExceptDomains[%v]",
+		slog.Info(fmt.Sprintf("sessionId [%v]: PostIgnoreMatcher ignoreAnyExceptRefuse [%v] ignoreAnyExceptDomains [%v]",
 			matchContext.Session.SessionId, ignoreAnyExceptRefuse, ignoreAnyExceptDomains),
 			slog.Any("traceId", ctx.Value(traceid.TraceId{})))
 		branch, err := processHelper.GetDomainSemanticBranch(matchContext.Session.CurrentDomain, process.BranchSemanticPositive)
