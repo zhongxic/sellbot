@@ -25,7 +25,6 @@ type Context struct {
 
 func (c *Context) AddMatchedPath(matchedPath MatchedPath) {
 	c.MatchedPaths = append(c.MatchedPaths, matchedPath)
-	// TODO update session stat
 }
 
 func (c *Context) GetLastMatchedPath() (MatchedPath, error) {
