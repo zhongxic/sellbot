@@ -46,8 +46,8 @@ func (s *serviceImpl) Prologue(ctx context.Context, prologueDTO *PrologueDTO) (*
 	}
 	matchContext.UpdateSessionStat()
 	intentionRules := []process.IntentionRule{processHelper.GetDefaultIntentionRule()}
-	s.storeSession(currentSession.SessionId, currentSession)
-	s.storeTokenizer(currentSession.SessionId, tokenizer)
+	s.storeSession(currentSession.Id, currentSession)
+	s.storeTokenizer(currentSession.Id, tokenizer)
 	return makeRespond(matchContext, answerDTO, intentionRules), nil
 }
 

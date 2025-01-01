@@ -21,7 +21,7 @@ func makeAnswer(ctx context.Context, matchContext *matcher.Context) (AnswerDTO, 
 	}
 	traceId := slog.Any("traceId", ctx.Value(traceid.TraceId{}))
 	slog.Info(fmt.Sprintf("sessionId [%v]: current domain [%v] last mainProcessDomain [%v] matched domain [%v] branch [%v]",
-		matchContext.Session.SessionId, matchContext.Session.CurrentDomain, matchContext.Session.LastMainProcessDomain,
+		matchContext.Session.Id, matchContext.Session.CurrentDomain, matchContext.Session.LastMainProcessDomain,
 		matchedPath.Domain, matchedPath.Branch), traceId)
 	processHelper := process.NewHelper(matchContext.Process)
 	domain, err := processHelper.GetDomain(matchedPath.Domain)
@@ -35,20 +35,20 @@ func makeAnswer(ctx context.Context, matchContext *matcher.Context) (AnswerDTO, 
 	hitCount := matchContext.Session.GetDomainBranchHitCount(matchedPath.Domain, matchedPath.Branch)
 	isExceed := hitCount >= len(branch.Responses) && domain.Category != process.DomainCategoryMainProcess
 	slog.Info(fmt.Sprintf("sessionId [%v]: domain [%v] branch [%v] hitCount [%v] isExceed [%v]",
-		matchContext.Session.SessionId, matchedPath.Domain, matchedPath.Branch, hitCount, isExceed), traceId)
+		matchContext.Session.Id, matchedPath.Domain, matchedPath.Branch, hitCount, isExceed), traceId)
 	if isExceed {
 		nextDomain := ""
 		if branch.EnableExceedJump && branch.Next != "" {
 			nextDomain = branch.Next
 		}
 		slog.Info(fmt.Sprintf("sessionId [%v]: jump to domain [%v] due to hitCount exceed",
-			matchContext.Session.SessionId, matchedPath.Branch), traceId)
+			matchContext.Session.Id, matchedPath.Branch), traceId)
 		return autoJump(ctx, matchContext, nextDomain)
 	}
 	response := branch.Responses[hitCount%len(branch.Responses)]
 	if response.EnableAutoJump && response.Next != "" {
 		slog.Info(fmt.Sprintf("sessionId [%v]: jump to domain [%v] due to domain [%v] branch [%v] auto jump enabled",
-			matchContext.Session.SessionId, response.Next, matchedPath.Domain, matchedPath.Branch), traceId)
+			matchContext.Session.Id, response.Next, matchedPath.Domain, matchedPath.Branch), traceId)
 		return autoJump(ctx, matchContext, response.Next)
 	}
 	return AnswerDTO{Text: response.Text, Audio: response.Audio}, nil
@@ -69,7 +69,7 @@ func autoJump(ctx context.Context, matchContext *matcher.Context, nextDomain str
 		matchedPath = matcher.MatchedPath{Domain: nextDomain, Branch: process.BranchNameEnter}
 	}
 	slog.Info(fmt.Sprintf("sessionId [%v]: expected jump to [%v] actual jump to domain [%v] branch [%v]",
-		matchContext.Session.SessionId, nextDomain, matchedPath.Domain, matchedPath.Branch),
+		matchContext.Session.Id, nextDomain, matchedPath.Domain, matchedPath.Branch),
 		slog.Any("traceId", ctx.Value(traceid.TraceId{})))
 	matchContext.AddMatchedPath(matchedPath)
 	return makeAnswer(ctx, matchContext)
@@ -77,7 +77,7 @@ func autoJump(ctx context.Context, matchContext *matcher.Context, nextDomain str
 
 func makeRespond(matchContext *matcher.Context, answerDTO AnswerDTO, intentionRules []process.IntentionRule) *InteractiveRespond {
 	interactiveRespond := &InteractiveRespond{}
-	interactiveRespond.SessionId = matchContext.Session.SessionId
+	interactiveRespond.SessionId = matchContext.Session.Id
 	interactiveRespond.Hits.Sentence = matchContext.Sentence
 	if len(matchContext.Segments) == 0 {
 		interactiveRespond.Hits.Segments = make([]string, 0)

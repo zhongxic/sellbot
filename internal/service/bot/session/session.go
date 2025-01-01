@@ -6,7 +6,7 @@ type StatPath struct {
 }
 
 type Session struct {
-	SessionId             string
+	Id                    string
 	ProcessId             string
 	Variables             map[string]string
 	Test                  bool
@@ -20,7 +20,7 @@ type Session struct {
 
 func New() *Session {
 	return &Session{
-		SessionId:            uuid.New().String(),
+		Id:                   uuid.New().String(),
 		DomainBranchHitCount: make(map[string]map[string]int),
 	}
 }

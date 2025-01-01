@@ -36,7 +36,7 @@ func (s *serviceImpl) initSession(ctx context.Context, prologueDTO *PrologueDTO)
 	sess.ProcessId = prologueDTO.ProcessId
 	sess.Variables = prologueDTO.Variables
 	sess.Test = prologueDTO.Test
-	slog.Info(fmt.Sprintf("init session [%v]", sess.SessionId),
+	slog.Info(fmt.Sprintf("init session [%v]", sess.Id),
 		"traceId", ctx.Value(traceid.TraceId{}), "prologueDTO", prologueDTO)
 	return sess
 }
