@@ -7,7 +7,6 @@ import (
 	"slices"
 
 	"github.com/zhongxic/sellbot/internal/service/process"
-	"github.com/zhongxic/sellbot/internal/service/process/helper"
 	"github.com/zhongxic/sellbot/internal/traceid"
 )
 
@@ -39,7 +38,7 @@ func (matcher *OutOfMaxRoundsMatcher) Match(ctx context.Context, matchContext *C
 		slog.Info(fmt.Sprintf("sessionId [%v]: OutOfMaxRoundsMatcher detect conversation count out of max rounds [%v]",
 			matchContext.Session.SessionId, matchContext.Process.Options.MaxRounds),
 			slog.Any("traceId", ctx.Value(traceid.TraceId{})))
-		processHelper := helper.New(matchContext.Process)
+		processHelper := process.NewHelper(matchContext.Process)
 		domain, err := processHelper.GetCommonDialogDomain(process.DomainTypeDialogEndExceed)
 		if err != nil {
 			return true, fmt.Errorf("OutOfMaxRoundsMatcher get common dialog domain [%v] failed: %w",
@@ -86,7 +85,7 @@ func (matcher *ClarificationInterruptionMatcher) Match(ctx context.Context, matc
 		slog.Info(fmt.Sprintf("sessionId [%v]: ClarificationInterruptionMatcher detect clarification interruption",
 			matchContext.Session.SessionId),
 			slog.Any("traceId", ctx.Value(traceid.TraceId{})))
-		processHelper := helper.New(matchContext.Process)
+		processHelper := process.NewHelper(matchContext.Process)
 		domain, err := processHelper.GetCommonDialogDomain(process.DomainTypeDialogClarification)
 		if err != nil {
 			return true, fmt.Errorf("ClarificationInterruptionMatcher get common dialog domain [%v] failed: %w",
@@ -109,7 +108,7 @@ func (matcher *SilenceMatcher) Match(ctx context.Context, matchContext *Context)
 	if matchContext.Silence {
 		slog.Info(fmt.Sprintf("sessionId [%v]: SilenceMatcher detect silence", matchContext.Session.SessionId),
 			slog.Any("traceId", ctx.Value(traceid.TraceId{})))
-		processHelper := helper.New(matchContext.Process)
+		processHelper := process.NewHelper(matchContext.Process)
 		domain, err := processHelper.GetSilenceDomain()
 		if err != nil {
 			return true, fmt.Errorf("SilenceMatcher get silence domain failed: %w", err)
@@ -128,7 +127,7 @@ type PreIgnoreMatcher struct {
 }
 
 func (matcher *PreIgnoreMatcher) Match(ctx context.Context, matchContext *Context) (bool, error) {
-	processHelper := helper.New(matchContext.Process)
+	processHelper := process.NewHelper(matchContext.Process)
 	domain, err := processHelper.GetDomain(matchContext.Session.CurrentDomain)
 	if err != nil {
 		return true, fmt.Errorf("PreIgnoreMatcher get current [%v] domain failed: %w",
@@ -157,7 +156,7 @@ type TextMatcher struct {
 }
 
 func (matcher *TextMatcher) Match(ctx context.Context, matchContext *Context) (bool, error) {
-	processHelper := helper.New(matchContext.Process)
+	processHelper := process.NewHelper(matchContext.Process)
 	matchPaths, err := processHelper.GetMergeOrderedMatchPaths(matchContext.Session.LastMainProcessDomain)
 	if err != nil {
 		return true, fmt.Errorf("TextMatcher get domain [%v] merge ordered match paths failed: %w",
@@ -220,7 +219,7 @@ func (matcher *PostIgnoreMatcher) Match(ctx context.Context, matchContext *Conte
 	if err != nil {
 		return true, fmt.Errorf("PostIgnoreMatcher get last matched path failed: %w", err)
 	}
-	processHelper := helper.New(matchContext.Process)
+	processHelper := process.NewHelper(matchContext.Process)
 	domain, err := processHelper.GetDomain(matchContext.Session.CurrentDomain)
 	if err != nil {
 		return true, fmt.Errorf("PostIgnoreMatcher get current domain [%v] failed: %w",
@@ -278,7 +277,7 @@ func (matcher *MissMatchMatcher) Match(ctx context.Context, matchContext *Contex
 	if err != nil {
 		return false, fmt.Errorf("MissMatchMatcher get last matched path failed: %w", err)
 	}
-	processHelper := helper.New(matchContext.Process)
+	processHelper := process.NewHelper(matchContext.Process)
 	domain, err := processHelper.GetDomain(matchContext.Session.CurrentDomain)
 	if err != nil {
 		return true, fmt.Errorf("MissMatchMatcher get current domain [%v] failed: %w",

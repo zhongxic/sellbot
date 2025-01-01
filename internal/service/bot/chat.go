@@ -9,7 +9,6 @@ import (
 
 	"github.com/zhongxic/sellbot/internal/service/bot/matcher"
 	"github.com/zhongxic/sellbot/internal/service/process"
-	"github.com/zhongxic/sellbot/internal/service/process/helper"
 	"github.com/zhongxic/sellbot/internal/traceid"
 	"github.com/zhongxic/sellbot/pkg/jieba"
 )
@@ -30,7 +29,7 @@ func (s *serviceImpl) Chat(ctx context.Context, chatDTO *ChatDTO) (*InteractiveR
 	if err != nil {
 		return nil, fmt.Errorf("load process failed: %w", err)
 	}
-	processHelper := helper.New(loadedProcess)
+	processHelper := process.NewHelper(loadedProcess)
 	matchContext := matcher.NewContext(currentSession, loadedProcess)
 	matchContext.Sentence = chatDTO.Sentence
 	matchContext.Segments = cutAll(ctx, tokenizer, s.stopWords, chatDTO.Sentence)

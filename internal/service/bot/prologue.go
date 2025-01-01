@@ -9,7 +9,6 @@ import (
 
 	"github.com/zhongxic/sellbot/internal/service/bot/matcher"
 	"github.com/zhongxic/sellbot/internal/service/process"
-	"github.com/zhongxic/sellbot/internal/service/process/helper"
 	"github.com/zhongxic/sellbot/internal/traceid"
 	"github.com/zhongxic/sellbot/pkg/jieba"
 )
@@ -31,7 +30,7 @@ func (s *serviceImpl) Prologue(ctx context.Context, prologueDTO *PrologueDTO) (*
 	if err != nil {
 		return nil, fmt.Errorf("init tokenizer failed: %w", err)
 	}
-	processHelper := helper.New(loadedProcess)
+	processHelper := process.NewHelper(loadedProcess)
 	if err := loadUserDict(tokenizer, processHelper); err != nil {
 		return nil, fmt.Errorf("load user dict failed: %w", err)
 	}
@@ -77,7 +76,7 @@ func validateVariables(actual map[string]string, expected []process.Variable) er
 	return nil
 }
 
-func loadUserDict(tokenizer *jieba.Tokenizer, processHelper *helper.Helper) error {
+func loadUserDict(tokenizer *jieba.Tokenizer, processHelper *process.Helper) error {
 	globalKeywords := processHelper.GetGlobalKeywords()
 	for _, keyword := range globalKeywords {
 		tokenizer.AddWord(keyword, 1)

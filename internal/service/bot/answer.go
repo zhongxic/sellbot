@@ -8,7 +8,6 @@ import (
 
 	"github.com/zhongxic/sellbot/internal/service/bot/matcher"
 	"github.com/zhongxic/sellbot/internal/service/process"
-	"github.com/zhongxic/sellbot/internal/service/process/helper"
 	"github.com/zhongxic/sellbot/internal/traceid"
 )
 
@@ -24,7 +23,7 @@ func makeAnswer(ctx context.Context, matchContext *matcher.Context) (AnswerDTO, 
 	slog.Info(fmt.Sprintf("sessionId [%v]: current domain [%v] last mainProcessDomain [%v] matched domain [%v] branch [%v]",
 		matchContext.Session.SessionId, matchContext.Session.CurrentDomain, matchContext.Session.LastMainProcessDomain,
 		matchedPath.Domain, matchedPath.Branch), traceId)
-	processHelper := helper.New(matchContext.Process)
+	processHelper := process.NewHelper(matchContext.Process)
 	domain, err := processHelper.GetDomain(matchedPath.Domain)
 	if err != nil {
 		return AnswerDTO{}, fmt.Errorf("get domain failed: %w", err)
@@ -57,7 +56,7 @@ func makeAnswer(ctx context.Context, matchContext *matcher.Context) (AnswerDTO, 
 
 func autoJump(ctx context.Context, matchContext *matcher.Context, nextDomain string) (AnswerDTO, error) {
 	var matchedPath matcher.MatchedPath
-	processHelper := helper.New(matchContext.Process)
+	processHelper := process.NewHelper(matchContext.Process)
 	if nextDomain == "" {
 		domain, err := processHelper.GetCommonDialogDomain(process.DomainTypeDialogEndFail)
 		if err != nil {
