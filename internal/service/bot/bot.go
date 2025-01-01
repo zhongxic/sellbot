@@ -25,18 +25,10 @@ type Service interface {
 type serviceImpl struct {
 	extraDict      string
 	stopWords      []string
-	testLoader     process.Loader
-	releaseLoader  process.Loader
+	processManager *process.Manager
 	sessionCache   cache.Cache[string, *session.Session]
 	tokenizerCache cache.Cache[string, *jieba.Tokenizer]
 	matcher        matcher.Matcher
-}
-
-func (s *serviceImpl) loadProcess(processId string, test bool) (*process.Process, error) {
-	if test {
-		return s.testLoader.Load(processId)
-	}
-	return s.releaseLoader.Load(processId)
 }
 
 func (s *serviceImpl) initSession(ctx context.Context, prologueDTO *PrologueDTO) *session.Session {
@@ -90,8 +82,7 @@ func (s *serviceImpl) retrieveTokenizer(sessionId string) (*jieba.Tokenizer, err
 type Options struct {
 	ExtraDict      string
 	StopWords      string
-	TestLoader     process.Loader
-	ReleaseLoader  process.Loader
+	ProcessManager *process.Manager
 	SessionCache   cache.Cache[string, *session.Session]
 	TokenizerCache cache.Cache[string, *jieba.Tokenizer]
 	Matcher        matcher.Matcher
@@ -103,8 +94,7 @@ func NewService(options Options) (Service, error) {
 	}
 	serve := &serviceImpl{
 		extraDict:      options.ExtraDict,
-		testLoader:     options.TestLoader,
-		releaseLoader:  options.ReleaseLoader,
+		processManager: options.ProcessManager,
 		sessionCache:   options.SessionCache,
 		tokenizerCache: options.TokenizerCache,
 		matcher:        options.Matcher,
@@ -148,11 +138,8 @@ func validate(options Options) error {
 			return fmt.Errorf("stop words [%v] not readable: %w", options.StopWords, err)
 		}
 	}
-	if options.TestLoader == nil {
-		return fmt.Errorf("test loader is required")
-	}
-	if options.ReleaseLoader == nil {
-		return fmt.Errorf("release loader is required")
+	if options.ProcessManager == nil {
+		return fmt.Errorf("process manager is required")
 	}
 	if options.SessionCache == nil {
 		return fmt.Errorf("session cache is required")

@@ -25,7 +25,7 @@ func (s *serviceImpl) Chat(ctx context.Context, chatDTO *ChatDTO) (*InteractiveR
 	if err != nil {
 		return nil, fmt.Errorf("retrieve tokenizer failed: %w", err)
 	}
-	loadedProcess, err := s.loadProcess(currentSession.ProcessId, currentSession.Test)
+	loadedProcess, err := s.processManager.Load(currentSession.ProcessId, currentSession.Test)
 	if err != nil {
 		return nil, fmt.Errorf("load process failed: %w", err)
 	}

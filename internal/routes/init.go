@@ -37,6 +37,18 @@ func registerMiddleware(r *gin.Engine) {
 
 func registerRoutes(r *gin.Engine, cfg *config.Config) error {
 	pingController := ping.NewController()
+	botService, err := newBotService(cfg)
+	if err != nil {
+		return err
+	}
+	botController := botctl.NewController(botService)
+	r.GET("/ping", pingController.Ping)
+	r.POST("/prologue", botController.Prologue)
+	r.POST("/chat", botController.Chat)
+	return nil
+}
+
+func newBotService(cfg *config.Config) (botserve.Service, error) {
 	testProcessCache := cache.NewCache[*process.Process](cache.Options{
 		DefaultExpiration: time.Duration(cfg.Process.Cache.Expiration) * time.Second,
 		CleanupInterval:   time.Duration(cfg.Process.Cache.CleanupInterval) * time.Second,
@@ -45,8 +57,9 @@ func registerRoutes(r *gin.Engine, cfg *config.Config) error {
 		DefaultExpiration: time.Duration(cfg.Process.Cache.Expiration) * time.Second,
 		CleanupInterval:   time.Duration(cfg.Process.Cache.CleanupInterval) * time.Second,
 	})
-	testLoader := process.NewCachedLoader(process.NewFileLoader(cfg.Process.Directory.Test), testProcessCache)
-	releaseLoader := process.NewCachedLoader(process.NewFileLoader(cfg.Process.Directory.Release), releaseProcessCache)
+	testProcessLoader := process.NewCachedLoader(process.NewFileLoader(cfg.Process.Directory.Test), testProcessCache)
+	releaseProcessLoader := process.NewCachedLoader(process.NewFileLoader(cfg.Process.Directory.Release), releaseProcessCache)
+	processManager := &process.Manager{TestProcessLoader: releaseProcessLoader, ReleaseProcessLoader: testProcessLoader}
 	sessionCache := cache.NewCache[*session.Session](cache.Options{
 		DefaultExpiration: time.Duration(cfg.Session.Cache.Expiration) * time.Second,
 		CleanupInterval:   time.Duration(cfg.Session.Cache.CleanupInterval) * time.Second,
@@ -58,19 +71,10 @@ func registerRoutes(r *gin.Engine, cfg *config.Config) error {
 	botOptions := botserve.Options{
 		ExtraDict:      cfg.Tokenizer.ExtraDict,
 		StopWords:      cfg.Tokenizer.StopWords,
-		TestLoader:     testLoader,
-		ReleaseLoader:  releaseLoader,
+		ProcessManager: processManager,
 		SessionCache:   sessionCache,
 		TokenizerCache: tokenizerCache,
 		Matcher:        matcher.DefaultChainedMatcher,
 	}
-	botService, err := botserve.NewService(botOptions)
-	if err != nil {
-		return err
-	}
-	botController := botctl.NewController(botService)
-	r.GET("/ping", pingController.Ping)
-	r.POST("/prologue", botController.Prologue)
-	r.POST("/chat", botController.Chat)
-	return nil
+	return botserve.NewService(botOptions)
 }
