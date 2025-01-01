@@ -34,6 +34,10 @@ func (c *Context) GetLastMatchedPath() (MatchedPath, error) {
 	return c.MatchedPaths[len(c.MatchedPaths)-1], nil
 }
 
+func (c *Context) UpdateSessionStat() {
+	// TODO update session stat
+}
+
 func NewContext(session *session.Session, process *process.Process) *Context {
 	return &Context{
 		Session: session,

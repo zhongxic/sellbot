@@ -54,8 +54,7 @@ func (s *serviceImpl) Chat(ctx context.Context, chatDTO *ChatDTO) (*InteractiveR
 	if err != nil {
 		return nil, fmt.Errorf("make answer failed: %w", err)
 	}
-	statPaths := convertMatchedPathsToStatPaths(matchContext.MatchedPaths)
-	currentSession.UpdateStat(statPaths)
+	matchContext.UpdateSessionStat()
 	// TODO intention analysis
 	intentionRules := make([]process.IntentionRule, 0)
 	s.storeSession(currentSession.SessionId, currentSession)
