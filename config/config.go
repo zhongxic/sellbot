@@ -7,10 +7,17 @@ import (
 )
 
 const (
-	defaultLogLevel    = "debug"
-	defaultLogFile     = "log.log"
-	defaultLogFileAge  = 7
-	defaultLogFileSize = 1024
+	defaultServerPort                  = 8080
+	defaultLogLevel                    = "debug"
+	defaultLogFile                     = "log.log"
+	defaultLogFileAge                  = 7
+	defaultLogFileSize                 = 1024
+	defaultProcessCacheExpiration      = 1800
+	defaultProcessCacheCleanupInterval = 900
+	defaultTestProcessDirectory        = "data/process/test/"
+	defaultReleaseProcessTestDirectory = "data/process/release/"
+	defaultSessionRepository           = "memory"
+	defaultSessionExpiration           = 1800
 )
 
 type Config struct {
@@ -72,8 +79,8 @@ func Parse(file string) (*Config, error) {
 }
 
 func applyDefault(config *Config) {
-	if config.Server.Port == 0 {
-		config.Server.Port = 8080
+	if config.Server.Port <= 0 {
+		config.Server.Port = defaultServerPort
 	}
 	if config.Logging.Level == "" {
 		config.Logging.Level = defaultLogLevel
@@ -81,10 +88,28 @@ func applyDefault(config *Config) {
 	if config.Logging.File == "" {
 		config.Logging.File = defaultLogFile
 	}
-	if config.Logging.MaxAge == 0 {
+	if config.Logging.MaxAge <= 0 {
 		config.Logging.MaxAge = defaultLogFileAge
 	}
-	if config.Logging.MaxSize == 0 {
+	if config.Logging.MaxSize <= 0 {
 		config.Logging.MaxSize = defaultLogFileSize
+	}
+	if config.Process.Cache.Expiration <= 0 {
+		config.Process.Cache.Expiration = defaultProcessCacheExpiration
+	}
+	if config.Process.Cache.CleanupInterval <= 0 {
+		config.Process.Cache.CleanupInterval = defaultProcessCacheCleanupInterval
+	}
+	if config.Process.Directory.Test == "" {
+		config.Process.Directory.Test = defaultTestProcessDirectory
+	}
+	if config.Process.Directory.Release == "" {
+		config.Process.Directory.Release = defaultReleaseProcessTestDirectory
+	}
+	if config.Session.Repository == "" {
+		config.Session.Repository = defaultSessionRepository
+	}
+	if config.Session.Expiration <= 0 {
+		config.Session.Expiration = defaultSessionExpiration
 	}
 }
