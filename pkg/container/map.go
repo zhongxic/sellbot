@@ -13,61 +13,15 @@ type Stringer interface {
 	comparable
 }
 
-type ConcurrentMap[K comparable, V any] struct {
-	shardCount int
-	shards     []*mapShard[K, V]
-	hash       func(k K) uint32
-}
-
 type mapShard[K comparable, V any] struct {
 	sync.RWMutex
 	items map[K]V
 }
 
-func NewConcurrentMap[V any](shardCount ...int) *ConcurrentMap[string, V] {
-	count := determineShardCount(shardCount)
-	cm := &ConcurrentMap[string, V]{
-		shardCount: count,
-		shards:     make([]*mapShard[string, V], count),
-		hash:       fnv32,
-	}
-	for i := 0; i < count; i++ {
-		cm.shards[i] = &mapShard[string, V]{items: make(map[string]V)}
-	}
-	return cm
-}
-
-func NewStringerConcurrentMap[K Stringer, V any](shardCount ...int) *ConcurrentMap[K, V] {
-	count := determineShardCount(shardCount)
-	cm := &ConcurrentMap[K, V]{
-		shardCount: count,
-		shards:     make([]*mapShard[K, V], count),
-		hash:       strfnv32[K],
-	}
-	for i := 0; i < count; i++ {
-		cm.shards[i] = &mapShard[K, V]{items: make(map[K]V)}
-	}
-	return cm
-}
-
-func determineShardCount(shardCount []int) int {
-	count := defaultShardCount
-	if len(shardCount) > 0 && shardCount[0] > 0 {
-		count = shardCount[0]
-	}
-	return count
-}
-
-func strfnv32[K Stringer](key K) uint32 {
-	return fnv32(key.String())
-}
-
-func fnv32(key string) uint32 {
-	hash := uint32(2166136261)
-	for _, c := range key {
-		hash = (hash * 16777619) ^ uint32(c)
-	}
-	return hash
+type ConcurrentMap[K comparable, V any] struct {
+	shardCount int
+	shards     []*mapShard[K, V]
+	hash       func(k K) uint32
 }
 
 func (c *ConcurrentMap[K, V]) getShard(key K) *mapShard[K, V] {
@@ -135,4 +89,50 @@ func (c *ConcurrentMap[K, V]) UnmarshalJSON(data []byte) error {
 		c.Put(key, value)
 	}
 	return nil
+}
+
+func NewConcurrentMap[V any](shardCount ...int) *ConcurrentMap[string, V] {
+	count := determineShardCount(shardCount)
+	cm := &ConcurrentMap[string, V]{
+		shardCount: count,
+		shards:     make([]*mapShard[string, V], count),
+		hash:       fnv32,
+	}
+	for i := 0; i < count; i++ {
+		cm.shards[i] = &mapShard[string, V]{items: make(map[string]V)}
+	}
+	return cm
+}
+
+func NewStringerConcurrentMap[K Stringer, V any](shardCount ...int) *ConcurrentMap[K, V] {
+	count := determineShardCount(shardCount)
+	cm := &ConcurrentMap[K, V]{
+		shardCount: count,
+		shards:     make([]*mapShard[K, V], count),
+		hash:       strfnv32[K],
+	}
+	for i := 0; i < count; i++ {
+		cm.shards[i] = &mapShard[K, V]{items: make(map[K]V)}
+	}
+	return cm
+}
+
+func determineShardCount(shardCount []int) int {
+	count := defaultShardCount
+	if len(shardCount) > 0 && shardCount[0] > 0 {
+		count = shardCount[0]
+	}
+	return count
+}
+
+func fnv32(key string) uint32 {
+	hash := uint32(2166136261)
+	for _, c := range key {
+		hash = (hash * 16777619) ^ uint32(c)
+	}
+	return hash
+}
+
+func strfnv32[K Stringer](key K) uint32 {
+	return fnv32(key.String())
 }
