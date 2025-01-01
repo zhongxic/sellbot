@@ -57,9 +57,9 @@ func autoJump(ctx context.Context, matchContext *matcher.Context, nextDomain str
 	var matchedPath matcher.MatchedPath
 	processHelper := process.NewHelper(matchContext.Process)
 	if nextDomain == "" {
-		domain, err := processHelper.GetCommonDialogDomain(process.DomainTypeDialogEndFail)
+		domain, err := processHelper.GetCommonDialog(process.DomainTypeDialogEndFail)
 		if err != nil {
-			return AnswerDTO{}, fmt.Errorf("get common dialog domain [%v] failed: %w", process.DomainTypeDialogEndFail, err)
+			return AnswerDTO{}, fmt.Errorf("get common dialog [%v] failed: %w", process.DomainTypeDialogEndFail, err)
 		}
 		matchedPath = matcher.MatchedPath{Domain: domain.Name, Branch: process.BranchNameEnter}
 	} else if nextDomain == process.DomainNameRepeat {

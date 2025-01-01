@@ -39,10 +39,9 @@ func (matcher *OutOfMaxRoundsMatcher) Match(ctx context.Context, matchContext *C
 			matchContext.Session.Id, matchContext.Process.Options.MaxRounds),
 			slog.Any("traceId", ctx.Value(traceid.TraceId{})))
 		processHelper := process.NewHelper(matchContext.Process)
-		domain, err := processHelper.GetCommonDialogDomain(process.DomainTypeDialogEndExceed)
+		domain, err := processHelper.GetCommonDialog(process.DomainTypeDialogEndExceed)
 		if err != nil {
-			return true, fmt.Errorf("OutOfMaxRoundsMatcher get common dialog domain [%v] failed: %w",
-				process.DomainTypeDialogEndExceed, err)
+			return true, fmt.Errorf("OutOfMaxRoundsMatcher get common dialog [%v] failed: %w", process.DomainTypeDialogEndExceed, err)
 		}
 		matchedPath := MatchedPath{Domain: domain.Name, Branch: process.BranchNameEnter}
 		slog.Info(fmt.Sprintf("sessionId [%v]: OutOfMaxRoundsMatcher matched domain [%v] branch [%v]",
@@ -86,9 +85,9 @@ func (matcher *ClarificationInterruptionMatcher) Match(ctx context.Context, matc
 			matchContext.Session.Id),
 			slog.Any("traceId", ctx.Value(traceid.TraceId{})))
 		processHelper := process.NewHelper(matchContext.Process)
-		domain, err := processHelper.GetCommonDialogDomain(process.DomainTypeDialogClarification)
+		domain, err := processHelper.GetCommonDialog(process.DomainTypeDialogClarification)
 		if err != nil {
-			return true, fmt.Errorf("ClarificationInterruptionMatcher get common dialog domain [%v] failed: %w",
+			return true, fmt.Errorf("ClarificationInterruptionMatcher get common dialog [%v] failed: %w",
 				process.DomainTypeDialogClarification, err)
 		}
 		matchedPath := MatchedPath{Domain: domain.Name, Branch: process.BranchNameEnter}
@@ -197,10 +196,9 @@ func (matcher *TextMatcher) Match(ctx context.Context, matchContext *Context) (b
 		slog.Info(fmt.Sprintf("sessionId [%v]: TextMatcher lastMainProcessDomain [%v] detect miss match",
 			matchContext.Session.Id, matchContext.Session.LastMainProcessDomain),
 			slog.Any("traceId", ctx.Value(traceid.TraceId{})))
-		domain, err := processHelper.GetCommonDialogDomain(process.DomainTypeDialogMissMatch)
+		domain, err := processHelper.GetCommonDialog(process.DomainTypeDialogMissMatch)
 		if err != nil {
-			return true, fmt.Errorf("TextMatcher get common dialog domain [%v] failed: %w",
-				process.DomainTypeDialogMissMatch, err)
+			return true, fmt.Errorf("TextMatcher get common dialog [%v] failed: %w", process.DomainTypeDialogMissMatch, err)
 		}
 		matchedPath := MatchedPath{Domain: domain.Name, Branch: process.BranchNameEnter}
 		slog.Info(fmt.Sprintf("sessionId [%v]: TextMatcher lastMainProcessDomain [%v] matched domain [%v] branch [%v]",

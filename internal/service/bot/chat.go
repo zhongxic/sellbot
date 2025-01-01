@@ -39,9 +39,9 @@ func (s *serviceImpl) Chat(ctx context.Context, chatDTO *ChatDTO) (*InteractiveR
 	if err != nil {
 		slog.Error(fmt.Sprintf("sessionId [%v]: process matching failed: %v", currentSession.Id, err),
 			slog.Any("traceId", traceid.TraceId{}))
-		domain, err := processHelper.GetCommonDialogDomain(process.DomainTypeDialogEndException)
+		domain, err := processHelper.GetCommonDialog(process.DomainTypeDialogEndException)
 		if err != nil {
-			return nil, fmt.Errorf("get common dialog domain [%v] failed: %w", process.DomainTypeDialogEndException, err)
+			return nil, fmt.Errorf("get common dialog [%v] failed: %w", process.DomainTypeDialogEndException, err)
 		}
 		matchedPath := matcher.MatchedPath{Domain: domain.Name, Branch: process.BranchNameEnter}
 		slog.Info(fmt.Sprintf("jump to domain [%v] branch [%v] due to match error occurred",

@@ -46,7 +46,7 @@ func (h *Helper) GetSilenceDomain() (Domain, error) {
 	return Domain{}, nil
 }
 
-func (h *Helper) GetCommonDialogDomain(domainDialogType string) (Domain, error) {
+func (h *Helper) GetCommonDialog(domainDialogType string) (Domain, error) {
 	if len(h.process.Domains) == 0 {
 		return Domain{}, fmt.Errorf("process [%v]: empty domains", h.process.Id)
 	}
