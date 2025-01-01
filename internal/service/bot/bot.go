@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"github.com/zhongxic/sellbot/internal/service/bot/matcher"
+	"github.com/zhongxic/sellbot/internal/service/bot/session"
 	"github.com/zhongxic/sellbot/internal/service/process"
-	"github.com/zhongxic/sellbot/internal/service/session"
 	"github.com/zhongxic/sellbot/internal/traceid"
 	"github.com/zhongxic/sellbot/pkg/cache"
 	"github.com/zhongxic/sellbot/pkg/jieba"

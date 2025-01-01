@@ -3,8 +3,8 @@ package matcher
 import (
 	"errors"
 
+	"github.com/zhongxic/sellbot/internal/service/bot/session"
 	"github.com/zhongxic/sellbot/internal/service/process"
-	"github.com/zhongxic/sellbot/internal/service/session"
 )
 
 type MatchedPath struct {
