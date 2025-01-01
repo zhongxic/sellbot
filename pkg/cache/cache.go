@@ -24,7 +24,7 @@ type cacheItem[V any] struct {
 type cacheImpl[K comparable, V any] struct {
 	defaultExpiration time.Duration
 	cleanupInterval   time.Duration
-	cm                *container.ConcurrentMap[K, cacheItem[V]]
+	store             *container.ConcurrentMap[K, cacheItem[V]]
 	janitor           *janitor[K, V]
 }
 
@@ -37,11 +37,11 @@ func (c *cacheImpl[K, V]) Set(key K, value V, expiration ...time.Duration) {
 		value:  value,
 		expire: time.Now().Add(ttl),
 	}
-	c.cm.Put(key, item)
+	c.store.Put(key, item)
 }
 
 func (c *cacheImpl[K, V]) Get(key K) (value V, exist bool) {
-	item, ok := c.cm.Get(key)
+	item, ok := c.store.Get(key)
 	if !ok || time.Now().After(item.expire) {
 		return
 	}
@@ -49,7 +49,7 @@ func (c *cacheImpl[K, V]) Get(key K) (value V, exist bool) {
 }
 
 func (c *cacheImpl[K, V]) Remove(key K) {
-	c.cm.Remove(key)
+	c.store.Remove(key)
 }
 
 type cacheHolder[K comparable, V any] struct {
@@ -68,7 +68,7 @@ func (j *janitor[K, V]) start() {
 		select {
 		case <-j.ticker.C:
 			if running.CompareAndSwap(false, true) {
-				j.cache.cm.Range(func(key K, value cacheItem[V]) bool {
+				j.cache.store.Range(func(key K, value cacheItem[V]) bool {
 					if time.Now().After(value.expire) {
 						j.cache.Remove(key)
 					}
@@ -104,7 +104,7 @@ func NewCache[V any](options Options) Cache[string, V] {
 	c := &cacheImpl[string, V]{
 		defaultExpiration: options.DefaultExpiration,
 		cleanupInterval:   options.CleanupInterval,
-		cm:                container.NewConcurrentMap[cacheItem[V]](),
+		store:             container.NewConcurrentMap[cacheItem[V]](),
 	}
 	c.janitor = newJanitor(options.CleanupInterval, c)
 	h := &cacheHolder[string, V]{c}
@@ -119,7 +119,7 @@ func NewStringerCache[K Stringer, V any](options Options) Cache[K, V] {
 	c := &cacheImpl[K, V]{
 		defaultExpiration: options.DefaultExpiration,
 		cleanupInterval:   options.CleanupInterval,
-		cm:                container.NewStringerConcurrentMap[K, cacheItem[V]](),
+		store:             container.NewStringerConcurrentMap[K, cacheItem[V]](),
 	}
 	c.janitor = newJanitor(options.CleanupInterval, c)
 	h := &cacheHolder[K, V]{c}
