@@ -53,7 +53,8 @@ type Tokenizer struct {
 }
 
 type Session struct {
-	Cache Cache `yaml:"cache"`
+	Repository string `yaml:"repository"`
+	Expiration int    `yaml:"expiration"`
 }
 
 func Parse(file string) (*Config, error) {

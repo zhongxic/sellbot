@@ -1,13 +1,14 @@
 package session
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/zhongxic/sellbot/pkg/cache"
 )
 
 const (
-	sessionCleanupInterval = 5 * time.Minute
+	DefaultCleanupInterval = 5 * time.Minute
 )
 
 type Manager interface {
@@ -34,14 +35,25 @@ func (m *inMemoryManager) Invalidate(id string) {
 }
 
 type Options struct {
+	Repository string
 	Expiration time.Duration
 }
 
-func NewInMemoryManager(options Options) Manager {
-	return &inMemoryManager{
+func NewManager(options Options) (Manager, error) {
+	switch options.Repository {
+	case "memory":
+		return newInMemoryManager(options)
+	default:
+		return nil, fmt.Errorf("invalid repository type [%v]", options.Repository)
+	}
+}
+
+func newInMemoryManager(options Options) (manager Manager, err error) {
+	manager = &inMemoryManager{
 		store: cache.NewCache[*Session](cache.Options{
 			DefaultExpiration: options.Expiration,
-			CleanupInterval:   sessionCleanupInterval,
+			CleanupInterval:   DefaultCleanupInterval,
 		}),
 	}
+	return
 }

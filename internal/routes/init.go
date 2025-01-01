@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -57,20 +58,26 @@ func newBotService(cfg *config.Config) (botserve.Service, error) {
 		DefaultExpiration: time.Duration(cfg.Process.Cache.Expiration) * time.Second,
 		CleanupInterval:   time.Duration(cfg.Process.Cache.CleanupInterval) * time.Second,
 	})
-	testProcessLoader := process.NewCachedLoader(process.NewFileLoader(cfg.Process.Directory.Test), testProcessCache)
-	releaseProcessLoader := process.NewCachedLoader(process.NewFileLoader(cfg.Process.Directory.Release), releaseProcessCache)
-	processManager := &process.Manager{TestProcessLoader: releaseProcessLoader, ReleaseProcessLoader: testProcessLoader}
+	processManager := &process.Manager{
+		TestProcessLoader:    process.NewCachedLoader(process.NewFileLoader(cfg.Process.Directory.Test), testProcessCache),
+		ReleaseProcessLoader: process.NewCachedLoader(process.NewFileLoader(cfg.Process.Directory.Release), releaseProcessCache),
+	}
+	sessionManager, err := session.NewManager(session.Options{
+		Repository: cfg.Session.Repository,
+		Expiration: time.Duration(cfg.Session.Expiration) * time.Second,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("create session manager failed: %w", err)
+	}
 	tokenizerCache := cache.NewCache[*jieba.Tokenizer](cache.Options{
-		DefaultExpiration: time.Duration(cfg.Session.Cache.Expiration) * time.Second,
-		CleanupInterval:   time.Duration(cfg.Session.Cache.CleanupInterval) * time.Second,
+		DefaultExpiration: time.Duration(cfg.Session.Expiration) * time.Second,
+		CleanupInterval:   session.DefaultCleanupInterval,
 	})
 	botOptions := botserve.Options{
 		ExtraDict:      cfg.Tokenizer.ExtraDict,
 		StopWordsDict:  cfg.Tokenizer.StopWordsDict,
 		ProcessManager: processManager,
-		SessionManager: session.NewInMemoryManager(session.Options{
-			Expiration: time.Duration(cfg.Session.Cache.Expiration) * time.Second,
-		}),
+		SessionManager: sessionManager,
 		TokenizerCache: tokenizerCache,
 		Matcher:        matcher.DefaultChainedMatcher,
 	}

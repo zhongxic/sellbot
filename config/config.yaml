@@ -16,6 +16,5 @@ tokenizer:
   extra-dict: data/dict/dict.txt.small
   stop-words-dict: data/dict/stop_words.txt
 session:
-  cache:
-    expiration: 1800
-    cleanup-interval: 900
+  repository: memory
+  expiration: 1800

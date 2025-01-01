@@ -35,10 +35,8 @@ func TestParse(t *testing.T) {
 			StopWordsDict: "data/dict/stop_words.txt",
 		},
 		Session: Session{
-			Cache: Cache{
-				Expiration:      1800,
-				CleanupInterval: 900,
-			},
+			Repository: "memory",
+			Expiration: 1800,
 		},
 	}
 
