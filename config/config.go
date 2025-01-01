@@ -48,8 +48,8 @@ type Directory struct {
 }
 
 type Tokenizer struct {
-	ExtraDict string `yaml:"extra-dict"`
-	StopWords string `yaml:"stop-words"`
+	ExtraDict     string `yaml:"extra-dict"`
+	StopWordsDict string `yaml:"stop-words-dict"`
 }
 
 type Session struct {

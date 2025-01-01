@@ -66,7 +66,7 @@ func newBotService(cfg *config.Config) (botserve.Service, error) {
 	})
 	botOptions := botserve.Options{
 		ExtraDict:      cfg.Tokenizer.ExtraDict,
-		StopWords:      cfg.Tokenizer.StopWords,
+		StopWordsDict:  cfg.Tokenizer.StopWordsDict,
 		ProcessManager: processManager,
 		SessionManager: session.NewInMemoryManager(session.Options{
 			Expiration: time.Duration(cfg.Session.Cache.Expiration) * time.Second,

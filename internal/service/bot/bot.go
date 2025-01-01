@@ -81,7 +81,7 @@ func (s *serviceImpl) retrieveTokenizer(sessionId string) (*jieba.Tokenizer, err
 
 type Options struct {
 	ExtraDict      string
-	StopWords      string
+	StopWordsDict  string
 	ProcessManager *process.Manager
 	SessionManager session.Manager
 	TokenizerCache cache.Cache[string, *jieba.Tokenizer]
@@ -90,52 +90,32 @@ type Options struct {
 
 func NewService(options Options) (Service, error) {
 	if err := validate(options); err != nil {
-		return nil, fmt.Errorf("create bot service failed: %w", err)
+		return nil, fmt.Errorf("int bot service failed: %w", err)
+	}
+	stopWords, err := loadStopWords(options.StopWordsDict)
+	if err != nil {
+		return nil, fmt.Errorf("int bot service load stop words failed: %w", err)
 	}
 	serve := &serviceImpl{
 		extraDict:      options.ExtraDict,
+		stopWords:      stopWords,
 		processManager: options.ProcessManager,
 		sessionManager: options.SessionManager,
 		tokenizerCache: options.TokenizerCache,
 		matcher:        options.Matcher,
 	}
-	stopWords, err := loadStopWords(options.StopWords)
-	if err != nil {
-		return nil, fmt.Errorf("create bot service load stop words failed: %w", err)
-	}
-	serve.stopWords = stopWords
 	return serve, nil
-}
-
-func loadStopWords(stopWordsFile string) ([]string, error) {
-	stopWords := make([]string, 0)
-	if stopWordsFile != "" {
-		f, err := os.Open(stopWordsFile)
-		if err != nil {
-			return stopWords, fmt.Errorf("load stop words [%v] failed: %w", stopWordsFile, err)
-		}
-		scanner := bufio.NewScanner(f)
-		for scanner.Scan() {
-			line := strings.TrimSpace(scanner.Text())
-			if line != "" {
-				stopWords = append(stopWords, line)
-			}
-		}
-	}
-	return stopWords, nil
 }
 
 func validate(options Options) error {
 	if options.ExtraDict != "" {
-		_, err := os.Stat(options.ExtraDict)
-		if err != nil {
-			return fmt.Errorf("extra dict [%v] not readable: %w", options.ExtraDict, err)
+		if _, err := os.Stat(options.ExtraDict); err != nil {
+			return fmt.Errorf("stat extra dict [%v] failed: %w", options.ExtraDict, err)
 		}
 	}
-	if options.StopWords != "" {
-		_, err := os.Stat(options.StopWords)
-		if err != nil {
-			return fmt.Errorf("stop words [%v] not readable: %w", options.StopWords, err)
+	if options.StopWordsDict != "" {
+		if _, err := os.Stat(options.StopWordsDict); err != nil {
+			return fmt.Errorf("stat stop words [%v] failed: %w", options.StopWordsDict, err)
 		}
 	}
 	if options.ProcessManager == nil {
@@ -151,4 +131,22 @@ func validate(options Options) error {
 		return fmt.Errorf("matcher is required")
 	}
 	return nil
+}
+
+func loadStopWords(stopWordsFile string) ([]string, error) {
+	stopWords := make([]string, 0)
+	if stopWordsFile != "" {
+		f, err := os.Open(stopWordsFile)
+		if err != nil {
+			return stopWords, err
+		}
+		scanner := bufio.NewScanner(f)
+		for scanner.Scan() {
+			line := strings.TrimSpace(scanner.Text())
+			if line != "" {
+				stopWords = append(stopWords, line)
+			}
+		}
+	}
+	return stopWords, nil
 }
