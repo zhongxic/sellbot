@@ -26,7 +26,7 @@ type serviceImpl struct {
 	extraDict      string
 	stopWords      []string
 	processManager *process.Manager
-	sessionCache   cache.Cache[string, *session.Session]
+	sessionManager session.Manager
 	tokenizerCache cache.Cache[string, *jieba.Tokenizer]
 	matcher        matcher.Matcher
 }
@@ -56,7 +56,7 @@ func (s *serviceImpl) initTokenizer(ctx context.Context) (tokenizer *jieba.Token
 }
 
 func (s *serviceImpl) storeSession(sessionId string, sess *session.Session) {
-	s.sessionCache.Set(sessionId, sess)
+	s.sessionManager.Put(sessionId, sess)
 }
 
 func (s *serviceImpl) storeTokenizer(sessionId string, tokenizer *jieba.Tokenizer) {
@@ -64,9 +64,9 @@ func (s *serviceImpl) storeTokenizer(sessionId string, tokenizer *jieba.Tokenize
 }
 
 func (s *serviceImpl) retrieveSession(sessionId string) (*session.Session, error) {
-	sess, ok := s.sessionCache.Get(sessionId)
-	if !ok {
-		return nil, fmt.Errorf("sessionId [%v]: session not found", sessionId)
+	sess := s.sessionManager.Get(sessionId)
+	if sess == nil {
+		return nil, fmt.Errorf("session [%s] not found", sessionId)
 	}
 	return sess, nil
 }
@@ -83,7 +83,7 @@ type Options struct {
 	ExtraDict      string
 	StopWords      string
 	ProcessManager *process.Manager
-	SessionCache   cache.Cache[string, *session.Session]
+	SessionManager session.Manager
 	TokenizerCache cache.Cache[string, *jieba.Tokenizer]
 	Matcher        matcher.Matcher
 }
@@ -95,7 +95,7 @@ func NewService(options Options) (Service, error) {
 	serve := &serviceImpl{
 		extraDict:      options.ExtraDict,
 		processManager: options.ProcessManager,
-		sessionCache:   options.SessionCache,
+		sessionManager: options.SessionManager,
 		tokenizerCache: options.TokenizerCache,
 		matcher:        options.Matcher,
 	}
@@ -141,8 +141,8 @@ func validate(options Options) error {
 	if options.ProcessManager == nil {
 		return fmt.Errorf("process manager is required")
 	}
-	if options.SessionCache == nil {
-		return fmt.Errorf("session cache is required")
+	if options.SessionManager == nil {
+		return fmt.Errorf("session manager is required")
 	}
 	if options.TokenizerCache == nil {
 		return fmt.Errorf("tokenizer cache is required")

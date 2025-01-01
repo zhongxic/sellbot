@@ -60,10 +60,6 @@ func newBotService(cfg *config.Config) (botserve.Service, error) {
 	testProcessLoader := process.NewCachedLoader(process.NewFileLoader(cfg.Process.Directory.Test), testProcessCache)
 	releaseProcessLoader := process.NewCachedLoader(process.NewFileLoader(cfg.Process.Directory.Release), releaseProcessCache)
 	processManager := &process.Manager{TestProcessLoader: releaseProcessLoader, ReleaseProcessLoader: testProcessLoader}
-	sessionCache := cache.NewCache[*session.Session](cache.Options{
-		DefaultExpiration: time.Duration(cfg.Session.Cache.Expiration) * time.Second,
-		CleanupInterval:   time.Duration(cfg.Session.Cache.CleanupInterval) * time.Second,
-	})
 	tokenizerCache := cache.NewCache[*jieba.Tokenizer](cache.Options{
 		DefaultExpiration: time.Duration(cfg.Session.Cache.Expiration) * time.Second,
 		CleanupInterval:   time.Duration(cfg.Session.Cache.CleanupInterval) * time.Second,
@@ -72,7 +68,9 @@ func newBotService(cfg *config.Config) (botserve.Service, error) {
 		ExtraDict:      cfg.Tokenizer.ExtraDict,
 		StopWords:      cfg.Tokenizer.StopWords,
 		ProcessManager: processManager,
-		SessionCache:   sessionCache,
+		SessionManager: session.NewInMemoryManager(session.Options{
+			Expiration: time.Duration(cfg.Session.Cache.Expiration) * time.Second,
+		}),
 		TokenizerCache: tokenizerCache,
 		Matcher:        matcher.DefaultChainedMatcher,
 	}
