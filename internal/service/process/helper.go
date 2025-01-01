@@ -1,8 +1,6 @@
 package process
 
-import (
-	"fmt"
-)
+import "fmt"
 
 const (
 	DefaultIntentionName   = "default"
@@ -10,39 +8,35 @@ const (
 )
 
 type Helper struct {
-	hold *Process
-}
-
-func NewHelper(hold *Process) *Helper {
-	return &Helper{hold: hold}
+	process *Process
 }
 
 func (h *Helper) GetDefaultIntentionRule() IntentionRule {
 	return IntentionRule{
-		Code:        h.hold.Intentions.DefaultIntention,
+		Code:        h.process.Intentions.DefaultIntention,
 		DisplayName: DefaultIntentionName,
 		Reason:      DefaultIntentionReason,
 	}
 }
 
 func (h *Helper) GetDomain(domainName string) (Domain, error) {
-	if len(h.hold.Domains) != 0 {
-		if domain, ok := h.hold.Domains[domainName]; ok {
+	if len(h.process.Domains) != 0 {
+		if domain, ok := h.process.Domains[domainName]; ok {
 			return domain, nil
 		}
 	}
-	return Domain{}, fmt.Errorf("process [%v]: domain [%v] not found", h.hold.Id, domainName)
+	return Domain{}, fmt.Errorf("process [%v]: domain [%v] not found", h.process.Id, domainName)
 }
 
 func (h *Helper) GetStartDomain() (Domain, error) {
 	domains := make([]Domain, 0)
-	for _, domain := range h.hold.Domains {
+	for _, domain := range h.process.Domains {
 		if domain.Category == DomainCategoryMainProcess && domain.Type == DomainTypeStart {
 			domains = append(domains, domain)
 		}
 	}
 	if len(domains) != 1 {
-		return Domain{}, fmt.Errorf("process [%v]: expected one start domain but found [%v]", h.hold.Id, len(domains))
+		return Domain{}, fmt.Errorf("process [%v]: expected one start domain but found [%v]", h.process.Id, len(domains))
 	}
 	return domains[0], nil
 }
@@ -53,33 +47,33 @@ func (h *Helper) GetSilenceDomain() (Domain, error) {
 }
 
 func (h *Helper) GetCommonDialogDomain(domainDialogType string) (Domain, error) {
-	if len(h.hold.Domains) == 0 {
-		return Domain{}, fmt.Errorf("process [%v]: empty domains", h.hold.Id)
+	if len(h.process.Domains) == 0 {
+		return Domain{}, fmt.Errorf("process [%v]: empty domains", h.process.Id)
 	}
 	domains := make([]Domain, 0)
-	for _, domain := range h.hold.Domains {
+	for _, domain := range h.process.Domains {
 		if domain.Category == DomainCategoryCommonDialog && domain.Type == domainDialogType {
 			domains = append(domains, domain)
 		}
 	}
 	if len(domains) != 1 {
 		return Domain{}, fmt.Errorf("process [%v]: expected one [%v] common dialog but found [%d]",
-			h.hold.Id, domainDialogType, len(domains))
+			h.process.Id, domainDialogType, len(domains))
 	}
 	return domains[0], nil
 }
 
 func (h *Helper) GetBranch(domainName, branchName string) (Branch, error) {
-	if len(h.hold.Domains) == 0 {
-		return Branch{}, fmt.Errorf("process [%v]: empty domains", h.hold.Id)
+	if len(h.process.Domains) == 0 {
+		return Branch{}, fmt.Errorf("process [%v]: empty domains", h.process.Id)
 	}
-	domain, ok := h.hold.Domains[domainName]
+	domain, ok := h.process.Domains[domainName]
 	if !ok {
-		return Branch{}, fmt.Errorf("process [%v]: domain [%s] not found", h.hold.Id, domainName)
+		return Branch{}, fmt.Errorf("process [%v]: domain [%s] not found", h.process.Id, domainName)
 	}
 	branch, ok := domain.Branches[branchName]
 	if !ok {
-		return Branch{}, fmt.Errorf("process [%v]: branch [%s] not found", h.hold.Id, branchName)
+		return Branch{}, fmt.Errorf("process [%v]: branch [%s] not found", h.process.Id, branchName)
 	}
 	return branch, nil
 }
@@ -91,10 +85,10 @@ func (h *Helper) GetDomainSemanticBranch(domainName, semantic string) (Branch, e
 
 func (h *Helper) GetDomainKeywords(domainName string) []string {
 	keywords := make([]string, 0)
-	if len(h.hold.Domains) == 0 {
+	if len(h.process.Domains) == 0 {
 		return keywords
 	}
-	domain, ok := h.hold.Domains[domainName]
+	domain, ok := h.process.Domains[domainName]
 	if !ok || len(domain.Branches) == 0 {
 		return keywords
 	}
@@ -107,10 +101,10 @@ func (h *Helper) GetDomainKeywords(domainName string) []string {
 
 func (h *Helper) GetBranchKeywords(domainName, branchName string) []string {
 	keywords := make([]string, 0)
-	if len(h.hold.Domains) == 0 {
+	if len(h.process.Domains) == 0 {
 		return keywords
 	}
-	domain, ok := h.hold.Domains[domainName]
+	domain, ok := h.process.Domains[domainName]
 	if !ok || len(domain.Branches) == 0 {
 		return keywords
 	}
@@ -142,4 +136,8 @@ func (h *Helper) GetGlobalKeywords() []string {
 func (h *Helper) GetMergeOrderedMatchPaths(domainName string) ([]MatchPath, error) {
 	// TODO impl-me get merged match order
 	return make([]MatchPath, 0), nil
+}
+
+func NewHelper(process *Process) *Helper {
+	return &Helper{process: process}
 }

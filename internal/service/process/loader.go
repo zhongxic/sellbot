@@ -15,10 +15,6 @@ type Loader interface {
 	LastModified(processId string) (time.Time, error)
 }
 
-func NewFileLoader(dir string) Loader {
-	return &fileLoader{dir}
-}
-
 type fileLoader struct {
 	dir string
 }
@@ -77,6 +73,10 @@ func (loader *cachedLoader) Load(processId string) (*Process, error) {
 
 func (loader *cachedLoader) LastModified(processId string) (time.Time, error) {
 	return loader.rawLoader.LastModified(processId)
+}
+
+func NewFileLoader(dir string) Loader {
+	return &fileLoader{dir}
 }
 
 func NewCachedLoader(rawLoader Loader, storage cache.Cache[string, *Process]) Loader {
