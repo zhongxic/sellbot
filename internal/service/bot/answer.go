@@ -31,6 +31,9 @@ func makeAnswer(ctx context.Context, matchContext *matcher.Context) (AnswerDTO, 
 	if err != nil {
 		return AnswerDTO{}, fmt.Errorf("get branch failed: %w", err)
 	}
+	if len(branch.Responses) == 0 {
+		return autoJump(ctx, matchContext, branch.Next)
+	}
 	hitCount := matchContext.Session.GetDomainBranchHitCount(matchedPath.Domain, matchedPath.Branch)
 	isExceed := hitCount >= len(branch.Responses) && domain.Category != process.DomainCategoryMainProcess
 	slog.Info(fmt.Sprintf("sessionId [%v]: domain [%v] branch [%v] hitCount [%v] isExceed [%v]",
