@@ -276,14 +276,14 @@ func (matcher *MissMatchMatcher) Match(ctx context.Context, matchContext *Contex
 		return false, fmt.Errorf("MissMatchMatcher get last matched path failed: %w", err)
 	}
 	processHelper := process.NewHelper(matchContext.Process)
-	domain, err := processHelper.GetDomain(matchContext.Session.CurrentDomain)
-	if err != nil {
-		return true, fmt.Errorf("MissMatchMatcher get current domain [%v] failed: %w",
-			matchContext.Session.CurrentDomain, err)
-	}
 	matchedDomain, err := processHelper.GetDomain(lastMatchedPath.Domain)
 	if err != nil {
 		return true, fmt.Errorf("MissMatchMatcher get last matched domain [%v] failed: %w", lastMatchedPath.Domain, err)
+	}
+	domain, err := processHelper.GetDomain(matchContext.Session.CurrentMainProcessDomain)
+	if err != nil {
+		return true, fmt.Errorf("MissMatchMatcher get current mainProcessDomain [%v] failed: %w",
+			matchContext.Session.CurrentDomain, err)
 	}
 	if matchedDomain.Type == process.DomainTypeDialogMissMatch {
 		jumpTo := ""
