@@ -1,28 +1,45 @@
 package session
 
-import "github.com/google/uuid"
+import (
+	"github.com/google/uuid"
+	"github.com/zhongxic/sellbot/internal/service/process"
+	"slices"
+	"time"
+)
 
-type StatPath struct {
+type HitPathView struct {
+	Domain         string
+	Branch         string
+	DomainType     process.DomainType
+	DomainCategory process.DomainCategory
+	BranchSemantic process.BranchSemantic
 }
 
+// Session is current session
+//
+// Notice that CurrentMainProcessDomain is located main process domain in current interaction before session update,
+// PreviousMainProcessDomain is located main process domain in current interaction after session updated.
+// Process matching should use CurrentMainProcessDomain, and intention analyze should use PreviousMainProcessDomain because
+// session has been updated.
 type Session struct {
-	Id                       string
-	ProcessId                string
-	Variables                map[string]string
-	Test                     bool
-	CurrentDomain            string
-	CurrentBranch            string
-	CurrentMainProcessDomain string
-	LastMainProcessBranch    string
-	ConversationCount        int
-	DomainBranchHitCount     map[string]map[string]int
-}
-
-func New() *Session {
-	return &Session{
-		Id:                   uuid.New().String(),
-		DomainBranchHitCount: make(map[string]map[string]int),
-	}
+	Id                        string
+	ProcessId                 string
+	Variables                 map[string]string
+	Test                      bool
+	CurrentDomain             string
+	CurrentBranch             string
+	CurrentMainProcessDomain  string
+	PreviousMainProcessDomain string
+	ConversationCount         int
+	PositiveCount             int
+	NegativeCount             int
+	RefusedCount              int
+	BusinessQACount           int
+	SilenceCount              int
+	MissMatchCount            int
+	CallAnswerTime            time.Time
+	PassedDomains             []string
+	DomainBranchHitCount      map[string]map[string]int
 }
 
 func (s *Session) GetDomainBranchHitCount(domainName, branchName string) int {
@@ -36,6 +53,138 @@ func (s *Session) GetDomainBranchHitCount(domainName, branchName string) int {
 	return branchHitCount[branchName]
 }
 
-func (s *Session) UpdateStat(statPath []StatPath) {
-	// TODO impl-me update session stat
+func (s *Session) UpdateStat(statPaths []HitPathView) {
+	if len(statPaths) == 0 {
+		return
+	}
+	if isHitPositiveBranch(statPaths) {
+		s.PositiveCount++
+	}
+	if isHitNegativeDomainOrBranch(statPaths) {
+		s.NegativeCount++
+	}
+	if isHitRefusedDomain(statPaths) {
+		s.RefusedCount++
+	}
+	if isHitBusinessQA(statPaths) {
+		s.BusinessQACount++
+	}
+	if isHitSilenceDomain(statPaths) {
+		s.SilenceCount++
+	}
+	if isHitMissMatchDomain(statPaths) {
+		s.MissMatchCount++
+	}
+	s.ConversationCount++
+	lastMatchedPath := statPaths[len(statPaths)]
+	s.CurrentDomain = lastMatchedPath.Domain
+	s.CurrentBranch = lastMatchedPath.Branch
+	if lastMatchedPath.DomainCategory == process.DomainCategoryMainProcess {
+		s.PreviousMainProcessDomain = s.CurrentMainProcessDomain
+		s.CurrentMainProcessDomain = lastMatchedPath.Domain
+	}
+	for _, path := range statPaths {
+		s.PassedDomains = append(s.PassedDomains, path.Domain)
+		branchHitCount := computeIfAbsent[string, map[string]int](s.DomainBranchHitCount, path.Domain,
+			func(key string) map[string]int {
+				return make(map[string]int)
+			})
+		branchHitCount[path.Branch] = branchHitCount[path.Branch] + 1
+	}
+}
+
+func computeIfAbsent[K comparable, V any](m map[K]V, key K, compute func(key K) V) (value V) {
+	if m == nil {
+		return
+	}
+	value, ok := m[key]
+	if !ok {
+		value = compute(key)
+		m[key] = value
+	}
+	return
+}
+
+func isHitPositiveBranch(statPaths []HitPathView) bool {
+	if len(statPaths) == 0 {
+		return false
+	}
+	for _, path := range statPaths {
+		if path.BranchSemantic == process.BranchSemanticPositive {
+			return true
+		}
+	}
+	return false
+}
+
+func isHitNegativeDomainOrBranch(statPaths []HitPathView) bool {
+	if len(statPaths) == 0 {
+		return false
+	}
+	for _, path := range statPaths {
+		isNegative := slices.Contains(process.NegativeDomainTypes, path.DomainType) ||
+			path.BranchSemantic == process.BranchSemanticNegative
+		if isNegative {
+			return true
+		}
+	}
+	return false
+}
+
+func isHitRefusedDomain(statPaths []HitPathView) bool {
+	if len(statPaths) == 0 {
+		return false
+	}
+	for _, path := range statPaths {
+		if path.DomainCategory == process.DomainCategoryCommonDialog &&
+			path.DomainType == process.DomainTypeDialogRefused {
+			return true
+		}
+	}
+	return false
+}
+
+func isHitBusinessQA(statPaths []HitPathView) bool {
+	if len(statPaths) == 0 {
+		return false
+	}
+	for _, path := range statPaths {
+		if path.DomainCategory == process.DomainCategoryBusinessQA {
+			return true
+		}
+	}
+	return false
+}
+
+func isHitSilenceDomain(statPaths []HitPathView) bool {
+	if len(statPaths) == 0 {
+		return false
+	}
+	for _, path := range statPaths {
+		if path.DomainCategory == process.DomainCategorySilence {
+			return true
+		}
+	}
+	return false
+}
+
+func isHitMissMatchDomain(statPaths []HitPathView) bool {
+	if len(statPaths) == 0 {
+		return false
+	}
+	for _, path := range statPaths {
+		if path.DomainCategory == process.DomainCategoryCommonDialog &&
+			path.DomainType == process.DomainTypeDialogMissMatch {
+			return true
+		}
+	}
+	return false
+}
+
+func New() *Session {
+	return &Session{
+		Id:                   uuid.New().String(),
+		DomainBranchHitCount: make(map[string]map[string]int),
+		PassedDomains:        make([]string, 0),
+	}
 }
