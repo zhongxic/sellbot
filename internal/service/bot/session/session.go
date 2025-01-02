@@ -76,7 +76,7 @@ func (s *Session) UpdateStat(hitPaths []HitPathView) {
 		s.MissMatchCount++
 	}
 	s.ConversationCount++
-	lastMatchedPath := hitPaths[len(hitPaths)]
+	lastMatchedPath := hitPaths[len(hitPaths)-1]
 	s.CurrentDomain = lastMatchedPath.Domain
 	s.CurrentBranch = lastMatchedPath.Branch
 	if lastMatchedPath.DomainCategory == process.DomainCategoryMainProcess {
