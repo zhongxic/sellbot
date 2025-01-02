@@ -53,8 +53,10 @@ func (s *serviceImpl) Chat(ctx context.Context, chatDTO *ChatDTO) (*InteractiveR
 	if err != nil {
 		return nil, fmt.Errorf("make answer failed: %w", err)
 	}
+	previousMainProcessDomain := currentSession.LastMainProcessDomain
 	matchContext.UpdateSessionStat()
 	intentionRules := analyzeIntention(currentSession, loadedProcess)
+	reloadKeywords(tokenizer, loadedProcess, previousMainProcessDomain, currentSession.LastMainProcessDomain)
 	s.storeSession(currentSession.Id, currentSession)
 	s.storeTokenizer(currentSession.Id, tokenizer)
 	return makeRespond(matchContext, answerDTO, intentionRules), nil
@@ -78,4 +80,9 @@ func cutAll(ctx context.Context, tokenizer *jieba.Tokenizer, stopWords []string,
 	slog.Info(fmt.Sprintf("cut sentence [%v] in to words [%v] after stop words removed", sentence, cuts),
 		"traceId", ctx.Value(traceid.TraceId{}))
 	return cuts
+}
+
+func reloadKeywords(tokenizer *jieba.Tokenizer, loadedProcess *process.Process,
+	previousMainProcessDomain, lastMainProcessDomain string) {
+	// TODO reload keywords
 }
