@@ -6,16 +6,16 @@ type StatPath struct {
 }
 
 type Session struct {
-	Id                    string
-	ProcessId             string
-	Variables             map[string]string
-	Test                  bool
-	CurrentDomain         string
-	CurrentBranch         string
-	LastMainProcessDomain string
-	LastMainProcessBranch string
-	ConversationCount     int
-	DomainBranchHitCount  map[string]map[string]int
+	Id                       string
+	ProcessId                string
+	Variables                map[string]string
+	Test                     bool
+	CurrentDomain            string
+	CurrentBranch            string
+	CurrentMainProcessDomain string
+	LastMainProcessBranch    string
+	ConversationCount        int
+	DomainBranchHitCount     map[string]map[string]int
 }
 
 func New() *Session {

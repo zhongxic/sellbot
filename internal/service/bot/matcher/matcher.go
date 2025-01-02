@@ -156,10 +156,10 @@ type TextMatcher struct {
 
 func (matcher *TextMatcher) Match(ctx context.Context, matchContext *Context) (bool, error) {
 	processHelper := process.NewHelper(matchContext.Process)
-	matchPaths, err := processHelper.GetMergeOrderedMatchPaths(matchContext.Session.LastMainProcessDomain)
+	matchPaths, err := processHelper.GetMergeOrderedMatchPaths(matchContext.Session.CurrentMainProcessDomain)
 	if err != nil {
 		return true, fmt.Errorf("TextMatcher get domain [%v] merge ordered match paths failed: %w",
-			matchContext.Session.LastMainProcessDomain, err)
+			matchContext.Session.CurrentMainProcessDomain, err)
 	}
 	maxSimilarity := similarity{}
 	bestMatchedPath := process.MatchPath{}
@@ -170,9 +170,9 @@ func (matcher *TextMatcher) Match(ctx context.Context, matchContext *Context) (b
 				matchPath.DomainName, matchPath.BranchName, err)
 		}
 		similarity := score(ctx, matchContext.Sentence, matchContext.Segments, branch.Keywords)
-		slog.Info(fmt.Sprintf("sessionId [%v]: TextMatcher last mainProcessDomain [%v] "+
+		slog.Info(fmt.Sprintf("sessionId [%v]: TextMatcher current mainProcessDomain [%v] "+
 			"detect domain [%v] branch [%v] similarity score [%v] isMatched [%v]",
-			matchContext.Session.Id, matchContext.Session.LastMainProcessDomain,
+			matchContext.Session.Id, matchContext.Session.CurrentMainProcessDomain,
 			matchPath.DomainName, matchPath.BranchName, similarity.score, similarity.isMatched()),
 			slog.Any("traceId", ctx.Value(traceid.TraceId{})))
 
@@ -182,9 +182,9 @@ func (matcher *TextMatcher) Match(ctx context.Context, matchContext *Context) (b
 		}
 	}
 	if maxSimilarity.isMatched() {
-		slog.Info(fmt.Sprintf("sessionId [%v]: TextMatcher last mainProcessDomain [%v] "+
+		slog.Info(fmt.Sprintf("sessionId [%v]: TextMatcher current mainProcessDomain [%v] "+
 			"detect best matched domain [%v] branch [%v]",
-			matchContext.Session.Id, matchContext.Session.LastMainProcessDomain,
+			matchContext.Session.Id, matchContext.Session.CurrentMainProcessDomain,
 			bestMatchedPath.DomainName, bestMatchedPath.BranchName),
 			slog.Any("traceId", ctx.Value(traceid.TraceId{})))
 		matchContext.AddMatchedPath(MatchedPath{
@@ -193,16 +193,16 @@ func (matcher *TextMatcher) Match(ctx context.Context, matchContext *Context) (b
 			MatchedWords: maxSimilarity.matches,
 		})
 	} else {
-		slog.Info(fmt.Sprintf("sessionId [%v]: TextMatcher lastMainProcessDomain [%v] detect miss match",
-			matchContext.Session.Id, matchContext.Session.LastMainProcessDomain),
+		slog.Info(fmt.Sprintf("sessionId [%v]: TextMatcher current MainProcessDomain [%v] detect miss match",
+			matchContext.Session.Id, matchContext.Session.CurrentMainProcessDomain),
 			slog.Any("traceId", ctx.Value(traceid.TraceId{})))
 		domain, err := processHelper.GetCommonDialog(process.DomainTypeDialogMissMatch)
 		if err != nil {
 			return true, fmt.Errorf("TextMatcher get common dialog [%v] failed: %w", process.DomainTypeDialogMissMatch, err)
 		}
 		matchedPath := MatchedPath{Domain: domain.Name, Branch: process.BranchNameEnter}
-		slog.Info(fmt.Sprintf("sessionId [%v]: TextMatcher lastMainProcessDomain [%v] matched domain [%v] branch [%v]",
-			matchContext.Session.Id, matchContext.Session.LastMainProcessDomain, matchedPath.Domain, matchedPath.Branch),
+		slog.Info(fmt.Sprintf("sessionId [%v]: TextMatcher current MainProcessDomain [%v] matched domain [%v] branch [%v]",
+			matchContext.Session.Id, matchContext.Session.CurrentMainProcessDomain, matchedPath.Domain, matchedPath.Branch),
 			slog.Any("traceId", ctx.Value(traceid.TraceId{})))
 		matchContext.AddMatchedPath(matchedPath)
 	}
