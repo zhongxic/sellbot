@@ -2,44 +2,61 @@ package process
 
 import "time"
 
-// Domain categories
+// DomainCategory is category of Domain.
+type DomainCategory string
+
 const (
-	DomainCategoryMainProcess  = "main_process"
-	DomainCategoryBusinessQA   = "business_qa"
-	DomainCategoryCommonDialog = "common_dialog"
-	DomainCategorySilence      = "silence"
+	DomainCategoryMainProcess  DomainCategory = "main_process"
+	DomainCategoryBusinessQA   DomainCategory = "business_qa"
+	DomainCategoryCommonDialog DomainCategory = "common_dialog"
+	DomainCategorySilence      DomainCategory = "silence"
 )
 
-// Domain types
+// DomainType is type of Domain.
+type DomainType string
+
 const (
-	DomainTypeStart               = "start"
-	DomainTypeNormal              = "normal"
-	DomainTypeEnd                 = "end"
-	DomainTypeAgent               = "agent"
-	DomainTypeDialogEndFail       = "end_fail"
-	DomainTypeDialogEndExceed     = "end_exceed"
-	DomainTypeDialogEndException  = "end_exception"
-	DomainTypeDialogClarification = "clarification"
-	DomainTypeDialogMissMatch     = "miss_match"
-	DomainTypeDialogRefuse        = "refuse"
+	DomainTypeStart               DomainType = "start"
+	DomainTypeNormal              DomainType = "normal"
+	DomainTypeEnd                 DomainType = "end"
+	DomainTypeAgent               DomainType = "agent"
+	DomainTypeDialogConfused      DomainType = "confused"
+	DomainTypeDialogRefused       DomainType = "refused"
+	DomainTypeDialogMissMatch     DomainType = "miss_match"
+	DomainTypeDialogEndFail       DomainType = "end_fail"
+	DomainTypeDialogEndBusy       DomainType = "end_busy"
+	DomainTypeDialogEndExceed     DomainType = "end_exceed"
+	DomainTypeDialogEndMissMatch  DomainType = "end_miss_match"
+	DomainTypeDialogEndException  DomainType = "end_exception"
+	DomainTypeDialogCompliant     DomainType = "compliant"
+	DomainTypeDialogPhoneFilter   DomainType = "phone_filter"
+	DomainTypeDialogClarification DomainType = "clarification"
 )
 
-// Branch semantics
+// BranchSemantic is semantics of Branch.
+type BranchSemantic string
+
 const (
-	BranchSemanticPositive = "positive"
-	BranchSemanticNegative = "negative"
-	BranchSemanticSpecial  = "special"
+	BranchSemanticPositive BranchSemantic = "positive"
+	BranchSemanticNegative BranchSemantic = "negative"
+	BranchSemanticSpecial  BranchSemantic = "special"
 )
 
-// Specific domain and branch names
+// Specific Domain and Branch names.
 const (
 	DomainNameRepeat = "repeat"
 	BranchNameEnter  = "enter"
 )
 
-// Interruption types
+// Interruption is type of interruption.
+type Interruption int
+
+func (i Interruption) Value() int {
+	return int(i)
+}
+
 const (
-	InterruptionTypeNone = iota
+	InterruptionTypeNone Interruption = iota
 	InterruptionTypeForce
 	InterruptionTypeQA
 	InterruptionTypeClarification
@@ -60,8 +77,8 @@ type Process struct {
 
 type Domain struct {
 	Name            string            `json:"name"`
-	Type            string            `json:"type"`
-	Category        string            `json:"category"`
+	Type            DomainType        `json:"type"`
+	Category        DomainCategory    `json:"category"`
 	Branches        map[string]Branch `json:"branches"`
 	MatchOrders     []MatchPath       `json:"matchOrders"`
 	IgnoreConfig    IgnoreConfig      `json:"ignoreConfig"`
@@ -69,11 +86,12 @@ type Domain struct {
 }
 
 type Branch struct {
-	Name             string     `json:"name"`
-	Keywords         Keywords   `json:"keywords"`
-	Responses        []Response `json:"responses"`
-	EnableExceedJump bool       `json:"enableExceedJump"`
-	Next             string     `json:"next"`
+	Name             string         `json:"name"`
+	Semantic         BranchSemantic `json:"semantic"`
+	Keywords         Keywords       `json:"keywords"`
+	Responses        []Response     `json:"responses"`
+	EnableExceedJump bool           `json:"enableExceedJump"`
+	Next             string         `json:"next"`
 }
 
 type Keywords struct {

@@ -57,7 +57,7 @@ type ForceInterruptionMatcher struct {
 }
 
 func (matcher *ForceInterruptionMatcher) Match(ctx context.Context, matchContext *Context) (bool, error) {
-	if matchContext.Interruption == process.InterruptionTypeForce {
+	if matchContext.Interruption == process.InterruptionTypeForce.Value() {
 		slog.Info(fmt.Sprintf("sessionId [%v]: ForceInterruptionMatcher detect force interruption", matchContext.Session.Id),
 			slog.Any("traceId", ctx.Value(traceid.TraceId{})))
 		if matchContext.Process.Options.ForceInterruptedJumpTo == "" {
@@ -80,7 +80,7 @@ type ClarificationInterruptionMatcher struct {
 }
 
 func (matcher *ClarificationInterruptionMatcher) Match(ctx context.Context, matchContext *Context) (bool, error) {
-	if matchContext.Interruption == process.InterruptionTypeClarification {
+	if matchContext.Interruption == process.InterruptionTypeClarification.Value() {
 		slog.Info(fmt.Sprintf("sessionId [%v]: ClarificationInterruptionMatcher detect clarification interruption",
 			matchContext.Session.Id),
 			slog.Any("traceId", ctx.Value(traceid.TraceId{})))
@@ -228,7 +228,7 @@ func (matcher *PostIgnoreMatcher) Match(ctx context.Context, matchContext *Conte
 		return true, fmt.Errorf("PostIgnoreMatcher get last matched domain [%v] failed: %w", lastMatchedPath.Domain, err)
 	}
 	ignoreAnyExceptRefuse := domain.IgnoreConfig.IgnoreAnyExceptRefuse &&
-		matchedDomain.Type != process.DomainTypeDialogRefuse
+		matchedDomain.Type != process.DomainTypeDialogRefused
 	nextDomain := ""
 	if matchedDomain.Category == process.DomainCategoryMainProcess {
 		branch, err := processHelper.GetBranch(lastMatchedPath.Domain, lastMatchedPath.Branch)

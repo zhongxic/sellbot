@@ -46,19 +46,19 @@ func (h *Helper) GetSilenceDomain() (Domain, error) {
 	return Domain{}, nil
 }
 
-func (h *Helper) GetCommonDialog(domainDialogType string) (Domain, error) {
+func (h *Helper) GetCommonDialog(dialogType DomainType) (Domain, error) {
 	if len(h.process.Domains) == 0 {
 		return Domain{}, fmt.Errorf("process [%v]: empty domains", h.process.Id)
 	}
 	domains := make([]Domain, 0)
 	for _, domain := range h.process.Domains {
-		if domain.Category == DomainCategoryCommonDialog && domain.Type == domainDialogType {
+		if domain.Category == DomainCategoryCommonDialog && domain.Type == dialogType {
 			domains = append(domains, domain)
 		}
 	}
 	if len(domains) != 1 {
 		return Domain{}, fmt.Errorf("process [%v]: expected one [%v] common dialog but found [%d]",
-			h.process.Id, domainDialogType, len(domains))
+			h.process.Id, dialogType, len(domains))
 	}
 	return domains[0], nil
 }
@@ -78,7 +78,7 @@ func (h *Helper) GetBranch(domainName, branchName string) (Branch, error) {
 	return branch, nil
 }
 
-func (h *Helper) GetDomainSemanticBranch(domainName, semantic string) (Branch, error) {
+func (h *Helper) GetDomainSemanticBranch(domainName string, semantic BranchSemantic) (Branch, error) {
 	// TODO impl-me get domain semantic branch
 	return Branch{}, nil
 }
