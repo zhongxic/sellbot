@@ -44,7 +44,9 @@ func (s *serviceImpl) Prologue(ctx context.Context, prologueDTO *PrologueDTO) (*
 	if err != nil {
 		return nil, fmt.Errorf("make answer failed: %w", err)
 	}
-	matchContext.UpdateSessionStat()
+	if err := matchContext.UpdateSessionStat(); err != nil {
+		return nil, fmt.Errorf("update session stat failed: %w", err)
+	}
 	intentionRules := []process.IntentionRule{processHelper.GetDefaultIntentionRule()}
 	s.storeSession(currentSession.Id, currentSession)
 	s.storeTokenizer(currentSession.Id, tokenizer)

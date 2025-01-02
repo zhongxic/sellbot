@@ -53,7 +53,9 @@ func (s *serviceImpl) Chat(ctx context.Context, chatDTO *ChatDTO) (*InteractiveR
 	if err != nil {
 		return nil, fmt.Errorf("make answer failed: %w", err)
 	}
-	matchContext.UpdateSessionStat()
+	if err := matchContext.UpdateSessionStat(); err != nil {
+		return nil, fmt.Errorf("update session stat failed: %w", err)
+	}
 	intentionRules := analyzeIntention(currentSession, loadedProcess)
 	reloadKeywords(tokenizer, loadedProcess, currentSession.PreviousMainProcessDomain, currentSession.CurrentMainProcessDomain)
 	s.storeSession(currentSession.Id, currentSession)
