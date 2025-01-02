@@ -33,6 +33,14 @@ const (
 	DomainTypeDialogClarification DomainType = "clarification"
 )
 
+// NegativeDomainTypes are common dialogs types those have negative semantic.
+var NegativeDomainTypes = []DomainType{
+	DomainTypeDialogRefused,
+	DomainTypeDialogEndBusy,
+	DomainTypeDialogCompliant,
+	DomainTypeDialogPhoneFilter,
+}
+
 // BranchSemantic is semantics of Branch.
 type BranchSemantic string
 
