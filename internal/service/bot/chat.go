@@ -29,7 +29,6 @@ func (s *serviceImpl) Chat(ctx context.Context, chatDTO *ChatDTO) (*InteractiveR
 	if err != nil {
 		return nil, fmt.Errorf("load process failed: %w", err)
 	}
-	processHelper := process.NewHelper(loadedProcess)
 	matchContext := matcher.NewContext(currentSession, loadedProcess)
 	matchContext.Sentence = chatDTO.Sentence
 	matchContext.Segments = cutAll(ctx, tokenizer, s.stopWords, chatDTO.Sentence)
@@ -39,6 +38,7 @@ func (s *serviceImpl) Chat(ctx context.Context, chatDTO *ChatDTO) (*InteractiveR
 	if err != nil {
 		slog.Error(fmt.Sprintf("sessionId [%v]: process matching failed: %v", currentSession.Id, err),
 			slog.Any("traceId", traceid.TraceId{}))
+		processHelper := process.NewHelper(loadedProcess)
 		domain, err := processHelper.GetCommonDialog(process.DomainTypeDialogEndException)
 		if err != nil {
 			return nil, fmt.Errorf("get common dialog [%v] failed: %w", process.DomainTypeDialogEndException, err)
@@ -54,8 +54,7 @@ func (s *serviceImpl) Chat(ctx context.Context, chatDTO *ChatDTO) (*InteractiveR
 		return nil, fmt.Errorf("make answer failed: %w", err)
 	}
 	matchContext.UpdateSessionStat()
-	// TODO intention analysis
-	intentionRules := make([]process.IntentionRule, 0)
+	intentionRules := analyzeIntention(currentSession, loadedProcess)
 	s.storeSession(currentSession.Id, currentSession)
 	s.storeTokenizer(currentSession.Id, tokenizer)
 	return makeRespond(matchContext, answerDTO, intentionRules), nil
