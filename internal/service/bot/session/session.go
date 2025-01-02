@@ -53,37 +53,37 @@ func (s *Session) GetDomainBranchHitCount(domainName, branchName string) int {
 	return branchHitCount[branchName]
 }
 
-func (s *Session) UpdateStat(statPaths []HitPathView) {
-	if len(statPaths) == 0 {
+func (s *Session) UpdateStat(hitPaths []HitPathView) {
+	if len(hitPaths) == 0 {
 		return
 	}
-	if isHitPositiveBranch(statPaths) {
+	if isHitPositiveBranch(hitPaths) {
 		s.PositiveCount++
 	}
-	if isHitNegativeDomainOrBranch(statPaths) {
+	if isHitNegativeDomainOrBranch(hitPaths) {
 		s.NegativeCount++
 	}
-	if isHitRefusedDomain(statPaths) {
+	if isHitRefusedDomain(hitPaths) {
 		s.RefusedCount++
 	}
-	if isHitBusinessQA(statPaths) {
+	if isHitBusinessQA(hitPaths) {
 		s.BusinessQACount++
 	}
-	if isHitSilenceDomain(statPaths) {
+	if isHitSilenceDomain(hitPaths) {
 		s.SilenceCount++
 	}
-	if isHitMissMatchDomain(statPaths) {
+	if isHitMissMatchDomain(hitPaths) {
 		s.MissMatchCount++
 	}
 	s.ConversationCount++
-	lastMatchedPath := statPaths[len(statPaths)]
+	lastMatchedPath := hitPaths[len(hitPaths)]
 	s.CurrentDomain = lastMatchedPath.Domain
 	s.CurrentBranch = lastMatchedPath.Branch
 	if lastMatchedPath.DomainCategory == process.DomainCategoryMainProcess {
 		s.PreviousMainProcessDomain = s.CurrentMainProcessDomain
 		s.CurrentMainProcessDomain = lastMatchedPath.Domain
 	}
-	for _, path := range statPaths {
+	for _, path := range hitPaths {
 		s.PassedDomains = append(s.PassedDomains, path.Domain)
 		branchHitCount := computeIfAbsent[string, map[string]int](s.DomainBranchHitCount, path.Domain,
 			func(key string) map[string]int {
