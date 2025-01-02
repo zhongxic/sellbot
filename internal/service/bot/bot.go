@@ -74,6 +74,7 @@ func (s *serviceImpl) retrieveSession(sessionId string) (*session.Session, error
 func (s *serviceImpl) retrieveTokenizer(sessionId string) (*jieba.Tokenizer, error) {
 	tokenizer, ok := s.tokenizerCache.Get(sessionId)
 	if !ok {
+		// TODO reload tokenizer
 		return nil, fmt.Errorf("sessionId [%v]: tokenizer not found", sessionId)
 	}
 	return tokenizer, nil
