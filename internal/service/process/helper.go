@@ -1,6 +1,10 @@
 package process
 
-import "fmt"
+import (
+	"fmt"
+	"slices"
+	"sort"
+)
 
 const (
 	DefaultIntentionName   = "default"
@@ -30,9 +34,11 @@ func (h *Helper) GetDomain(domainName string) (Domain, error) {
 
 func (h *Helper) GetStartDomain() (Domain, error) {
 	domains := make([]Domain, 0)
-	for _, domain := range h.process.Domains {
-		if domain.Category == DomainCategoryMainProcess && domain.Type == DomainTypeStart {
-			domains = append(domains, domain)
+	if len(h.process.Domains) != 0 {
+		for _, domain := range h.process.Domains {
+			if domain.Category == DomainCategoryMainProcess && domain.Type == DomainTypeStart {
+				domains = append(domains, domain)
+			}
 		}
 	}
 	if len(domains) != 1 {
@@ -42,18 +48,27 @@ func (h *Helper) GetStartDomain() (Domain, error) {
 }
 
 func (h *Helper) GetSilenceDomain() (Domain, error) {
-	// TODO impl-me get silence domain
-	return Domain{}, nil
+	domains := make([]Domain, 0)
+	if len(h.process.Domains) != 0 {
+		for _, domain := range h.process.Domains {
+			if domain.Category == DomainCategorySilence && domain.Type == DomainTypeNormal {
+				domains = append(domains, domain)
+			}
+		}
+	}
+	if len(domains) != 1 {
+		return Domain{}, fmt.Errorf("process [%v]: expected one silence domain but found [%v]", h.process.Id, len(domains))
+	}
+	return domains[0], nil
 }
 
 func (h *Helper) GetCommonDialog(dialogType DomainType) (Domain, error) {
-	if len(h.process.Domains) == 0 {
-		return Domain{}, fmt.Errorf("process [%v]: empty domains", h.process.Id)
-	}
 	domains := make([]Domain, 0)
-	for _, domain := range h.process.Domains {
-		if domain.Category == DomainCategoryCommonDialog && domain.Type == dialogType {
-			domains = append(domains, domain)
+	if len(h.process.Domains) != 0 {
+		for _, domain := range h.process.Domains {
+			if domain.Category == DomainCategoryCommonDialog && domain.Type == dialogType {
+				domains = append(domains, domain)
+			}
 		}
 	}
 	if len(domains) != 1 {
@@ -63,24 +78,58 @@ func (h *Helper) GetCommonDialog(dialogType DomainType) (Domain, error) {
 	return domains[0], nil
 }
 
+func (h *Helper) GetBusinessQADomain() (Domain, error) {
+	domains := make([]Domain, 0)
+	if len(h.process.Domains) != 0 {
+		for _, domain := range h.process.Domains {
+			if domain.Category == DomainCategoryBusinessQA && domain.Type == DomainTypeNormal {
+				domains = append(domains, domain)
+			}
+		}
+	}
+	if len(domains) != 1 {
+		return Domain{}, fmt.Errorf("process [%v]: expected one business QA domain but found [%v]", h.process.Id, domains)
+	}
+	return domains[0], nil
+}
+
 func (h *Helper) GetBranch(domainName, branchName string) (Branch, error) {
 	if len(h.process.Domains) == 0 {
-		return Branch{}, fmt.Errorf("process [%v]: empty domains", h.process.Id)
+		return Branch{}, fmt.Errorf("process [%v]: get branch failed due to empty domains", h.process.Id)
 	}
 	domain, ok := h.process.Domains[domainName]
 	if !ok {
-		return Branch{}, fmt.Errorf("process [%v]: domain [%s] not found", h.process.Id, domainName)
+		return Branch{}, fmt.Errorf("process [%v]: get branch failed due to domain [%s] not found", h.process.Id, domainName)
 	}
 	branch, ok := domain.Branches[branchName]
 	if !ok {
-		return Branch{}, fmt.Errorf("process [%v]: branch [%s] not found", h.process.Id, branchName)
+		return Branch{}, fmt.Errorf("process [%v]: get branch failed due to branch [%s] not found in domain [%v]",
+			h.process.Id, branchName, domainName)
 	}
 	return branch, nil
 }
 
 func (h *Helper) GetDomainSemanticBranch(domainName string, semantic BranchSemantic) (Branch, error) {
-	// TODO impl-me get domain semantic branch
-	return Branch{}, nil
+	if len(h.process.Domains) == 0 {
+		return Branch{}, fmt.Errorf("process [%v]: get semantic branch failed due to empty domains", h.process.Id)
+	}
+	domain, ok := h.process.Domains[domainName]
+	if !ok {
+		return Branch{}, fmt.Errorf("process [%v]: get semantic branch failed due to domain [%s] not found", h.process.Id, domainName)
+	}
+	branches := make([]Branch, 0)
+	if len(domain.Branches) != 0 {
+		for _, branch := range domain.Branches {
+			if branch.Semantic == semantic {
+				branches = append(branches, branch)
+			}
+		}
+	}
+	if len(branches) != 1 {
+		return Branch{}, fmt.Errorf("process [%v]: expected one [%v] semantic branch in domain [%v] but found [%v]",
+			h.process.Id, semantic, domainName, len(branches))
+	}
+	return branches[0], nil
 }
 
 func (h *Helper) GetDomainKeywords(domainName string) []string {
@@ -128,14 +177,84 @@ func (h *Helper) GetBranchKeywords(domainName, branchName string) []string {
 	return keywords
 }
 
-func (h *Helper) GetGlobalKeywords() []string {
-	// TODO impl-me load global keywords
-	return make([]string, 0)
+func (h *Helper) GetGlobalKeywords() ([]string, error) {
+	keywords := make([]string, 0)
+	for _, dialog := range DomainTypeDialogMatchOrders {
+		domain, err := h.GetCommonDialog(dialog)
+		if err != nil {
+			return nil, fmt.Errorf("process [%v]: get global keywords failed due to get common dialog: %v", h.process.Id, err)
+		}
+		keywords = append(keywords, h.GetDomainKeywords(domain.Name)...)
+	}
+	domain, err := h.GetBusinessQADomain()
+	if err != nil {
+		return nil, fmt.Errorf("process [%v]: get global keywords failed due to get business QA: %v", h.process.Id, err)
+	}
+	keywords = append(keywords, h.GetDomainKeywords(domain.Name)...)
+	return keywords, nil
 }
 
 func (h *Helper) GetMergeOrderedMatchPaths(domainName string) ([]MatchPath, error) {
-	// TODO impl-me get merged match order
-	return make([]MatchPath, 0), nil
+	matchPaths := make([]MatchPath, 0)
+	domain, err := h.GetDomain(domainName)
+	if err != nil {
+		return nil, fmt.Errorf("process [%v]: get domain [%v] match paths failed due to domain: %v",
+			h.process.Id, domainName, err)
+	}
+	if len(domain.MatchOrders) > 0 {
+		// user defined domain matcher order has the highest priority.
+		matchPaths = append(matchPaths, domain.MatchOrders...)
+	}
+	// then common dialogs.
+	for _, dialogType := range DomainTypeDialogMatchOrders {
+		dialog, err := h.GetCommonDialog(dialogType)
+		if err != nil {
+			return nil, fmt.Errorf("process [%v]: get domain [%v] match paths failed due to dialog: %v",
+				h.process.Id, domainName, err)
+		}
+		appendMatchPaths(matchPaths, dialog)
+	}
+	// next is others branches in this domain.
+	appendMatchPaths(matchPaths, domain)
+	// branches in business qa have the lowest priority.
+	qaDomain, err := h.GetBusinessQADomain()
+	if err != nil {
+		return nil, fmt.Errorf("process [%v]: get domain [%v] match paths failed due to business QA: %v",
+			h.process.Id, domainName, err)
+	}
+	appendMatchPaths(matchPaths, qaDomain)
+	return matchPaths, nil
+}
+
+type branchSlice []Branch
+
+func (s branchSlice) Len() int {
+	return len(s)
+}
+
+func (s branchSlice) Less(i, j int) bool {
+	return s[i].Order < s[j].Order
+}
+
+func (s branchSlice) Swap(i, j int) {
+	s[i], s[j] = s[j], s[i]
+}
+
+func appendMatchPaths(matchPaths []MatchPath, domain Domain) {
+	branches := make(branchSlice, 0)
+	if len(domain.Branches) != 0 {
+		for _, branch := range domain.Branches {
+			branches = append(branches, branch)
+		}
+	}
+	// consider business qa order.
+	sort.Sort(branches)
+	for _, branch := range branches {
+		matchPath := MatchPath{DomainName: domain.Name, BranchName: branch.Name}
+		if !slices.Contains(matchPaths, matchPath) {
+			matchPaths = append(matchPaths, matchPath)
+		}
+	}
 }
 
 func NewHelper(process *Process) *Helper {

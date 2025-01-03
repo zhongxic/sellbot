@@ -79,7 +79,10 @@ func validateVariables(actual map[string]string, expected []process.Variable) er
 }
 
 func loadUserDict(tokenizer *jieba.Tokenizer, processHelper *process.Helper) error {
-	globalKeywords := processHelper.GetGlobalKeywords()
+	globalKeywords, err := processHelper.GetGlobalKeywords()
+	if err != nil {
+		return fmt.Errorf("get global keywords failed: %w", err)
+	}
 	for _, keyword := range globalKeywords {
 		tokenizer.AddWord(keyword, 1)
 	}
