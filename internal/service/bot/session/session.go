@@ -1,10 +1,11 @@
 package session
 
 import (
-	"github.com/google/uuid"
-	"github.com/zhongxic/sellbot/internal/service/process"
 	"slices"
 	"time"
+
+	"github.com/google/uuid"
+	"github.com/zhongxic/sellbot/internal/service/process"
 )
 
 type HitPathView struct {
