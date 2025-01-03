@@ -44,7 +44,7 @@ func makeAnswer(ctx context.Context, matchContext *matcher.Context) (AnswerDTO, 
 			nextDomain = branch.Next
 		}
 		slog.Info(fmt.Sprintf("sessionId [%v]: jump to domain [%v] due to hitCount exceed",
-			matchContext.Session.Id, matchedPath.Branch), traceId)
+			matchContext.Session.Id, nextDomain), traceId)
 		return autoJump(ctx, matchContext, nextDomain)
 	}
 	response := branch.Responses[hitCount%len(branch.Responses)]
