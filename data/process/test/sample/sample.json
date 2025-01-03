@@ -59,6 +59,10 @@
           "enableExceedJump": false,
           "next": "结束（非本人）"
         }
+      },
+      "missMatchConfig": {
+        "longTextMissMatchJumpTo": "来电目的",
+        "shortTextMissMatchJumpTo": ""
       }
     },
     "来电目的": {
@@ -538,6 +542,32 @@
             {
               "text": "好的，您请说。",
               "audio": "14.wav",
+              "enableAutoJump": false,
+              "next": ""
+            }
+          ],
+          "enableExceedJump": false,
+          "next": ""
+        }
+      }
+    },
+    "静音": {
+      "name": "静音",
+      "type": "normal",
+      "category": "silence",
+      "branches": {
+        "enter": {
+          "name": "enter",
+          "semantic": "special",
+          "keywords": {
+            "simple": [],
+            "combination": [],
+            "exact": []
+          },
+          "responses": [
+            {
+              "text": "$0001你好，现在有一个活动非常推荐您了解一下，我将活动短信发送给您，行吗。",
+              "audio": "15.wav",
               "enableAutoJump": false,
               "next": ""
             }
