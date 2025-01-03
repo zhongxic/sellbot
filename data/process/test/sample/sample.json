@@ -10,6 +10,7 @@
       "branches": {
         "enter": {
           "name": "enter",
+          "semantic": "special",
           "keywords": {
             "simple": [],
             "combination": [],
@@ -17,10 +18,324 @@
           },
           "responses": [
             {
-              "text": "你好这里是招商银行你的专属客户经理，请问你是$0001吗",
-              "audio": "1",
+              "text": "你好，这里是招商银行你的专属客户经理，请问你是$0001吗。",
+              "audio": "1.wav",
               "enableAutoJump": false,
               "next": ""
+            }
+          ],
+          "enableExceedJump": false,
+          "next": ""
+        },
+        "身份确认": {
+          "name": "身份确认",
+          "semantic": "positive",
+          "keywords": {
+            "simple": [
+              "是的",
+              "是我",
+              "什么事情"
+            ],
+            "combination": [],
+            "exact": []
+          },
+          "responses": [],
+          "enableExceedJump": false,
+          "next": "来电目的"
+        },
+        "非本人": {
+          "name": "非本人",
+          "semantic": "negative",
+          "keywords": {
+            "simple": [
+              "不是",
+              "不是我",
+              "打错了"
+            ],
+            "combination": [],
+            "exact": []
+          },
+          "responses": [],
+          "enableExceedJump": false,
+          "next": "结束（非本人）"
+        }
+      }
+    },
+    "来电目的": {
+      "name": "来电目的",
+      "type": "normal",
+      "category": "main_process",
+      "branches": {
+        "enter": {
+          "name": "enter",
+          "semantic": "special",
+          "keywords": {
+            "simple": [],
+            "combination": [],
+            "exact": []
+          },
+          "responses": [
+            {
+              "text": "来电是想邀请您参加$0002活动，这个活动只需要您在$0003前完成，就有机会抽取$0004元，稍后我将活动详情发短信给您，您有空登录手机银行参加一下，好吗。",
+              "audio": "2.wav",
+              "enableAutoJump": false,
+              "next": ""
+            }
+          ],
+          "enableExceedJump": false,
+          "next": ""
+        },
+        "同意": {
+          "name": "同意",
+          "semantic": "positive",
+          "keywords": {
+            "simple": [
+              "好的",
+              "可以",
+              "没问题"
+            ],
+            "combination": [],
+            "exact": []
+          },
+          "responses": [],
+          "enableExceedJump": false,
+          "next": "结束（成功）"
+        },
+        "拒绝": {
+          "name": "拒绝",
+          "semantic": "negative",
+          "keywords": {
+            "simple": [
+              "不要",
+              "不需要",
+              "别发短信"
+            ],
+            "combination": [],
+            "exact": []
+          },
+          "responses": [],
+          "enableExceedJump": false,
+          "next": "结束"
+        }
+      }
+    },
+    "结束（非本人）": {
+      "name": "结束（非本人）",
+      "type": "end",
+      "category": "main_process",
+      "branches": {
+        "enter": {
+          "name": "enter",
+          "semantic": "special",
+          "keywords": {
+            "simple": [],
+            "combination": [],
+            "exact": []
+          },
+          "responses": [
+            {
+              "text": "这里是招商银行，有个活动通知，稍后会给他发短信，届时请让他留意一下，感谢您的接听，祝你生活愉快，再见。",
+              "audio": "3.wav",
+              "enableAutoJump": false,
+              "next": ""
+            }
+          ],
+          "enableExceedJump": false,
+          "next": ""
+        }
+      }
+    },
+    "结束（成功）": {
+      "name": "结束（成功）",
+      "type": "end",
+      "category": "main_process",
+      "branches": {
+        "enter": {
+          "name": "enter",
+          "semantic": "special",
+          "keywords": {
+            "simple": [],
+            "combination": [],
+            "exact": []
+          },
+          "responses": [
+            {
+              "text": "好的，稍后把活动参与流程用短信发送给你，请您有空尽快参与，感谢你的接听，祝你用卡愉快，再见。",
+              "audio": "4.wav",
+              "enableAutoJump": false,
+              "next": ""
+            }
+          ],
+          "enableExceedJump": false,
+          "next": ""
+        }
+      }
+    },
+    "结束": {
+      "name": "结束",
+      "type": "end",
+      "category": "main_process",
+      "branches": {
+        "enter": {
+          "name": "enter",
+          "semantic": "special",
+          "keywords": {
+            "simple": [],
+            "combination": [],
+            "exact": []
+          },
+          "responses": [
+            {
+              "text": "那就不打扰您了，祝你生活愉快，再见。",
+              "audio": "5.wav",
+              "enableAutoJump": false,
+              "next": ""
+            }
+          ],
+          "enableExceedJump": false,
+          "next": ""
+        }
+      }
+    },
+    "业务问答": {
+      "name": "业务问答",
+      "type": "normal",
+      "category": "business_qa",
+      "branches": {
+        "问机器人": {
+          "name": "问机器人",
+          "semantic": "special",
+          "order": 1,
+          "keywords": {
+            "simple": [
+              "机器人",
+              "是不是机器人",
+              "不是人"
+            ],
+            "combination": [
+              [
+                "你是",
+                "机器人"
+              ]
+            ],
+            "exact": []
+          },
+          "responses": [
+            {
+              "text": "您真厉害，我是招商银行智能助手，来电是通知你参加活动。",
+              "audio": "6.wav",
+              "enableAutoJump": false,
+              "next": ""
+            }
+          ],
+          "enableExceedJump": true,
+          "next": "来电目的"
+        },
+        "问参与方式": {
+          "name": "问参与方式",
+          "semantic": "special",
+          "order": 2,
+          "keywords": {
+            "simple": [
+              "怎么参与",
+              "参与方式"
+            ],
+            "combination": [],
+            "exact": []
+          },
+          "responses": [
+            {
+              "text": "这个活动在手机银行上参加，稍后我将活动参与短信发送给您，您看可以吗。",
+              "audio": "7.wav",
+              "enableAutoJump": false,
+              "next": ""
+            }
+          ],
+          "enableExceedJump": false,
+          "next": ""
+        }
+      }
+    },
+    "用户不清": {
+      "name": "用户不清",
+      "type": "confused",
+      "category": "common_dialog",
+      "branches": {
+        "enter": {
+          "name": "enter",
+          "semantic": "special",
+          "keywords": {
+            "simple": [
+              "没听清",
+              "再说一下",
+              "再说一遍",
+              "信号不好"
+            ],
+            "combination": [],
+            "exact": []
+          },
+          "responses": [
+          ],
+          "enableExceedJump": false,
+          "next": "repeat"
+        }
+      }
+    },
+    "拒绝": {
+      "name": "拒绝",
+      "type": "refused",
+      "category": "common_dialog",
+      "branches": {
+        "enter": {
+          "name": "enter",
+          "semantic": "special",
+          "keywords": {
+            "simple": [
+              "不参加",
+              "不参与",
+              "别给我打"
+            ],
+            "combination": [],
+            "exact": []
+          },
+          "responses": [
+            {
+              "text": "很抱歉给你带来了不好的服务体验，后续我会不断提升自己的服务能力，那先不打扰您了，感谢您的接听，祝您生活愉快，再见。",
+              "audio": "8.wav",
+              "enableAutoJump": false,
+              "next": ""
+            }
+          ],
+          "enableExceedJump": false,
+          "next": ""
+        }
+      }
+    },
+    "未识别": {
+      "name": "未识别",
+      "type": "miss_match",
+      "category": "common_dialog",
+      "branches": {
+        "enter": {
+          "name": "enter",
+          "semantic": "special",
+          "keywords": {
+            "simple": [],
+            "combination": [],
+            "exact": []
+          },
+          "responses": [
+            {
+              "text": "抱歉我没有理解到你说的话。",
+              "audio": "9.wav",
+              "enableAutoJump": false,
+              "next": ""
+            },
+            {
+              "text": "",
+              "audio": "",
+              "enableAutoJump": true,
+              "next": "来电目的"
             }
           ],
           "enableExceedJump": false,
@@ -35,6 +350,7 @@
       "branches": {
         "enter": {
           "name": "enter",
+          "semantic": "special",
           "keywords": {
             "simple": [],
             "combination": [],
@@ -43,7 +359,185 @@
           "responses": [
             {
               "text": "好的那就不打扰你了，祝你生活愉快再见",
-              "audio": "2",
+              "audio": "10.wav",
+              "enableAutoJump": false,
+              "next": ""
+            }
+          ],
+          "enableExceedJump": false,
+          "next": ""
+        }
+      }
+    },
+    "结束_在忙": {
+      "name": "结束_在忙",
+      "type": "end_busy",
+      "category": "common_dialog",
+      "branches": {
+        "enter": {
+          "name": "enter",
+          "semantic": "special",
+          "keywords": {
+            "simple": [
+              "在忙",
+              "不方便"
+            ],
+            "combination": [],
+            "exact": []
+          },
+          "responses": [
+            {
+              "text": "那你先忙，稍后请留意短信，祝您生活愉快，再见。",
+              "audio": "11.wav",
+              "enableAutoJump": false,
+              "next": ""
+            }
+          ],
+          "enableExceedJump": false,
+          "next": ""
+        }
+      }
+    },
+    "结束_超限": {
+      "name": "结束_超限",
+      "type": "end_exceed",
+      "category": "common_dialog",
+      "branches": {
+        "enter": {
+          "name": "enter",
+          "semantic": "special",
+          "keywords": {
+            "simple": [],
+            "combination": [],
+            "exact": []
+          },
+          "responses": [
+            {
+              "text": "这里就先不占用你的时间了，如有其他疑问，请致电九四个五咨询，感谢您的接听，祝您生活愉快，再见。",
+              "audio": "12.wav",
+              "enableAutoJump": false,
+              "next": ""
+            }
+          ],
+          "enableExceedJump": false,
+          "next": ""
+        }
+      }
+    },
+    "结束_出错": {
+      "name": "结束_出错",
+      "type": "end_exception",
+      "category": "common_dialog",
+      "branches": {
+        "enter": {
+          "name": "enter",
+          "semantic": "special",
+          "keywords": {
+            "simple": [],
+            "combination": [],
+            "exact": []
+          },
+          "responses": [
+            {
+              "text": "不好意思，发生了一些错误。",
+              "audio": "13.wav",
+              "enableAutoJump": false,
+              "next": ""
+            }
+          ],
+          "enableExceedJump": false,
+          "next": ""
+        }
+      }
+    },
+    "结束_未匹配": {
+      "name": "结束_未匹配",
+      "type": "end_miss_match",
+      "category": "common_dialog",
+      "branches": {
+        "enter": {
+          "name": "enter",
+          "semantic": "special",
+          "keywords": {
+            "simple": [],
+            "combination": [],
+            "exact": []
+          },
+          "responses": [
+            {
+              "text": "本次来电是向邀请您参与活动，请您尽快登陆手机银行查看，祝您生活愉快，再见。",
+              "audio": "13.wav",
+              "enableAutoJump": false,
+              "next": ""
+            }
+          ],
+          "enableExceedJump": false,
+          "next": ""
+        }
+      }
+    },
+    "投诉抱怨": {
+      "name": "投诉抱怨",
+      "type": "compliant",
+      "category": "common_dialog",
+      "branches": {
+        "enter": {
+          "name": "enter",
+          "keywords": {
+            "simple": [
+              "投诉",
+              "我要投诉",
+              "投诉你"
+            ],
+            "combination": [],
+            "exact": []
+          },
+          "responses": [
+          ],
+          "enableExceedJump": false,
+          "next": "结束_失败"
+        }
+      }
+    },
+    "号码过滤": {
+      "name": "号码过滤",
+      "type": "phone_filter",
+      "category": "common_dialog",
+      "branches": {
+        "enter": {
+          "name": "enter",
+          "keywords": {
+            "simple": [
+              "被叫用户忙",
+              "客户忙",
+              "结束请挂机"
+            ],
+            "combination": [],
+            "exact": []
+          },
+          "responses": [
+          ],
+          "enableExceedJump": false,
+          "next": "结束_失败"
+        }
+      }
+    },
+    "澄清打断": {
+      "name": "澄清打断",
+      "type": "clarification",
+      "category": "common_dialog",
+      "branches": {
+        "enter": {
+          "name": "enter",
+          "keywords": {
+            "simple": [],
+            "combination": [],
+            "exact": []
+          },
+          "responses": [
+            {
+              "text": "好的，您请说。",
+              "audio": "14.wav",
               "enableAutoJump": false,
               "next": ""
             }
@@ -54,6 +548,10 @@
       }
     }
   },
+  "options": {
+    "maxRounds": 12,
+    "forceInterruptedJumpTo": "结束_失败"
+  },
   "intentions": {
     "defaultIntention": "T"
   },
@@ -62,6 +560,21 @@
       "code": "$0001",
       "name": "客户姓名",
       "nickname": "cust_name"
+    },
+    {
+      "code": "$0002",
+      "name": "活动名称",
+      "nickname": "activity_name"
+    },
+    {
+      "code": "$0003",
+      "name": "日期",
+      "nickname": "date"
+    },
+    {
+      "code": "$0004",
+      "name": "金额",
+      "nickname": "money"
     }
   ]
 }
