@@ -8,6 +8,7 @@ import (
 	"slices"
 
 	"github.com/zhongxic/sellbot/internal/service/bot/matcher"
+	"github.com/zhongxic/sellbot/internal/service/bot/session"
 	"github.com/zhongxic/sellbot/internal/service/process"
 	"github.com/zhongxic/sellbot/internal/traceid"
 	"github.com/zhongxic/sellbot/pkg/jieba"
@@ -57,7 +58,7 @@ func (s *serviceImpl) Chat(ctx context.Context, chatDTO *ChatDTO) (*InteractiveR
 		return nil, fmt.Errorf("update session stat failed: %w", err)
 	}
 	intentionRules := analyzeIntention(currentSession, loadedProcess)
-	reloadKeywords(tokenizer, loadedProcess, currentSession.PreviousMainProcessDomain, currentSession.CurrentMainProcessDomain)
+	reloadKeywords(tokenizer, loadedProcess, currentSession)
 	s.storeSession(currentSession.Id, currentSession)
 	s.storeTokenizer(currentSession.Id, tokenizer)
 	return makeRespond(matchContext, answerDTO, intentionRules), nil
@@ -77,7 +78,17 @@ func cutAll(ctx context.Context, tokenizer *jieba.Tokenizer, stopWords []string,
 	return cuts
 }
 
-func reloadKeywords(tokenizer *jieba.Tokenizer, loadedProcess *process.Process,
-	previousMainProcessDomain, lastMainProcessDomain string) {
-	// TODO reload keywords
+func reloadKeywords(tokenizer *jieba.Tokenizer, loadedProcess *process.Process, currentSession *session.Session) {
+	if currentSession.PreviousMainProcessDomain == currentSession.CurrentMainProcessDomain {
+		return
+	}
+	processHelper := process.NewHelper(loadedProcess)
+	previousDomainKeywords := processHelper.GetDomainKeywords(currentSession.PreviousMainProcessDomain)
+	for _, keyword := range previousDomainKeywords {
+		tokenizer.AddWord(keyword, -1)
+	}
+	currentDomainKeywords := processHelper.GetDomainKeywords(currentSession.CurrentMainProcessDomain)
+	for _, keyword := range currentDomainKeywords {
+		tokenizer.AddWord(keyword, 1)
+	}
 }
