@@ -109,25 +109,25 @@ func (h *Helper) GetBranch(domainName, branchName string) (Branch, error) {
 	return branch, nil
 }
 
-func (h *Helper) GetDomainSemanticBranch(domainName string, semantic BranchSemantic) (Branch, error) {
+func (h *Helper) GetDomainPositiveBranch(domainName string) (Branch, error) {
 	if len(h.process.Domains) == 0 {
-		return Branch{}, fmt.Errorf("process [%v]: get semantic branch failed due to empty domains", h.process.Id)
+		return Branch{}, fmt.Errorf("process [%v]: get positive branch failed due to empty domains", h.process.Id)
 	}
 	domain, ok := h.process.Domains[domainName]
 	if !ok {
-		return Branch{}, fmt.Errorf("process [%v]: get semantic branch failed due to domain [%s] not found", h.process.Id, domainName)
+		return Branch{}, fmt.Errorf("process [%v]: get positive branch failed due to domain [%s] not found", h.process.Id, domainName)
 	}
 	branches := make([]Branch, 0)
 	if len(domain.Branches) != 0 {
 		for _, branch := range domain.Branches {
-			if branch.Semantic == semantic {
+			if branch.Semantic == BranchSemanticPositive {
 				branches = append(branches, branch)
 			}
 		}
 	}
 	if len(branches) != 1 {
-		return Branch{}, fmt.Errorf("process [%v]: expected one [%v] semantic branch in domain [%v] but found [%v]",
-			h.process.Id, semantic, domainName, len(branches))
+		return Branch{}, fmt.Errorf("process [%v]: expected one positive branch in domain [%v] but found [%v]",
+			h.process.Id, domainName, len(branches))
 	}
 	return branches[0], nil
 }
