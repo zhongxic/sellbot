@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"slices"
 
 	"github.com/zhongxic/sellbot/internal/service/bot/matcher"
 	"github.com/zhongxic/sellbot/internal/service/process"
@@ -48,13 +49,20 @@ func makeAnswer(ctx context.Context, matchContext *matcher.Context) (AnswerDTO, 
 			matchContext.Session.Id, nextDomain), traceId)
 		return autoJump(ctx, matchContext, nextDomain)
 	}
+	ended, agent := false, false
+	if slices.Contains(process.EndedDomainTypes, domain.Type) {
+		ended = true
+	}
+	if domain.Type == process.DomainTypeAgent {
+		agent = true
+	}
 	response := branch.Responses[hitCount%len(branch.Responses)]
 	if response.EnableAutoJump && response.Next != "" {
 		slog.Info(fmt.Sprintf("sessionId [%v]: jump to domain [%v] due to domain [%v] branch [%v] auto jump enabled",
 			matchContext.Session.Id, response.Next, matchedPath.Domain, matchedPath.Branch), traceId)
 		return autoJump(ctx, matchContext, response.Next)
 	}
-	return AnswerDTO{Text: response.Text, Audio: response.Audio}, nil
+	return AnswerDTO{Text: response.Text, Audio: response.Audio, Ended: ended, Agent: agent}, nil
 }
 
 func autoJump(ctx context.Context, matchContext *matcher.Context, nextDomain string) (AnswerDTO, error) {

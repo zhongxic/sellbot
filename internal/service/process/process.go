@@ -33,6 +33,16 @@ const (
 	DomainTypeDialogClarification DomainType = "clarification"
 )
 
+// EndedDomainTypes are domain types who mean process has ended.
+var EndedDomainTypes = []DomainType{
+	DomainTypeEnd,
+	DomainTypeDialogEndFail,
+	DomainTypeDialogEndBusy,
+	DomainTypeDialogEndExceed,
+	DomainTypeDialogEndMissMatch,
+	DomainTypeDialogEndException,
+}
+
 // NegativeDomainTypes are common dialogs types those have negative semantic.
 var NegativeDomainTypes = []DomainType{
 	DomainTypeDialogRefused,

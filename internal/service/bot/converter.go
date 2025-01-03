@@ -19,6 +19,8 @@ func makeRespond(matchContext *matcher.Context, answerDTO AnswerDTO, intentionRu
 	interactiveRespond.Hits.HitPaths = convertMatchedPathListToHitPathDTOList(matchContext.MatchedPaths)
 	interactiveRespond.Answer.Text = replaceVariables(answerDTO.Text, matchContext.Session.Variables)
 	interactiveRespond.Answer.Audio = answerDTO.Audio
+	interactiveRespond.Answer.Ended = answerDTO.Ended
+	interactiveRespond.Answer.Agent = answerDTO.Agent
 	interactiveRespond.Intentions = convertIntentionRuleListToIntentionDTOList(intentionRules)
 	return interactiveRespond
 }

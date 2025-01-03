@@ -67,6 +67,8 @@ func convertAnswerDTOToAnswerResponse(answer bot.AnswerDTO) AnswerResponse {
 	return AnswerResponse{
 		Text:  answer.Text,
 		Audio: answer.Audio,
+		Ended: answer.Ended,
+		Agent: answer.Agent,
 	}
 }
 

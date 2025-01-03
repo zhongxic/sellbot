@@ -35,6 +35,8 @@ type HitPathResponse struct {
 type AnswerResponse struct {
 	Text  string `json:"text"`
 	Audio string `json:"audio"`
+	Ended bool   `json:"ended"`
+	Agent bool   `json:"agent"`
 }
 
 type IntentionResponse struct {

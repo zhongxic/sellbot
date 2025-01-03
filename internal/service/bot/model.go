@@ -35,6 +35,8 @@ type HitPathDTO struct {
 type AnswerDTO struct {
 	Text  string
 	Audio string
+	Ended bool
+	Agent bool
 }
 
 type IntentionDTO struct {
