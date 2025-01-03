@@ -38,6 +38,7 @@ func makeAnswer(ctx context.Context, matchContext *matcher.Context) (AnswerDTO, 
 	isExceed := hitCount >= len(branch.Responses) && domain.Category != process.DomainCategoryMainProcess
 	slog.Info(fmt.Sprintf("sessionId [%v]: domain [%v] branch [%v] hitCount [%v] isExceed [%v]",
 		matchContext.Session.Id, matchedPath.Domain, matchedPath.Branch, hitCount, isExceed), traceId)
+	// TODO loop forever when session going to end domain but continue interactive
 	if isExceed {
 		nextDomain := ""
 		if branch.EnableExceedJump && branch.Next != "" {
