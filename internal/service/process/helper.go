@@ -212,17 +212,17 @@ func (h *Helper) GetMergeOrderedMatchPaths(domainName string) ([]MatchPath, erro
 			return nil, fmt.Errorf("process [%v]: get domain [%v] match paths failed due to dialog: %v",
 				h.process.Id, domainName, err)
 		}
-		appendMatchPaths(matchPaths, dialog)
+		matchPaths = appendMatchPaths(matchPaths, dialog)
 	}
 	// next is others branches in this domain.
-	appendMatchPaths(matchPaths, domain)
+	matchPaths = appendMatchPaths(matchPaths, domain)
 	// branches in business qa have the lowest priority.
 	qaDomain, err := h.GetBusinessQADomain()
 	if err != nil {
 		return nil, fmt.Errorf("process [%v]: get domain [%v] match paths failed due to business QA: %v",
 			h.process.Id, domainName, err)
 	}
-	appendMatchPaths(matchPaths, qaDomain)
+	matchPaths = appendMatchPaths(matchPaths, qaDomain)
 	return matchPaths, nil
 }
 
@@ -240,7 +240,7 @@ func (s branchSlice) Swap(i, j int) {
 	s[i], s[j] = s[j], s[i]
 }
 
-func appendMatchPaths(matchPaths []MatchPath, domain Domain) {
+func appendMatchPaths(matchPaths []MatchPath, domain Domain) []MatchPath {
 	branches := make(branchSlice, 0)
 	if len(domain.Branches) != 0 {
 		for _, branch := range domain.Branches {
@@ -255,6 +255,7 @@ func appendMatchPaths(matchPaths []MatchPath, domain Domain) {
 			matchPaths = append(matchPaths, matchPath)
 		}
 	}
+	return matchPaths
 }
 
 func NewHelper(process *Process) *Helper {
