@@ -41,6 +41,15 @@ var NegativeDomainTypes = []DomainType{
 	DomainTypeDialogPhoneFilter,
 }
 
+// DomainTypeDialogMatchOrders are default match order of common dialogs who has keywords in its branch.
+var DomainTypeDialogMatchOrders = []DomainType{
+	DomainTypeDialogPhoneFilter,
+	DomainTypeDialogCompliant,
+	DomainTypeDialogEndBusy,
+	DomainTypeDialogRefused,
+	DomainTypeDialogConfused,
+}
+
 // BranchSemantic is semantics of Branch.
 type BranchSemantic string
 
@@ -95,6 +104,7 @@ type Domain struct {
 
 type Branch struct {
 	Name             string         `json:"name"`
+	Order            int            `json:"order"`
 	Semantic         BranchSemantic `json:"semantic"`
 	Keywords         Keywords       `json:"keywords"`
 	Responses        []Response     `json:"responses"`
