@@ -245,8 +245,8 @@ func (matcher *PostIgnoreMatcher) Match(ctx context.Context, matchContext *Conte
 		nextDomain = lastMatchedPath.Domain
 	}
 	ignoreAnyExceptDomains := false
-	if len(domain.IgnoreConfig.IgnoreAnyExceptDomains) >= 0 {
-		ignoreAnyExceptDomains = slices.Index(domain.IgnoreConfig.IgnoreAnyExceptDomains, nextDomain) == -1
+	if len(domain.IgnoreConfig.IgnoreAnyExceptDomains) > 0 {
+		ignoreAnyExceptDomains = !slices.Contains(domain.IgnoreConfig.IgnoreAnyExceptDomains, nextDomain)
 	}
 	shouldIgnore := ignoreAnyExceptRefuse || ignoreAnyExceptDomains
 	if shouldIgnore {
