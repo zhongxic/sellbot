@@ -169,9 +169,8 @@ func (matcher *TextMatcher) Match(ctx context.Context, matchContext *Context) (b
 			return true, fmt.Errorf("TextMatcher get domain [%v] branch [%v] failed: %w",
 				matchPath.DomainName, matchPath.BranchName, err)
 		}
-		// TODO set logging level to debug
 		similarity := score(ctx, matchContext.Sentence, matchContext.Segments, branch.Keywords)
-		slog.Info(fmt.Sprintf("sessionId [%v]: TextMatcher current mainProcessDomain [%v] "+
+		slog.Debug(fmt.Sprintf("sessionId [%v]: TextMatcher current mainProcessDomain [%v] "+
 			"detect domain [%v] branch [%v] similarity score [%v] isMatched [%v]",
 			matchContext.Session.Id, matchContext.Session.CurrentMainProcessDomain,
 			matchPath.DomainName, matchPath.BranchName, similarity.score, similarity.isMatched()),
