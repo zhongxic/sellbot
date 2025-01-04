@@ -19,9 +19,10 @@ import (
 
 type Service interface {
 	Prologue(ctx context.Context, prologueDTO *PrologueDTO) (*InteractiveRespond, error)
-	Connect(ctx context.Context, connectDTO *SessionIdDTO) (*InteractiveRespond, error)
+	Connect(ctx context.Context, sessionIdDTO *SessionIdDTO) (*InteractiveRespond, error)
 	Chat(ctx context.Context, chatDTO *ChatDTO) (*InteractiveRespond, error)
 	Hold(ctx context.Context, sessionIdDTO *SessionIdDTO) (*InteractiveRespond, error)
+	Hangup(ctx context.Context, sessionIdDTO *SessionIdDTO) (*InteractiveRespond, error)
 }
 
 type serviceImpl struct {
@@ -76,10 +77,18 @@ func (s *serviceImpl) retrieveSession(sessionId string) (*session.Session, error
 func (s *serviceImpl) retrieveTokenizer(sessionId string) (*jieba.Tokenizer, error) {
 	tokenizer, ok := s.tokenizerCache.Get(sessionId)
 	if !ok {
-		// TODO reload tokenizer
+		// reload tokenizer when cache expired?
 		return nil, fmt.Errorf("sessionId [%v]: tokenizer not found", sessionId)
 	}
 	return tokenizer, nil
+}
+
+func (s *serviceImpl) invalidateSession(sessionId string) {
+	s.sessionManager.Invalidate(sessionId)
+}
+
+func (s *serviceImpl) invalidateTokenizer(sessionId string) {
+	s.tokenizerCache.Remove(sessionId)
 }
 
 type Options struct {
