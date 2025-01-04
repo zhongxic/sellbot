@@ -30,9 +30,10 @@ func (s *serviceImpl) Chat(ctx context.Context, chatDTO *ChatDTO) (*InteractiveR
 	if err != nil {
 		return nil, fmt.Errorf("load process failed: %w", err)
 	}
+	segments := cutAll(ctx, tokenizer, s.stopWords, chatDTO.Sentence)
 	matchContext := matcher.NewContext(currentSession, loadedProcess)
 	matchContext.Sentence = chatDTO.Sentence
-	matchContext.Segments = cutAll(ctx, tokenizer, s.stopWords, chatDTO.Sentence)
+	matchContext.Segments = segments
 	matchContext.Silence = chatDTO.Silence
 	matchContext.Interruption = chatDTO.Interruption
 	_, err = s.matcher.Match(ctx, matchContext)
@@ -57,7 +58,8 @@ func (s *serviceImpl) Chat(ctx context.Context, chatDTO *ChatDTO) (*InteractiveR
 	if err := matchContext.UpdateSessionStat(); err != nil {
 		return nil, fmt.Errorf("update session stat failed: %w", err)
 	}
-	intentionRules := analyzeIntention(currentSession, loadedProcess)
+	env := assembleIntentionAnalyzeEnv(chatDTO.Sentence, segments, currentSession)
+	intentionRules := analyzeIntention(ctx, env, loadedProcess.Intentions.IntentionRules)
 	reloadKeywords(tokenizer, loadedProcess, currentSession)
 	s.storeSession(currentSession.Id, currentSession)
 	s.storeTokenizer(currentSession.Id, tokenizer)
