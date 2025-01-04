@@ -270,7 +270,7 @@ func (matcher *PostIgnoreMatcher) Match(ctx context.Context, matchContext *Conte
 type MissMatchMatcher struct {
 }
 
-func (matcher *MissMatchMatcher) Match(ctx context.Context, matchContext *Context) (bool, error) {
+func (matcher *MissMatchMatcher) Match(ctx context.Context, matchContext *Context) (bool, error) { // NOSONAR
 	lastMatchedPath, err := matchContext.GetLastMatchedPath()
 	if err != nil {
 		return false, fmt.Errorf("MissMatchMatcher get last matched path failed: %w", err)
@@ -286,18 +286,33 @@ func (matcher *MissMatchMatcher) Match(ctx context.Context, matchContext *Contex
 			matchContext.Session.CurrentDomain, err)
 	}
 	if matchedDomain.Type == process.DomainTypeDialogMissMatch {
+		if matchContext.Session.MissMatchCount >= 3 {
+			slog.Info("sessionId [%v]: MissMatchMatcher current main process domain [%v] detect miss match count exceed",
+				matchContext.Session.Id, matchContext.Session.CurrentMainProcessDomain,
+				slog.Any("traceId", ctx.Value(traceid.TraceId{})))
+			dialog, err := processHelper.GetCommonDialog(process.DomainTypeDialogEndMissMatch)
+			if err != nil {
+				return true, fmt.Errorf("MissMatchMatcher get end_miss_match common dialog failed: %w", err)
+			}
+			matchedPath := MatchedPath{Domain: dialog.Name, Branch: process.BranchNameEnter}
+			slog.Info(fmt.Sprintf("sessionId [%v]: MissMatchMatcher matched domain [%v] branch [%v]",
+				matchContext.Session.Id, matchedPath.Domain, matchedPath.Branch),
+				slog.Any("traceId", ctx.Value(traceid.TraceId{})))
+			matchContext.AddMatchedPath(matchedPath)
+			return true, nil
+		}
 		jumpTo := ""
 		shortTextMissMatchJump := len([]rune(matchContext.Sentence)) < 4 && domain.MissMatchConfig.ShortTextMissMatchJumpTo != ""
 		if shortTextMissMatchJump {
-			slog.Info(fmt.Sprintf("sessionId [%v]: MissMatchMatcher current domain [%v] detect miss match [short text] jump to [%v]",
-				matchContext.Session.Id, matchContext.Session.CurrentDomain, domain.MissMatchConfig.ShortTextMissMatchJumpTo),
+			slog.Info(fmt.Sprintf("sessionId [%v]: MissMatchMatcher current main process domain [%v] detect miss match [short text] jump to [%v]",
+				matchContext.Session.Id, matchContext.Session.CurrentMainProcessDomain, domain.MissMatchConfig.ShortTextMissMatchJumpTo),
 				slog.Any("traceId", ctx.Value(traceid.TraceId{})))
 			jumpTo = domain.MissMatchConfig.ShortTextMissMatchJumpTo
 		}
 		longTextMissMatchJump := len([]rune(matchContext.Sentence)) >= 4 && domain.MissMatchConfig.LongTextMissMatchJumpTo != ""
 		if longTextMissMatchJump {
-			slog.Info(fmt.Sprintf("sessionId [%v]: MissMatchMatcher current domain [%v] detect miss match [long text] jump to [%v]",
-				matchContext.Session.Id, matchContext.Session.CurrentDomain, domain.MissMatchConfig.LongTextMissMatchJumpTo),
+			slog.Info(fmt.Sprintf("sessionId [%v]: MissMatchMatcher current main process domain [%v] detect miss match [long text] jump to [%v]",
+				matchContext.Session.Id, matchContext.Session.CurrentMainProcessDomain, domain.MissMatchConfig.LongTextMissMatchJumpTo),
 				slog.Any("traceId", ctx.Value(traceid.TraceId{})))
 			jumpTo = domain.MissMatchConfig.LongTextMissMatchJumpTo
 		}
