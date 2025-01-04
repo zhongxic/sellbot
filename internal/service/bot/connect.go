@@ -9,7 +9,7 @@ import (
 	"github.com/zhongxic/sellbot/internal/traceid"
 )
 
-func (s *serviceImpl) Connect(ctx context.Context, connectDTO *ConnectDTO) (*ConnectRespond, error) {
+func (s *serviceImpl) Connect(ctx context.Context, connectDTO *ConnectDTO) (*InteractiveRespond, error) {
 	slog.Info("start process connect", "traceId", ctx.Value(traceid.TraceId{}))
 	currentSession, err := s.retrieveSession(connectDTO.SessionId)
 	if err != nil {
@@ -22,5 +22,5 @@ func (s *serviceImpl) Connect(ctx context.Context, connectDTO *ConnectDTO) (*Con
 	currentSession.CallAnswerTime = time.Now()
 	s.storeSession(currentSession.Id, currentSession)
 	s.storeTokenizer(currentSession.Id, tokenizer)
-	return &ConnectRespond{SessionId: currentSession.Id, AnswerTime: currentSession.CallAnswerTime.Format(time.DateTime)}, nil
+	return &InteractiveRespond{SessionId: currentSession.Id}, nil
 }

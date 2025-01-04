@@ -96,10 +96,3 @@ func convertIntentionListToIntentionResponse(intentionDTO bot.IntentionDTO) Inte
 		Reason:      intentionDTO.Reason,
 	}
 }
-
-func convertConnectRespondToResponse(respond *bot.ConnectRespond) *ConnectResponse {
-	return &ConnectResponse{
-		SessionId:  respond.SessionId,
-		AnswerTime: respond.AnswerTime,
-	}
-}

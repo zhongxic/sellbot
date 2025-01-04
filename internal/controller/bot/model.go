@@ -48,8 +48,3 @@ type IntentionResponse struct {
 	DisplayName string `json:"displayName"`
 	Reason      string `json:"reason"`
 }
-
-type ConnectResponse struct {
-	SessionId  string `json:"sessionId"`
-	AnswerTime string `json:"answerTime"`
-}

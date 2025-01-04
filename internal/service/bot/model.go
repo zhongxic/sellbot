@@ -48,8 +48,3 @@ type IntentionDTO struct {
 	DisplayName string
 	Reason      string
 }
-
-type ConnectRespond struct {
-	SessionId  string
-	AnswerTime string
-}

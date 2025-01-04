@@ -63,7 +63,7 @@ func (c *Controller) Connect(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, result.FailedWithErrorCode(errorcode.SystemError, http.StatusText(http.StatusInternalServerError)))
 		return
 	}
-	connectResponse := convertConnectRespondToResponse(connectRespond)
+	connectResponse := convertInteractiveRespondToInteractiveResponse(connectRespond)
 	ctx.JSON(http.StatusOK, result.SuccessWithData(connectResponse))
 }
 
