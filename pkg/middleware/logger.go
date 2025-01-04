@@ -44,6 +44,7 @@ func Logger() gin.HandlerFunc {
 			traceId = uuid.New().String()
 		}
 		c.Set(ContextKeyTraceId, traceId)
+		c.Header(RequestHeaderTraceId, traceId)
 		start := time.Now()
 		path := c.Request.URL.Path
 		query := c.Request.URL.RawQuery
