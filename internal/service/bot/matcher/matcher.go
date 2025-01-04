@@ -287,14 +287,14 @@ func (matcher *MissMatchMatcher) Match(ctx context.Context, matchContext *Contex
 	}
 	if matchedDomain.Type == process.DomainTypeDialogMissMatch {
 		jumpTo := ""
-		shortTextMissMatchJump := len(matchContext.Sentence) < 4 && domain.MissMatchConfig.ShortTextMissMatchJumpTo != ""
+		shortTextMissMatchJump := len([]rune(matchContext.Sentence)) < 4 && domain.MissMatchConfig.ShortTextMissMatchJumpTo != ""
 		if shortTextMissMatchJump {
 			slog.Info(fmt.Sprintf("sessionId [%v]: MissMatchMatcher current domain [%v] detect miss match [short text] jump to [%v]",
 				matchContext.Session.Id, matchContext.Session.CurrentDomain, domain.MissMatchConfig.ShortTextMissMatchJumpTo),
 				slog.Any("traceId", ctx.Value(traceid.TraceId{})))
 			jumpTo = domain.MissMatchConfig.ShortTextMissMatchJumpTo
 		}
-		longTextMissMatchJump := len(matchContext.Sentence) >= 4 && domain.MissMatchConfig.LongTextMissMatchJumpTo != ""
+		longTextMissMatchJump := len([]rune(matchContext.Sentence)) >= 4 && domain.MissMatchConfig.LongTextMissMatchJumpTo != ""
 		if longTextMissMatchJump {
 			slog.Info(fmt.Sprintf("sessionId [%v]: MissMatchMatcher current domain [%v] detect miss match [long text] jump to [%v]",
 				matchContext.Session.Id, matchContext.Session.CurrentDomain, domain.MissMatchConfig.LongTextMissMatchJumpTo),
