@@ -6,6 +6,10 @@ type PrologueDTO struct {
 	Test      bool
 }
 
+type ConnectDTO struct {
+	SessionId string
+}
+
 type ChatDTO struct {
 	SessionId    string
 	Sentence     string
@@ -43,4 +47,9 @@ type IntentionDTO struct {
 	Code        string
 	DisplayName string
 	Reason      string
+}
+
+type ConnectRespond struct {
+	SessionId  string
+	AnswerTime string
 }

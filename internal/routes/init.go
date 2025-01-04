@@ -46,6 +46,7 @@ func registerRoutes(r *gin.Engine, cfg *config.Config) error {
 	r.GET("/ping", pingController.Ping)
 	r.POST("/prologue", botController.Prologue)
 	r.POST("/chat", botController.Chat)
+	r.POST("/connect", botController.Connect)
 	return nil
 }
 

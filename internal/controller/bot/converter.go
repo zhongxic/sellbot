@@ -10,6 +10,12 @@ func convertPrologueRequestToPrologueDTO(request *PrologueRequest) *bot.Prologue
 	}
 }
 
+func convertConnectRequestToConnectDTO(request *ConnectRequest) *bot.ConnectDTO {
+	return &bot.ConnectDTO{
+		SessionId: request.SessionId,
+	}
+}
+
 func convertChatRequestToChatDTO(request *ChatRequest) *bot.ChatDTO {
 	return &bot.ChatDTO{
 		SessionId:    request.SessionId,
@@ -88,5 +94,12 @@ func convertIntentionListToIntentionResponse(intentionDTO bot.IntentionDTO) Inte
 		Code:        intentionDTO.Code,
 		DisplayName: intentionDTO.DisplayName,
 		Reason:      intentionDTO.Reason,
+	}
+}
+
+func convertConnectRespondToResponse(respond *bot.ConnectRespond) *ConnectResponse {
+	return &ConnectResponse{
+		SessionId:  respond.SessionId,
+		AnswerTime: respond.AnswerTime,
 	}
 }

@@ -6,6 +6,10 @@ type PrologueRequest struct {
 	Test      bool              `json:"test"`
 }
 
+type ConnectRequest struct {
+	SessionId string `json:"sessionId"`
+}
+
 type ChatRequest struct {
 	SessionId    string `json:"sessionId"`
 	Sentence     string `json:"sentence"`
@@ -43,4 +47,9 @@ type IntentionResponse struct {
 	Code        string `json:"code"`
 	DisplayName string `json:"displayName"`
 	Reason      string `json:"reason"`
+}
+
+type ConnectResponse struct {
+	SessionId  string `json:"sessionId"`
+	AnswerTime string `json:"answerTime"`
 }

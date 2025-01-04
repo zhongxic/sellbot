@@ -42,6 +42,31 @@ func (c *Controller) Prologue(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, result.SuccessWithData(interactiveResponse))
 }
 
+func (c *Controller) Connect(ctx *gin.Context) {
+	traceId := ctx.GetString(middleware.ContextKeyTraceId)
+	request := &ConnectRequest{}
+	if err := ctx.ShouldBindJSON(request); err != nil {
+		slog.Error("bind connect request failed", "traceId", traceId, "error", err)
+		ctx.JSON(http.StatusBadRequest, result.FailedWithErrorCode(errorcode.ParamsError, errorcode.MessageRequestBodyNotBindable))
+		return
+	}
+	slog.Info("connect request received", "traceId", traceId, "body", request)
+	if request.SessionId == "" {
+		ctx.JSON(http.StatusBadRequest, result.FailedWithErrorCode(errorcode.ParamsError, "sessionId is required"))
+		return
+	}
+	connectDTO := convertConnectRequestToConnectDTO(request)
+	traceContext := context.WithValue(context.Background(), traceid.TraceId{}, traceId)
+	connectRespond, err := c.botService.Connect(traceContext, connectDTO)
+	if err != nil {
+		slog.Error("process connect request failed", "traceId", traceId, "error", err)
+		ctx.JSON(http.StatusInternalServerError, result.FailedWithErrorCode(errorcode.SystemError, http.StatusText(http.StatusInternalServerError)))
+		return
+	}
+	connectResponse := convertConnectRespondToResponse(connectRespond)
+	ctx.JSON(http.StatusOK, result.SuccessWithData(connectResponse))
+}
+
 func (c *Controller) Chat(ctx *gin.Context) {
 	traceId := ctx.GetString(middleware.ContextKeyTraceId)
 	request := &ChatRequest{}

@@ -19,6 +19,7 @@ import (
 
 type Service interface {
 	Prologue(ctx context.Context, prologueDTO *PrologueDTO) (*InteractiveRespond, error)
+	Connect(ctx context.Context, connectDTO *ConnectDTO) (*ConnectRespond, error)
 	Chat(ctx context.Context, chatDTO *ChatDTO) (*InteractiveRespond, error)
 }
 
