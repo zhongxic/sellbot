@@ -1,4 +1,4 @@
-package matcher
+package process
 
 import (
 	"context"
@@ -6,7 +6,6 @@ import (
 	"log/slog"
 	"slices"
 
-	"github.com/zhongxic/sellbot/internal/service/process"
 	"github.com/zhongxic/sellbot/internal/traceid"
 )
 
@@ -16,24 +15,24 @@ const (
 	exactKeywordsBoost       = 100
 )
 
-type similarity struct {
-	score   int
-	matches []string
+type Similarity struct {
+	Score   int
+	Matches []string
 }
 
-func (s similarity) isMatched() bool {
-	return s.score > 0
+func (s Similarity) IsMatched() bool {
+	return s.Score > 0
 }
 
-func (s similarity) isBetterThan(other similarity) bool {
-	return s.score > other.score
+func (s Similarity) IsBetterThan(other Similarity) bool {
+	return s.Score > other.Score
 }
 
-func (s similarity) String() string {
-	return fmt.Sprintf("{score: %v, matches: %v}", s.score, s.matches)
+func (s Similarity) String() string {
+	return fmt.Sprintf("{score: %v, matches: %v}", s.Score, s.Matches)
 }
 
-func score(ctx context.Context, text string, segments []string, Keywords process.Keywords) similarity {
+func Score(ctx context.Context, text string, segments []string, Keywords Keywords) Similarity {
 	simpleKeywordsSim := scoreSimpleKeywords(segments, Keywords.Simple)
 	combinationKeywordsSim := scoreCombinationKeywords(segments, Keywords.Combination)
 	exactKeywordsSim := scoreExactKeywords(segments, Keywords.Exact)
@@ -41,14 +40,14 @@ func score(ctx context.Context, text string, segments []string, Keywords process
 		"simple keywords similarity [%v], combination keywords similarity [%v], exact keywords similarity [%v]",
 		text, segments, simpleKeywordsSim, combinationKeywordsSim, exactKeywordsSim),
 		slog.Any("traceId", ctx.Value(traceid.TraceId{})))
-	maxSim := similarity{}
-	if simpleKeywordsSim.isBetterThan(maxSim) {
+	maxSim := Similarity{}
+	if simpleKeywordsSim.IsBetterThan(maxSim) {
 		maxSim = simpleKeywordsSim
 	}
-	if combinationKeywordsSim.isBetterThan(maxSim) {
+	if combinationKeywordsSim.IsBetterThan(maxSim) {
 		maxSim = combinationKeywordsSim
 	}
-	if exactKeywordsSim.isBetterThan(maxSim) {
+	if exactKeywordsSim.IsBetterThan(maxSim) {
 		maxSim = exactKeywordsSim
 	}
 	slog.Debug(fmt.Sprintf("text [%v] segments [%v]: best matched keywords similarity is [%v]",
@@ -57,9 +56,9 @@ func score(ctx context.Context, text string, segments []string, Keywords process
 	return maxSim
 }
 
-func scoreSimpleKeywords(segments, simpleKeywords []string) similarity {
+func scoreSimpleKeywords(segments, simpleKeywords []string) Similarity {
 	if len(segments) == 0 || len(simpleKeywords) == 0 {
-		return similarity{}
+		return Similarity{}
 	}
 	var matches []string
 	for _, segment := range segments {
@@ -67,24 +66,24 @@ func scoreSimpleKeywords(segments, simpleKeywords []string) similarity {
 			matches = append(matches, segment)
 		}
 	}
-	return similarity{
-		score:   len(matches) * simpleKeywordBoost,
-		matches: matches,
+	return Similarity{
+		Score:   len(matches) * simpleKeywordBoost,
+		Matches: matches,
 	}
 }
 
-func scoreCombinationKeywords(segments []string, combinationKeywords [][]string) similarity {
-	maxSim := similarity{}
+func scoreCombinationKeywords(segments []string, combinationKeywords [][]string) Similarity {
+	maxSim := Similarity{}
 	if len(segments) == 0 || len(combinationKeywords) == 0 {
 		return maxSim
 	}
 	for _, combinations := range combinationKeywords {
 		if keywordsMatchAll(segments, combinations) {
-			sim := similarity{
-				score:   len(combinations) * combinationKeywordsBoost,
-				matches: combinations,
+			sim := Similarity{
+				Score:   len(combinations) * combinationKeywordsBoost,
+				Matches: combinations,
 			}
-			if sim.isBetterThan(maxSim) {
+			if sim.IsBetterThan(maxSim) {
 				maxSim = sim
 			}
 		}
@@ -101,16 +100,16 @@ func keywordsMatchAll(segments, keywords []string) bool {
 	return true
 }
 
-func scoreExactKeywords(segments, exactKeywords []string) similarity {
+func scoreExactKeywords(segments, exactKeywords []string) Similarity {
 	if len(segments) != 1 || len(exactKeywords) == 0 {
-		return similarity{}
+		return Similarity{}
 	}
 	segment := segments[0]
 	if slices.Contains(exactKeywords, segment) {
-		return similarity{
-			score:   1 * exactKeywordsBoost,
-			matches: []string{segment},
+		return Similarity{
+			Score:   1 * exactKeywordsBoost,
+			Matches: []string{segment},
 		}
 	}
-	return similarity{}
+	return Similarity{}
 }

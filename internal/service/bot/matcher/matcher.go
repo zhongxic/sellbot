@@ -161,7 +161,7 @@ func (matcher *TextMatcher) Match(ctx context.Context, matchContext *Context) (b
 		return true, fmt.Errorf("TextMatcher get domain [%v] merge ordered match paths failed: %w",
 			matchContext.Session.CurrentMainProcessDomain, err)
 	}
-	maxSimilarity := similarity{}
+	maxSimilarity := process.Similarity{}
 	bestMatchedPath := process.MatchPath{}
 	for _, matchPath := range matchPaths {
 		branch, err := processHelper.GetBranch(matchPath.DomainName, matchPath.BranchName)
@@ -169,19 +169,19 @@ func (matcher *TextMatcher) Match(ctx context.Context, matchContext *Context) (b
 			return true, fmt.Errorf("TextMatcher get domain [%v] branch [%v] failed: %w",
 				matchPath.DomainName, matchPath.BranchName, err)
 		}
-		similarity := score(ctx, matchContext.Sentence, matchContext.Segments, branch.Keywords)
+		similarity := process.Score(ctx, matchContext.Sentence, matchContext.Segments, branch.Keywords)
 		slog.Debug(fmt.Sprintf("sessionId [%v]: TextMatcher current mainProcessDomain [%v] "+
 			"detect domain [%v] branch [%v] similarity score [%v] isMatched [%v]",
 			matchContext.Session.Id, matchContext.Session.CurrentMainProcessDomain,
-			matchPath.DomainName, matchPath.BranchName, similarity.score, similarity.isMatched()),
+			matchPath.DomainName, matchPath.BranchName, similarity.Score, similarity.IsMatched()),
 			slog.Any("traceId", ctx.Value(traceid.TraceId{})))
 
-		if similarity.isMatched() && similarity.isBetterThan(maxSimilarity) {
+		if similarity.IsMatched() && similarity.IsBetterThan(maxSimilarity) {
 			maxSimilarity = similarity
 			bestMatchedPath = matchPath
 		}
 	}
-	if maxSimilarity.isMatched() {
+	if maxSimilarity.IsMatched() {
 		slog.Info(fmt.Sprintf("sessionId [%v]: TextMatcher current mainProcessDomain [%v] "+
 			"detect best matched domain [%v] branch [%v]",
 			matchContext.Session.Id, matchContext.Session.CurrentMainProcessDomain,
@@ -190,7 +190,7 @@ func (matcher *TextMatcher) Match(ctx context.Context, matchContext *Context) (b
 		matchContext.AddMatchedPath(MatchedPath{
 			Domain:       bestMatchedPath.DomainName,
 			Branch:       bestMatchedPath.BranchName,
-			MatchedWords: maxSimilarity.matches,
+			MatchedWords: maxSimilarity.Matches,
 		})
 	} else {
 		slog.Info(fmt.Sprintf("sessionId [%v]: TextMatcher current MainProcessDomain [%v] detect miss match",
