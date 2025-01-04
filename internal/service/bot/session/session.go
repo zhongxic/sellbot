@@ -82,6 +82,10 @@ func (s *Session) UpdateStat(hitPaths []HitPathView) {
 	}
 	s.CurrentDomain = lastMatchedPath.Domain
 	s.CurrentBranch = lastMatchedPath.Branch
+	if lastMatchedPath.DomainType == process.DomainTypeStart {
+		s.PreviousMainProcessDomain = lastMatchedPath.Domain
+		s.CurrentMainProcessDomain = lastMatchedPath.Domain
+	}
 	if lastMatchedPath.DomainCategory == process.DomainCategoryMainProcess {
 		s.PreviousMainProcessDomain = s.CurrentMainProcessDomain
 		s.CurrentMainProcessDomain = lastMatchedPath.Domain

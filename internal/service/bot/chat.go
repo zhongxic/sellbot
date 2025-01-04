@@ -79,9 +79,7 @@ func cutAll(ctx context.Context, tokenizer *jieba.Tokenizer, stopWords []string,
 }
 
 func reloadKeywords(tokenizer *jieba.Tokenizer, loadedProcess *process.Process, currentSession *session.Session) {
-	notLeaving := currentSession.PreviousMainProcessDomain == "" ||
-		currentSession.PreviousMainProcessDomain == currentSession.CurrentMainProcessDomain
-	if notLeaving {
+	if currentSession.PreviousMainProcessDomain == currentSession.CurrentMainProcessDomain {
 		return
 	}
 	processHelper := process.NewHelper(loadedProcess)
