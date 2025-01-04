@@ -6,7 +6,7 @@ type PrologueRequest struct {
 	Test      bool              `json:"test"`
 }
 
-type ConnectRequest struct {
+type SessionIdRequest struct {
 	SessionId string `json:"sessionId"`
 }
 

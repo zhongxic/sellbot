@@ -6,7 +6,7 @@ type PrologueDTO struct {
 	Test      bool
 }
 
-type ConnectDTO struct {
+type SessionIdDTO struct {
 	SessionId string
 }
 

@@ -44,7 +44,7 @@ func (c *Controller) Prologue(ctx *gin.Context) {
 
 func (c *Controller) Connect(ctx *gin.Context) {
 	traceId := ctx.GetString(middleware.ContextKeyTraceId)
-	request := &ConnectRequest{}
+	request := &SessionIdRequest{}
 	if err := ctx.ShouldBindJSON(request); err != nil {
 		slog.Error("bind connect request failed", "traceId", traceId, "error", err)
 		ctx.JSON(http.StatusBadRequest, result.FailedWithErrorCode(errorcode.ParamsError, errorcode.MessageRequestBodyNotBindable))
@@ -55,15 +55,15 @@ func (c *Controller) Connect(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, result.FailedWithErrorCode(errorcode.ParamsError, "sessionId is required"))
 		return
 	}
-	connectDTO := convertConnectRequestToConnectDTO(request)
+	sessionIdDTO := convertSessionIdRequestToSessionDTO(request)
 	traceContext := context.WithValue(context.Background(), traceid.TraceId{}, traceId)
-	connectRespond, err := c.botService.Connect(traceContext, connectDTO)
+	interactiveRespond, err := c.botService.Connect(traceContext, sessionIdDTO)
 	if err != nil {
 		slog.Error("process connect request failed", "traceId", traceId, "error", err)
 		ctx.JSON(http.StatusInternalServerError, result.FailedWithErrorCode(errorcode.SystemError, http.StatusText(http.StatusInternalServerError)))
 		return
 	}
-	connectResponse := convertInteractiveRespondToInteractiveResponse(connectRespond)
+	connectResponse := convertInteractiveRespondToInteractiveResponse(interactiveRespond)
 	ctx.JSON(http.StatusOK, result.SuccessWithData(connectResponse))
 }
 

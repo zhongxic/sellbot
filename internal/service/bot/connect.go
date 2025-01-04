@@ -9,13 +9,13 @@ import (
 	"github.com/zhongxic/sellbot/internal/traceid"
 )
 
-func (s *serviceImpl) Connect(ctx context.Context, connectDTO *ConnectDTO) (*InteractiveRespond, error) {
+func (s *serviceImpl) Connect(ctx context.Context, sessionIdDTO *SessionIdDTO) (*InteractiveRespond, error) {
 	slog.Info("start process connect", "traceId", ctx.Value(traceid.TraceId{}))
-	currentSession, err := s.retrieveSession(connectDTO.SessionId)
+	currentSession, err := s.retrieveSession(sessionIdDTO.SessionId)
 	if err != nil {
 		return nil, fmt.Errorf("retrieve session failed: %w", err)
 	}
-	tokenizer, err := s.retrieveTokenizer(connectDTO.SessionId)
+	tokenizer, err := s.retrieveTokenizer(sessionIdDTO.SessionId)
 	if err != nil {
 		return nil, fmt.Errorf("retrieve tokenizer failed: %w", err)
 	}

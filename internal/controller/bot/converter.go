@@ -10,8 +10,8 @@ func convertPrologueRequestToPrologueDTO(request *PrologueRequest) *bot.Prologue
 	}
 }
 
-func convertConnectRequestToConnectDTO(request *ConnectRequest) *bot.ConnectDTO {
-	return &bot.ConnectDTO{
+func convertSessionIdRequestToSessionDTO(request *SessionIdRequest) *bot.SessionIdDTO {
+	return &bot.SessionIdDTO{
 		SessionId: request.SessionId,
 	}
 }
