@@ -1,6 +1,8 @@
 package process
 
-import "time"
+import (
+	"time"
+)
 
 // DomainCategory is category of Domain.
 type DomainCategory string
@@ -165,9 +167,9 @@ type IntentionRule struct {
 }
 
 type IntentionCondition struct {
-	EnableCondition bool     `json:"enableCondition"`
-	DomainName      string   `json:"domainName"`
-	Keywords        Keywords `json:"keywords"`
+	Enabled    bool     `json:"enabled"`
+	DomainName string   `json:"domainName"`
+	Keywords   Keywords `json:"keywords"`
 }
 
 type Options struct {
