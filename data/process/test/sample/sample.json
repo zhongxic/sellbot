@@ -304,7 +304,7 @@
           },
           "responses": [
             {
-              "text": "很抱歉给你带来了不好的服务体验，后续我会不断提升自己的服务能力，那先不打扰您了，感谢您的接听，祝您生活愉快，再见。",
+              "text": "您真的不再考虑一下吗。",
               "audio": "8.wav",
               "enableAutoJump": false,
               "next": ""
@@ -583,7 +583,38 @@
     "forceInterruptedJumpTo": "结束_失败"
   },
   "intentions": {
-    "defaultIntention": "T"
+    "defaultIntention": "T",
+    "intentionRules": [
+      {
+        "code": "B",
+        "expression": "status.PassedDomain(\"结束（成功）\")",
+        "displayName": "有意向",
+        "reason": "命中主流程节点'结束（成功）'"
+      },
+      {
+        "code": "A",
+        "expression": "status.PassedDomain(\"结束（成功）\") && status.ConversationCount >= 2",
+        "displayName": "强意向",
+        "reason": "(命中主流程节点'结束（成功）') 且 (有效对话轮次大于等于 2 次)"
+      },
+      {
+        "code": "F",
+        "expression": "status.RefusedCount >= 1",
+        "displayName": "客户拒绝",
+        "reason": "(拒绝次数大于等于 1 次) 且 (处于'开场白'节点并命中关键词)",
+        "intentionCondition": {
+          "enabled": true,
+          "domainName": "开场白",
+          "keywords": {
+            "simple": [
+              "不参加"
+            ],
+            "combination": [],
+            "exact": []
+          }
+        }
+      }
+    ]
   },
   "variables": [
     {
