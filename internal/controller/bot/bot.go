@@ -92,6 +92,31 @@ func (c *Controller) Chat(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, result.SuccessWithData(interactiveResponse))
 }
 
+func (c *Controller) Hold(ctx *gin.Context) {
+	traceId := ctx.GetString(middleware.ContextKeyTraceId)
+	request := &SessionIdRequest{}
+	if err := ctx.ShouldBindJSON(request); err != nil {
+		slog.Error("bind hold request failed", "traceId", traceId, "error", err)
+		ctx.JSON(http.StatusBadRequest, result.FailedWithErrorCode(errorcode.ParamsError, errorcode.MessageRequestBodyNotBindable))
+		return
+	}
+	slog.Info("hold request received", "traceId", traceId, "body", request)
+	if request.SessionId == "" {
+		ctx.JSON(http.StatusBadRequest, result.FailedWithErrorCode(errorcode.ParamsError, "sessionId is required"))
+		return
+	}
+	sessionIdDTO := convertSessionIdRequestToSessionDTO(request)
+	traceContext := context.WithValue(context.Background(), traceid.TraceId{}, traceId)
+	interactiveRespond, err := c.botService.Hold(traceContext, sessionIdDTO)
+	if err != nil {
+		slog.Error("process hold request failed", "traceId", traceId, "error", err)
+		ctx.JSON(http.StatusInternalServerError, result.FailedWithErrorCode(errorcode.SystemError, http.StatusText(http.StatusInternalServerError)))
+		return
+	}
+	connectResponse := convertInteractiveRespondToInteractiveResponse(interactiveRespond)
+	ctx.JSON(http.StatusOK, result.SuccessWithData(connectResponse))
+}
+
 func NewController(botService bot.Service) *Controller {
 	return &Controller{botService: botService}
 }

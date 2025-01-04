@@ -21,6 +21,7 @@ type Service interface {
 	Prologue(ctx context.Context, prologueDTO *PrologueDTO) (*InteractiveRespond, error)
 	Connect(ctx context.Context, connectDTO *SessionIdDTO) (*InteractiveRespond, error)
 	Chat(ctx context.Context, chatDTO *ChatDTO) (*InteractiveRespond, error)
+	Hold(ctx context.Context, sessionIdDTO *SessionIdDTO) (*InteractiveRespond, error)
 }
 
 type serviceImpl struct {
