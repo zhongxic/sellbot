@@ -39,3 +39,10 @@ func (s Status) GetDomainBranchHitCount(domainName, branchName string) int {
 	}
 	return branchHitCount[branchName]
 }
+
+func (s Status) AnswerSecondsCompareTo(sec int) int {
+	if s.CallAnswerTime.IsZero() {
+		return -1
+	}
+	return int(time.Since(s.CallAnswerTime).Seconds()) - sec
+}
