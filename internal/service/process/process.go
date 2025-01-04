@@ -1,7 +1,11 @@
 package process
 
 import (
+	"context"
 	"time"
+
+	"github.com/expr-lang/expr"
+	"github.com/expr-lang/expr/vm"
 )
 
 // DomainCategory is category of Domain.
@@ -164,6 +168,33 @@ type IntentionRule struct {
 	DisplayName        string             `json:"displayName"`
 	Reason             string             `json:"reason"`
 	IntentionCondition IntentionCondition `json:"intentionCondition"`
+
+	// program is an expression who compiled from Expression.
+	program *vm.Program
+}
+
+func (i IntentionRule) IsHit(ctx context.Context, env IntentionAnalyzeEnv) (bool, error) {
+	expressionHit := true
+	intentionConditionHit := true
+	// check if expression matched.
+	if i.program != nil {
+		value, err := expr.Run(i.program, env)
+		if err != nil {
+			return false, err
+		}
+		if v, ok := value.(bool); ok {
+			expressionHit = v
+		} else {
+			expressionHit = false
+		}
+	}
+	// check if intention condition matched.
+	if i.IntentionCondition.Enabled {
+		domainMatched := env.Status.PreviousMainProcessDomain == i.IntentionCondition.DomainName
+		similarity := Score(ctx, env.Sentence, env.Segments, i.IntentionCondition.Keywords)
+		intentionConditionHit = domainMatched && similarity.IsMatched()
+	}
+	return expressionHit && intentionConditionHit, nil
 }
 
 type IntentionCondition struct {

@@ -3,6 +3,7 @@ module github.com/zhongxic/sellbot
 go 1.23.2
 
 require (
+	github.com/expr-lang/expr v1.16.9
 	github.com/gin-gonic/gin v1.10.0
 	github.com/google/uuid v1.6.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1

@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/expr-lang/expr"
 	"github.com/zhongxic/sellbot/pkg/cache"
 )
 
@@ -34,8 +35,31 @@ func (loader *fileLoader) Load(processId string) (*Process, error) {
 	if err != nil {
 		return nil, fmt.Errorf("process [%v] read stat failed: %w", processId, err)
 	}
+	// compile intention rules expression.
+	if err := compileIntentionRulesExpression(process); err != nil {
+		return nil, fmt.Errorf("process [%v] compile intention rules failed: %w", processId, err)
+	}
 	process.lastModified = lastModified
 	return process, nil
+}
+
+func compileIntentionRulesExpression(process *Process) error {
+	size := len(process.Intentions.IntentionRules)
+	if size == 0 {
+		return nil
+	}
+	env := IntentionAnalyzeEnv{}
+	for i := 0; i < size; i++ {
+		rule := &process.Intentions.IntentionRules[i]
+		if rule.Expression != "" {
+			program, err := expr.Compile(rule.Expression, expr.Env(env), expr.AsBool())
+			if err != nil {
+				return fmt.Errorf("rule [%v] expression [%v]  compile failed: %w", rule.Code, rule.Expression, err)
+			}
+			rule.program = program
+		}
+	}
+	return nil
 }
 
 func (loader *fileLoader) LastModified(processId string) (time.Time, error) {
