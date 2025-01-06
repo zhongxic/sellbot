@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
-	"slices"
 
 	"github.com/zhongxic/sellbot/internal/service/bot/matcher"
 	"github.com/zhongxic/sellbot/internal/service/process"
@@ -55,7 +54,7 @@ func makeAnswer(ctx context.Context, matchContext *matcher.Context) (AnswerDTO, 
 		return autoJump(ctx, matchContext, nextDomain)
 	}
 	ended, agent := false, false
-	if slices.Contains(process.EndedDomainTypes, domain.Type) {
+	if domain.Type.IsEnded() {
 		ended = true
 	}
 	if domain.Type == process.DomainTypeAgent {

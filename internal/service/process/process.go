@@ -2,6 +2,7 @@ package process
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"github.com/expr-lang/expr"
@@ -21,6 +22,14 @@ const (
 // DomainType is type of Domain.
 type DomainType string
 
+func (t DomainType) IsEnded() bool {
+	s := string(t)
+	if t == DomainTypeEnd || strings.HasPrefix(s, "end_") {
+		return true
+	}
+	return false
+}
+
 const (
 	DomainTypeStart               DomainType = "start"
 	DomainTypeNormal              DomainType = "normal"
@@ -38,16 +47,6 @@ const (
 	DomainTypeDialogPhoneFilter   DomainType = "phone_filter"
 	DomainTypeDialogClarification DomainType = "clarification"
 )
-
-// EndedDomainTypes are domain types who mean process has ended.
-var EndedDomainTypes = []DomainType{
-	DomainTypeEnd,
-	DomainTypeDialogEndFail,
-	DomainTypeDialogEndBusy,
-	DomainTypeDialogEndExceed,
-	DomainTypeDialogEndMissMatch,
-	DomainTypeDialogEndException,
-}
 
 // DomainTypeDialogMatchOrders are default match order of common dialogs who has keywords in its branch.
 var DomainTypeDialogMatchOrders = []DomainType{
