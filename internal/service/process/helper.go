@@ -179,12 +179,10 @@ func (h *Helper) GetBranchKeywords(domainName, branchName string) []string {
 
 func (h *Helper) GetGlobalKeywords() ([]string, error) {
 	keywords := make([]string, 0)
-	for _, dialog := range DomainTypeDialogMatchOrders {
-		domain, err := h.GetCommonDialog(dialog)
-		if err != nil {
-			return nil, fmt.Errorf("process [%v]: get global keywords failed due to get common dialog: %v", h.process.Id, err)
+	for _, domain := range h.process.Domains {
+		if domain.Category == DomainCategoryCommonDialog {
+			keywords = append(keywords, h.GetDomainKeywords(domain.Name)...)
 		}
-		keywords = append(keywords, h.GetDomainKeywords(domain.Name)...)
 	}
 	domain, err := h.GetBusinessQADomain()
 	if err != nil {
