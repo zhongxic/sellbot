@@ -36,10 +36,6 @@ func Score(ctx context.Context, text string, segments []string, Keywords Keyword
 	simpleKeywordsSim := scoreSimpleKeywords(segments, Keywords.Simple)
 	combinationKeywordsSim := scoreCombinationKeywords(segments, Keywords.Combination)
 	exactKeywordsSim := scoreExactKeywords(segments, Keywords.Exact)
-	slog.Debug(fmt.Sprintf("text [%v] segments [%v]: "+
-		"simple keywords similarity [%v], combination keywords similarity [%v], exact keywords similarity [%v]",
-		text, segments, simpleKeywordsSim, combinationKeywordsSim, exactKeywordsSim),
-		slog.Any("traceId", ctx.Value(traceid.TraceId{})))
 	maxSim := Similarity{}
 	if simpleKeywordsSim.IsBetterThan(maxSim) {
 		maxSim = simpleKeywordsSim
