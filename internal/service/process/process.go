@@ -48,15 +48,6 @@ const (
 	DomainTypeDialogClarification DomainType = "clarification"
 )
 
-// DomainTypeDialogMatchOrders are default match order of common dialogs who has keywords in its branch.
-var DomainTypeDialogMatchOrders = []DomainType{
-	DomainTypeDialogPhoneFilter,
-	DomainTypeDialogCompliant,
-	DomainTypeDialogEndBusy,
-	DomainTypeDialogRefused,
-	DomainTypeDialogConfused,
-}
-
 // BranchSemantic is semantics of Branch.
 type BranchSemantic string
 
@@ -103,6 +94,7 @@ type Domain struct {
 	Name            string            `json:"name"`
 	Type            DomainType        `json:"type"`
 	Category        DomainCategory    `json:"category"`
+	Order           int               `json:"order"`
 	Branches        map[string]Branch `json:"branches"`
 	MatchOrders     []MatchPath       `json:"matchOrders"`
 	IgnoreConfig    IgnoreConfig      `json:"ignoreConfig"`

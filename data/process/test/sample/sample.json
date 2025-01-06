@@ -264,6 +264,7 @@
       "name": "用户不清",
       "type": "confused",
       "category": "common_dialog",
+      "order": 4,
       "branches": {
         "enter": {
           "name": "enter",
@@ -289,6 +290,7 @@
       "name": "拒绝",
       "type": "refused",
       "category": "common_dialog",
+      "order": 3,
       "branches": {
         "enter": {
           "name": "enter",
@@ -377,6 +379,7 @@
       "name": "结束_在忙",
       "type": "end_busy",
       "category": "common_dialog",
+      "order": 2,
       "branches": {
         "enter": {
           "name": "enter",
@@ -484,6 +487,7 @@
       "name": "投诉抱怨",
       "type": "compliant",
       "category": "common_dialog",
+      "order": 1,
       "branches": {
         "enter": {
           "name": "enter",
@@ -508,6 +512,7 @@
       "name": "号码过滤",
       "type": "phone_filter",
       "category": "common_dialog",
+      "order": 0,
       "branches": {
         "enter": {
           "name": "enter",

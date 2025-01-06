@@ -11,6 +11,34 @@ const (
 	DefaultIntentionReason = "default intention"
 )
 
+type domainSlice []Domain
+
+func (s domainSlice) Len() int {
+	return len(s)
+}
+
+func (s domainSlice) Less(i, j int) bool {
+	return s[i].Order < s[j].Order
+}
+
+func (s domainSlice) Swap(i, j int) {
+	s[i], s[j] = s[j], s[i]
+}
+
+type branchSlice []Branch
+
+func (s branchSlice) Len() int {
+	return len(s)
+}
+
+func (s branchSlice) Less(i, j int) bool {
+	return s[i].Order < s[j].Order
+}
+
+func (s branchSlice) Swap(i, j int) {
+	s[i], s[j] = s[j], s[i]
+}
+
 type Helper struct {
 	process *Process
 }
@@ -76,6 +104,17 @@ func (h *Helper) GetCommonDialog(dialogType DomainType) (Domain, error) {
 			h.process.Id, dialogType, len(domains))
 	}
 	return domains[0], nil
+}
+
+func (h *Helper) GetSortedCommonDialogs() []Domain {
+	domains := make(domainSlice, 0)
+	for _, domain := range h.process.Domains {
+		if domain.Category == DomainCategoryCommonDialog {
+			domains = append(domains, domain)
+		}
+	}
+	sort.Sort(domains)
+	return domains
 }
 
 func (h *Helper) GetBusinessQADomain() (Domain, error) {
@@ -179,10 +218,9 @@ func (h *Helper) GetBranchKeywords(domainName, branchName string) []string {
 
 func (h *Helper) GetGlobalKeywords() ([]string, error) {
 	keywords := make([]string, 0)
-	for _, domain := range h.process.Domains {
-		if domain.Category == DomainCategoryCommonDialog {
-			keywords = append(keywords, h.GetDomainKeywords(domain.Name)...)
-		}
+	dialogs := h.GetSortedCommonDialogs()
+	for _, dialog := range dialogs {
+		keywords = append(keywords, h.GetDomainKeywords(dialog.Name)...)
 	}
 	domain, err := h.GetBusinessQADomain()
 	if err != nil {
@@ -204,12 +242,8 @@ func (h *Helper) GetMergeOrderedMatchPaths(domainName string) ([]MatchPath, erro
 		matchPaths = append(matchPaths, domain.MatchOrders...)
 	}
 	// then common dialogs.
-	for _, dialogType := range DomainTypeDialogMatchOrders {
-		dialog, err := h.GetCommonDialog(dialogType)
-		if err != nil {
-			return nil, fmt.Errorf("process [%v]: get domain [%v] match paths failed due to dialog: %v",
-				h.process.Id, domainName, err)
-		}
+	dialogs := h.GetSortedCommonDialogs()
+	for _, dialog := range dialogs {
 		matchPaths = appendMatchPaths(matchPaths, dialog)
 	}
 	// next is others branches in this domain.
@@ -222,20 +256,6 @@ func (h *Helper) GetMergeOrderedMatchPaths(domainName string) ([]MatchPath, erro
 	}
 	matchPaths = appendMatchPaths(matchPaths, qaDomain)
 	return matchPaths, nil
-}
-
-type branchSlice []Branch
-
-func (s branchSlice) Len() int {
-	return len(s)
-}
-
-func (s branchSlice) Less(i, j int) bool {
-	return s[i].Order < s[j].Order
-}
-
-func (s branchSlice) Swap(i, j int) {
-	s[i], s[j] = s[j], s[i]
 }
 
 func appendMatchPaths(matchPaths []MatchPath, domain Domain) []MatchPath {
