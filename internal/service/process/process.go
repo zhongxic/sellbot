@@ -49,14 +49,6 @@ var EndedDomainTypes = []DomainType{
 	DomainTypeDialogEndException,
 }
 
-// NegativeDomainTypes are common dialogs types those have negative semantic.
-var NegativeDomainTypes = []DomainType{
-	DomainTypeDialogRefused,
-	DomainTypeDialogEndBusy,
-	DomainTypeDialogCompliant,
-	DomainTypeDialogPhoneFilter,
-}
-
 // DomainTypeDialogMatchOrders are default match order of common dialogs who has keywords in its branch.
 var DomainTypeDialogMatchOrders = []DomainType{
 	DomainTypeDialogPhoneFilter,

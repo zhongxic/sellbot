@@ -1,7 +1,6 @@
 package session
 
 import (
-	"slices"
 	"time"
 
 	"github.com/google/uuid"
@@ -61,7 +60,7 @@ func (s *Session) UpdateStat(hitPaths []HitPathView) {
 	if isHitPositiveBranch(hitPaths) {
 		s.PositiveCount++
 	}
-	if isHitNegativeDomainOrBranch(hitPaths) {
+	if isHitNegativeBranch(hitPaths) {
 		s.NegativeCount++
 	}
 	if isHitRefusedDomain(hitPaths) {
@@ -124,14 +123,12 @@ func isHitPositiveBranch(statPaths []HitPathView) bool {
 	return false
 }
 
-func isHitNegativeDomainOrBranch(statPaths []HitPathView) bool {
+func isHitNegativeBranch(statPaths []HitPathView) bool {
 	if len(statPaths) == 0 {
 		return false
 	}
 	for _, path := range statPaths {
-		isNegative := slices.Contains(process.NegativeDomainTypes, path.DomainType) ||
-			path.BranchSemantic == process.BranchSemanticNegative
-		if isNegative {
+		if path.BranchSemantic == process.BranchSemanticNegative {
 			return true
 		}
 	}

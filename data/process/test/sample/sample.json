@@ -292,7 +292,7 @@
       "branches": {
         "enter": {
           "name": "enter",
-          "semantic": "special",
+          "semantic": "negative",
           "keywords": {
             "simple": [
               "不参加",
@@ -380,7 +380,7 @@
       "branches": {
         "enter": {
           "name": "enter",
-          "semantic": "special",
+          "semantic": "negative",
           "keywords": {
             "simple": [
               "在忙",
@@ -487,6 +487,7 @@
       "branches": {
         "enter": {
           "name": "enter",
+          "semantic": "negative",
           "keywords": {
             "simple": [
               "投诉",
@@ -510,6 +511,7 @@
       "branches": {
         "enter": {
           "name": "enter",
+          "semantic": "negative",
           "keywords": {
             "simple": [
               "被叫用户忙",
@@ -533,6 +535,7 @@
       "branches": {
         "enter": {
           "name": "enter",
+          "semantic": "special",
           "keywords": {
             "simple": [],
             "combination": [],
