@@ -16,7 +16,7 @@ import (
 	"github.com/zhongxic/sellbot/pkg/logger"
 )
 
-const version = "1.0-SNAPSHOT"
+const version = "1.0.0"
 
 var (
 	showVersion bool
