@@ -35,16 +35,12 @@ const (
 	DomainTypeNormal              DomainType = "normal"
 	DomainTypeEnd                 DomainType = "end"
 	DomainTypeAgent               DomainType = "agent"
-	DomainTypeDialogConfused      DomainType = "confused"
 	DomainTypeDialogRefused       DomainType = "refused"
 	DomainTypeDialogMissMatch     DomainType = "miss_match"
 	DomainTypeDialogEndFail       DomainType = "end_fail"
-	DomainTypeDialogEndBusy       DomainType = "end_busy"
 	DomainTypeDialogEndExceed     DomainType = "end_exceed"
 	DomainTypeDialogEndMissMatch  DomainType = "end_miss_match"
 	DomainTypeDialogEndException  DomainType = "end_exception"
-	DomainTypeDialogCompliant     DomainType = "compliant"
-	DomainTypeDialogPhoneFilter   DomainType = "phone_filter"
 	DomainTypeDialogClarification DomainType = "clarification"
 )
 
