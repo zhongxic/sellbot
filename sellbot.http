@@ -1,0 +1,58 @@
+### 申请开场白
+POST http://localhost:8080/prologue
+Content-Type: application/json
+
+{
+  "processId": "sample",
+  "variables": {
+    "$0001": "张三",
+    "$0002": "贷款送好礼",
+    "$0003": "2025-01-31",
+    "$0004": "2000"
+  },
+  "test": true
+}
+
+> {%
+    const sessionId = response.body["data"]["sessionId"];
+    client.global.set("sessionId", sessionId);
+%}
+
+### 标记通话接听
+POST http://localhost:8080/connect
+Content-Type: application/json
+
+{
+  "sessionId": "{{sessionId}}"
+}
+
+### 对话接口
+POST http://localhost:8080/chat
+Content-Type: application/json
+
+{
+  "sessionId": "{{sessionId}}",
+  "sentence": "是的",
+  "silence": false,
+  "interruption": 0
+}
+
+### 会话保持
+POST http://localhost:8080/hold
+Content-Type: application/json
+
+{
+  "sessionId": "{{sessionId}}"
+}
+
+### 挂断机器人
+POST http://localhost:8080/hangup
+Content-Type: application/json
+
+{
+  "sessionId": "{{sessionId}}"
+}
+
+> {%
+    client.global.clearAll()
+%}
