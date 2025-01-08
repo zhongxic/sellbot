@@ -268,7 +268,7 @@ Content-Type: application/json
 
 节点即对话过程中的一个流程节点，节点具有分支，分支控制了流程的走向。如下图所示。
 
-![process_overview.jpg](./assets/process_overview.jpg)
+![domain_branch.jpg](./assets/domain_branch.jpg)
 
 #### 定义分支
 
